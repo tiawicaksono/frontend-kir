@@ -1,58 +1,27 @@
 "use client";
-
-import React, { createContext, useContext, useState, useEffect } from "react";
+import { createContext, useContext, useState } from "react";
 
 type SidebarContextType = {
   isExpanded: boolean;
-  isMobileOpen: boolean;
-  isHovered: boolean;
-  toggleSidebar: () => void;
-  toggleMobileSidebar: () => void;
-  setIsHovered: (v: boolean) => void;
+  toggle: () => void;
 };
 
-const SidebarContext = createContext<SidebarContextType | undefined>(undefined);
+const SidebarContext = createContext<SidebarContextType | null>(null);
 
-export const useSidebar = () => {
-  const ctx = useContext(SidebarContext);
-  if (!ctx) throw new Error("useSidebar must be used within SidebarProvider");
-  return ctx;
-};
+export function SidebarProvider({ children }: { children: React.ReactNode }) {
+  const [isExpanded, setIsExpanded] = useState(true);
 
-export const SidebarProvider = ({
-  children,
-}: {
-  children: React.ReactNode;
-}) => {
-  /** ✅ SSR-safe + no effect */
-  const [isExpanded, setIsExpanded] = useState<boolean>(() => {
-    if (typeof window === "undefined") return true;
-    return localStorage.getItem("sidebarExpanded") !== "false";
-  });
-
-  const [isMobileOpen, setIsMobileOpen] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
-
-  /** ✅ effect hanya untuk sync ke external system */
-  useEffect(() => {
-    localStorage.setItem("sidebarExpanded", String(isExpanded));
-  }, [isExpanded]);
-
-  const toggleSidebar = () => setIsExpanded((p) => !p);
-  const toggleMobileSidebar = () => setIsMobileOpen((p) => !p);
+  const toggle = () => setIsExpanded((prev) => !prev);
 
   return (
-    <SidebarContext.Provider
-      value={{
-        isExpanded,
-        isMobileOpen,
-        isHovered,
-        toggleSidebar,
-        toggleMobileSidebar,
-        setIsHovered,
-      }}
-    >
+    <SidebarContext.Provider value={{ isExpanded, toggle }}>
       {children}
     </SidebarContext.Provider>
   );
+}
+
+export const useSidebar = () => {
+  const ctx = useContext(SidebarContext);
+  if (!ctx) throw new Error("useSidebar must be used inside SidebarProvider");
+  return ctx;
 };
