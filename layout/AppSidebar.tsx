@@ -74,11 +74,10 @@ export default function AppSidebar() {
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
   const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
 
   /* ========================================================= */
-
+  // ===== EFFECT 1: ukur tinggi submenu =====
   useEffect(() => {
     if (openSubmenu !== null) {
       const ref = subMenuRefs.current[openSubmenu];
@@ -91,6 +90,17 @@ export default function AppSidebar() {
     }
   }, [openSubmenu]);
 
+  // ===== EFFECT 2: AUTO OPEN BASED ON ROUTE (INI) =====
+  useEffect(() => {
+    navItems.forEach((item, index) => {
+      if (item.subItems?.some((sub) => pathname === sub.path)) {
+        setOpenSubmenu(index);
+      }
+    });
+  }, [pathname]);
+
+  /* ========================================================= */
+  // ===== HOVER HANDLERS (BOX MODE) =====
   const handleHover = (index: number) => {
     hoverTimer.current = setTimeout(() => setHovered(index), 120);
   };
@@ -106,6 +116,11 @@ export default function AppSidebar() {
     <ul className="flex flex-col gap-3">
       {items.map((item, index) => {
         const isOpen = openSubmenu === index;
+        const hasActiveSubmenu = item.subItems?.some((sub) =>
+          isActive(sub.path),
+        );
+
+        const isMenuOpen = isOpen || hasActiveSubmenu;
 
         return (
           <li key={item.name} className="relative">
@@ -114,7 +129,7 @@ export default function AppSidebar() {
               onClick={() => expanded && setOpenSubmenu(isOpen ? null : index)}
               onMouseEnter={() => compact && handleHover(index)}
               onMouseLeave={() => compact && clearHover()}
-              className={`menu-item group ${isOpen && "menu-item-active"} ${
+              className={`menu-item group ${isMenuOpen && "menu-item-active"} ${
                 expanded ? "justify-start" : "justify-center"
               }`}
             >
@@ -123,7 +138,7 @@ export default function AppSidebar() {
                 alt=""
                 width={20}
                 height={20}
-                className={`${isOpen && "icon-active"} dark:invert`}
+                className={`${isMenuOpen && "icon-active"} dark:invert`}
               />
               {expanded && <span className="menu-item-text">{item.name}</span>}
               {expanded && item.subItems && (
@@ -132,7 +147,7 @@ export default function AppSidebar() {
                   alt="chevron"
                   width={20}
                   height={20}
-                  className={`ml-auto transition ${isOpen && "rotate-180 icon-active"} dark:invert`}
+                  className={`ml-auto transition ${isMenuOpen && "rotate-180 icon-active"} dark:invert`}
                 />
               )}
             </button>
@@ -147,7 +162,7 @@ export default function AppSidebar() {
                 }}
                 className="overflow-hidden transition-all duration-300"
                 style={{
-                  height: isOpen ? heights[index] || 0 : 0,
+                  height: isMenuOpen ? heights[index] || 0 : 0,
                 }}
               >
                 <ul className="ml-9 mt-2 space-y-1">
@@ -188,7 +203,8 @@ export default function AppSidebar() {
                     transition={{ duration: 0.18, ease: "easeOut" }}
                     className="absolute left-18 top-0 z-50"
                     onMouseEnter={() => {
-                      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+                      if (closeTimeout.current)
+                        clearTimeout(closeTimeout.current);
                     }}
                     onMouseLeave={() => {
                       closeTimeout.current = setTimeout(() => {
@@ -202,40 +218,46 @@ export default function AppSidebar() {
                     {/* ARROW */}
                     <div
                       className="
-        absolute -left-2 top-4 w-3 h-3 rotate-45
-        bg-white/80 dark:bg-slate-800/80
-        backdrop-blur-md shadow-sm
-      "
+                      absolute -left-2 top-4 w-3 h-3 rotate-45
+                      bg-white/80 dark:bg-slate-800/80
+                      backdrop-blur-md shadow-sm"
                     />
 
                     {/* PANEL */}
                     <div
                       className="
-        min-w-55 rounded-xl
-        bg-white/80 dark:bg-slate-900/80
-        backdrop-blur-xl
-        shadow-xl
-        border border-slate-200/50 dark:border-slate-700/50
-        p-4
-      "
+                        min-w-55 rounded-xl
+                        bg-white/80 dark:bg-slate-900/80
+                        backdrop-blur-xl
+                        shadow-xl
+                        border border-slate-200/50 dark:border-slate-700/50
+                        p-4
+                      "
                     >
                       <p className="mb-2 text-sm font-semibold">{item.name}</p>
 
                       <ul className="space-y-1">
-                        {item.subItems.map((sub) => (
-                          <li key={sub.name}>
-                            <Link
-                              href={sub.path}
-                              className="
-                  block rounded-md px-3 py-2 text-sm
-                  hover:bg-black/5 dark:hover:bg-white/10
-                  transition-colors
-                "
-                            >
-                              {sub.name}
-                            </Link>
-                          </li>
-                        ))}
+                        {item.subItems.map((sub) => {
+                          const isSubActive = isActive(sub.path);
+                          return (
+                            <li key={sub.name}>
+                              <Link
+                                href={sub.path}
+                                className={`
+                                  block rounded-md px-3 py-2 text-sm
+                                  transition-colors
+                                  ${
+                                    isSubActive
+                                      ? "menu-dropdown-item-active"
+                                      : "hover:bg-black/5 dark:hover:bg-white/10"
+                                  }
+                                `}
+                              >
+                                {sub.name}
+                              </Link>
+                            </li>
+                          );
+                        })}
                       </ul>
                     </div>
                   </motion.div>
@@ -253,18 +275,18 @@ export default function AppSidebar() {
   return (
     <aside
       className={`
-    fixed lg:static top-0 left-0 z-40
-    h-screen border-r
-    bg-white dark:bg-slate-900
-    border-slate-200 dark:border-slate-800
+        fixed lg:static top-0 left-0 z-40
+        h-screen border-r
+        bg-white dark:bg-slate-900
+        border-slate-200 dark:border-slate-800
 
-    text-slate-800 dark:text-slate-100
+        text-slate-800 dark:text-slate-100
 
-    transition-[width,background-color,border-color] 
-    duration-300 ease-out
+        transition-[width,background-color,border-color] 
+        duration-300 ease-out
 
-    ${expanded ? "w-72" : "w-20"}
-  `}
+        ${expanded ? "w-72" : "w-20"}
+      `}
     >
       <div className="p-6">
         <Image
