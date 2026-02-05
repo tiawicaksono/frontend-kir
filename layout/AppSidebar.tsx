@@ -72,6 +72,8 @@ export default function AppSidebar() {
   /* FLYOUT (BOX MODE) */
   const [hovered, setHovered] = useState<number | null>(null);
   const hoverTimer = useRef<NodeJS.Timeout | null>(null);
+  const closeTimeout = useRef<ReturnType<typeof setTimeout> | null>(null);
+
 
   const isActive = useCallback((path: string) => pathname === path, [pathname]);
 
@@ -166,38 +168,80 @@ export default function AppSidebar() {
             )}
 
             {/* ================= FLYOUT ================= */}
-            <AnimatePresence>
-              {compact && hovered === index && item.subItems && (
-                <motion.div
-                  initial={{ opacity: 0, x: -10, scale: 0.98 }}
-                  animate={{ opacity: 1, x: 0, scale: 1 }}
-                  exit={{ opacity: 0, x: -10 }}
-                  transition={{ duration: 0.18 }}
-                  className="absolute left-18 top-0 z-50"
-                >
-                  {/* ARROW */}
-                  <div className="absolute -left-2 top-4 w-3 h-3 rotate-45 bg-white/80 backdrop-blur" />
+            <div
+              onMouseEnter={() => {
+                if (closeTimeout.current) clearTimeout(closeTimeout.current);
+                setHovered(index);
+              }}
+              onMouseLeave={() => {
+                closeTimeout.current = setTimeout(() => {
+                  setHovered(null);
+                }, 180); // 👈 grace time
+              }}
+            >
+              <AnimatePresence>
+                {compact && hovered === index && item.subItems && (
+                  <motion.div
+                    initial={{ opacity: 0, x: -8, scale: 0.98 }}
+                    animate={{ opacity: 1, x: 0, scale: 1 }}
+                    exit={{ opacity: 0, x: -8, scale: 0.98 }}
+                    transition={{ duration: 0.18, ease: "easeOut" }}
+                    className="absolute left-18 top-0 z-50"
+                    onMouseEnter={() => {
+                      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+                    }}
+                    onMouseLeave={() => {
+                      closeTimeout.current = setTimeout(() => {
+                        setHovered(null);
+                      }, 180);
+                    }}
+                  >
+                    {/* HOVER BRIDGE (ANTI GAP) */}
+                    <div className="absolute -left-6 top-0 h-full w-6" />
 
-                  {/* PANEL */}
-                  <div className="min-w-55 rounded-xl bg-white/80 backdrop-blur-xl shadow-xl p-4">
-                    <p className="mb-2 text-sm font-semibold">{item.name}</p>
+                    {/* ARROW */}
+                    <div
+                      className="
+        absolute -left-2 top-4 w-3 h-3 rotate-45
+        bg-white/80 dark:bg-slate-800/80
+        backdrop-blur-md shadow-sm
+      "
+                    />
 
-                    <ul className="space-y-1">
-                      {item.subItems.map((sub) => (
-                        <li key={sub.name}>
-                          <Link
-                            href={sub.path}
-                            className="block rounded-md px-3 py-2 text-sm hover:bg-black/5"
-                          >
-                            {sub.name}
-                          </Link>
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
+                    {/* PANEL */}
+                    <div
+                      className="
+        min-w-55 rounded-xl
+        bg-white/80 dark:bg-slate-900/80
+        backdrop-blur-xl
+        shadow-xl
+        border border-slate-200/50 dark:border-slate-700/50
+        p-4
+      "
+                    >
+                      <p className="mb-2 text-sm font-semibold">{item.name}</p>
+
+                      <ul className="space-y-1">
+                        {item.subItems.map((sub) => (
+                          <li key={sub.name}>
+                            <Link
+                              href={sub.path}
+                              className="
+                  block rounded-md px-3 py-2 text-sm
+                  hover:bg-black/5 dark:hover:bg-white/10
+                  transition-colors
+                "
+                            >
+                              {sub.name}
+                            </Link>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  </motion.div>
+                )}
+              </AnimatePresence>
+            </div>
           </li>
         );
       })}
