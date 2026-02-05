@@ -135,37 +135,48 @@ export default function AppSidebar() {
                 ${expanded ? "justify-start" : "justify-center"}
               `}
             >
-              <Image
-                src={item.icon}
-                alt=""
-                width={20}
-                height={20}
-                className={`${isButtonOpen && "icon-active"} dark:invert`}
-              />
-              {expanded && <span className="menu-item-text">{item.name}</span>}
-              {expanded && item.subItems && (
+              <motion.div
+                animate={{ scale: isButtonOpen ? 1.1 : 1 }}
+                transition={{ type: "spring", stiffness: 300, damping: 20 }}
+              >
                 <Image
-                  src={ChevronDownIcon.src}
-                  alt="chevron"
+                  src={item.icon}
+                  alt=""
                   width={20}
                   height={20}
-                  className={`ml-auto transition ${isButtonOpen && "rotate-180 icon-active"} dark:invert`}
+                  className={`${isButtonOpen && "icon-active"} dark:invert`}
                 />
+              </motion.div>
+              {expanded && <span className="menu-item-text">{item.name}</span>}
+              {expanded && item.subItems && (
+                <motion.div
+                  animate={{ rotate: isButtonOpen ? 180 : 0 }}
+                  transition={{ duration: 0.2 }}
+                  className="ml-auto"
+                >
+                  <Image
+                    src={ChevronDownIcon.src}
+                    alt="chevron"
+                    width={20}
+                    height={20}
+                    className={`ml-auto transition ${isButtonOpen && "rotate-180 icon-active"} dark:invert`}
+                  />
+                </motion.div>
               )}
             </button>
 
             {/* ================= FLUID SUBMENU ================= */}
             {expanded && item.subItems && (
-              <div
-                ref={(el) => {
-                  if (el) {
-                    subMenuRefs.current[index] = el;
-                  }
+              <motion.div
+                key={item.name} // wajib agar height independen
+                initial={{ height: 0, opacity: 0 }}
+                animate={{
+                  height: isButtonOpen ? "auto" : 0,
+                  opacity: isButtonOpen ? 1 : 0,
                 }}
-                className="overflow-hidden transition-all duration-300"
-                style={{
-                  height: isButtonOpen ? heights[index] || 0 : 0,
-                }}
+                exit={{ height: 0, opacity: 0 }}
+                transition={{ duration: 0.25, ease: "easeInOut" }}
+                className="overflow-hidden"
               >
                 <ul className="ml-9 mt-2 space-y-1">
                   {item.subItems.map((sub) => (
@@ -183,7 +194,7 @@ export default function AppSidebar() {
                     </li>
                   ))}
                 </ul>
-              </div>
+              </motion.div>
             )}
 
             {/* ================= FLYOUT ================= */}
@@ -277,19 +288,16 @@ export default function AppSidebar() {
   /* ========================================================= */
 
   return (
-    <aside
+    <motion.aside
+      animate={{ width: expanded ? 288 : 80 }} // w-72 → 288px, w-20 → 80px
+      transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className={`
         fixed lg:static top-0 left-0 z-40
         h-screen border-r
         bg-white dark:bg-slate-900
         border-slate-200 dark:border-slate-800
-
         text-slate-800 dark:text-slate-100
-
-        transition-[width,background-color,border-color] 
-        duration-300 ease-out
-
-        ${expanded ? "w-72" : "w-20"}
+        overflow-hidden
       `}
     >
       <div className="p-6">
@@ -305,6 +313,6 @@ export default function AppSidebar() {
       </div>
 
       <nav className="px-3 space-y-8">{renderItems(navItems)}</nav>
-    </aside>
+    </motion.aside>
   );
 }
