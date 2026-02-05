@@ -31,7 +31,10 @@ const navItems: NavItem[] = [
   {
     icon: GridIcon.src,
     name: "Dashboard",
-    subItems: [{ name: "Ecommerce", path: "/" }],
+    subItems: [
+      { name: "Ecommerce", path: "/" },
+      { name: "Analytics", path: "/analytics" },
+    ],
   },
   { icon: CalenderIcon.src, name: "Calendar", path: "/calendar" },
   { icon: UserCircleIcon.src, name: "User Profile", path: "/profile" },
@@ -115,30 +118,29 @@ export default function AppSidebar() {
   const renderItems = (items: NavItem[]) => (
     <ul className="flex flex-col gap-3">
       {items.map((item, index) => {
-        const isOpen = openSubmenu === index;
-        const hasActiveSubmenu = item.subItems?.some((sub) =>
-          isActive(sub.path),
-        );
-
-        const isMenuOpen = isOpen || hasActiveSubmenu;
+        const isButtonOpen = openSubmenu === index; // manual click, kontrol fluid submenu
 
         return (
           <li key={item.name} className="relative">
             {/* ================= BUTTON ================= */}
             <button
-              onClick={() => expanded && setOpenSubmenu(isOpen ? null : index)}
+              onClick={() =>
+                expanded && setOpenSubmenu(isButtonOpen ? null : index)
+              }
               onMouseEnter={() => compact && handleHover(index)}
               onMouseLeave={() => compact && clearHover()}
-              className={`menu-item group ${isMenuOpen && "menu-item-active"} ${
-                expanded ? "justify-start" : "justify-center"
-              }`}
+              className={`
+                menu-item group 
+                ${isButtonOpen ? "menu-item-active" : "hover:bg-black/5 dark:hover:bg-white/10"}
+                ${expanded ? "justify-start" : "justify-center"}
+              `}
             >
               <Image
                 src={item.icon}
                 alt=""
                 width={20}
                 height={20}
-                className={`${isMenuOpen && "icon-active"} dark:invert`}
+                className={`${isButtonOpen && "icon-active"} dark:invert`}
               />
               {expanded && <span className="menu-item-text">{item.name}</span>}
               {expanded && item.subItems && (
@@ -147,7 +149,7 @@ export default function AppSidebar() {
                   alt="chevron"
                   width={20}
                   height={20}
-                  className={`ml-auto transition ${isMenuOpen && "rotate-180 icon-active"} dark:invert`}
+                  className={`ml-auto transition ${isButtonOpen && "rotate-180 icon-active"} dark:invert`}
                 />
               )}
             </button>
@@ -162,7 +164,7 @@ export default function AppSidebar() {
                 }}
                 className="overflow-hidden transition-all duration-300"
                 style={{
-                  height: isMenuOpen ? heights[index] || 0 : 0,
+                  height: isButtonOpen ? heights[index] || 0 : 0,
                 }}
               >
                 <ul className="ml-9 mt-2 space-y-1">
@@ -170,8 +172,10 @@ export default function AppSidebar() {
                     <li key={sub.name}>
                       <Link
                         href={sub.path}
-                        className={`menu-dropdown-item ${
-                          isActive(sub.path) ? "menu-dropdown-item-active" : ""
+                        className={`block rounded-md px-3 py-2 text-sm transition-colors ${
+                          isActive(sub.path)
+                            ? "menu-dropdown-item-active"
+                            : "hover:bg-black/5 dark:hover:bg-white/10"
                         }`}
                       >
                         {sub.name}
