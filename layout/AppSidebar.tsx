@@ -112,11 +112,17 @@ export default function AppSidebar() {
               onClick={() => expanded && setOpenSubmenu(isOpen ? null : index)}
               onMouseEnter={() => compact && handleHover(index)}
               onMouseLeave={() => compact && clearHover()}
-              className={`menu-item ${
+              className={`menu-item group ${isOpen && "menu-item-active"} ${
                 expanded ? "justify-start" : "justify-center"
               }`}
             >
-              <Image src={item.icon} alt="" width={20} height={20} />
+              <Image
+                src={item.icon}
+                alt=""
+                width={20}
+                height={20}
+                className={`${isOpen && "icon-active"} dark:invert`}
+              />
               {expanded && <span className="menu-item-text">{item.name}</span>}
               {expanded && item.subItems && (
                 <Image
@@ -124,7 +130,7 @@ export default function AppSidebar() {
                   alt="chevron"
                   width={20}
                   height={20}
-                  className={`ml-auto transition ${isOpen && "rotate-180"}`}
+                  className={`ml-auto transition ${isOpen && "rotate-180 icon-active"} dark:invert`}
                 />
               )}
             </button>
@@ -203,11 +209,18 @@ export default function AppSidebar() {
   return (
     <aside
       className={`
-        fixed lg:static top-0 left-0 z-40
-        h-screen border-r bg-white
-        transition-[width] duration-300 ease-out
-        ${expanded ? "w-72" : "w-20"}
-      `}
+    fixed lg:static top-0 left-0 z-40
+    h-screen border-r
+    bg-white dark:bg-slate-900
+    border-slate-200 dark:border-slate-800
+
+    text-slate-800 dark:text-slate-100
+
+    transition-[width,background-color,border-color] 
+    duration-300 ease-out
+
+    ${expanded ? "w-72" : "w-20"}
+  `}
     >
       <div className="p-6">
         <Image
@@ -217,6 +230,7 @@ export default function AppSidebar() {
           alt="logo"
           width={expanded ? 140 : 32}
           height={32}
+          className="dark:invert"
         />
       </div>
 

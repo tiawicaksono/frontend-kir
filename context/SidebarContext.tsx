@@ -3,7 +3,7 @@ import { createContext, useContext, useState } from "react";
 
 type SidebarContextType = {
   isExpanded: boolean;
-  toggle: () => void;
+  toggleSidebar: () => void;
 };
 
 const SidebarContext = createContext<SidebarContextType | null>(null);
@@ -11,10 +11,10 @@ const SidebarContext = createContext<SidebarContextType | null>(null);
 export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const [isExpanded, setIsExpanded] = useState(true);
 
-  const toggle = () => setIsExpanded((prev) => !prev);
+  const toggleSidebar = () => setIsExpanded((prev) => !prev);
 
   return (
-    <SidebarContext.Provider value={{ isExpanded, toggle }}>
+    <SidebarContext.Provider value={{ isExpanded, toggleSidebar }}>
       {children}
     </SidebarContext.Provider>
   );
