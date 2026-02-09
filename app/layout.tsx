@@ -3,7 +3,6 @@ import "./globals.css";
 
 import AppHeader from "@/layout/AppHeader";
 import AppSidebar from "@/layout/AppSidebar";
-import Backdrop from "@/layout/Backdrop";
 import { ThemeProvider } from "@/context/ThemeContext";
 import { SidebarProvider } from "@/context/SidebarContext";
 import BackToTopButton from "@/components/common/BackToTopButton";
@@ -31,7 +30,6 @@ export default function RootLayout({
 
                 {/* Sidebar */}
                 <AppSidebar />
-                <Backdrop />
 
                 {/* Main area */}
                 <div className="flex flex-1 flex-col transition-all duration-300">
