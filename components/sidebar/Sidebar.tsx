@@ -9,7 +9,6 @@ import { usePathname } from "next/navigation";
 import SidebarItem from "./SidebarItem";
 import { getMenus } from "@/services/menu.service";
 import { formatMenuName } from "@/utils/formatMenuName";
-import { menuIconMap } from "@/icons/menuIcons";
 import { Menu } from "@/types/menu";
 
 export default function Sidebar() {
@@ -74,7 +73,6 @@ export default function Sidebar() {
               compact={compact}
               isOpen={openIndex === index}
               onToggle={() => setOpenIndex(openIndex === index ? null : index)}
-              icon={menuIconMap[menu.icon ?? "default"]}
               name={formatMenuName(menu.code)}
               path={menu.route ?? undefined}
               subItems={menu.children?.map((c) => ({

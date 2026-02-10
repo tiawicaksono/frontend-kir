@@ -9,11 +9,14 @@ import { useThemeCustomizer } from "@/context/ThemeCustomizerContext";
 import Section from "./Section";
 import ThemePreview from "./ThemePreview";
 import LayoutPreview from "./LayoutPreview";
+import MenuPreview from "./MenuPreview";
+import { useLayout } from "@/context/LayoutContext";
 
 export default function ThemeCustomizerDrawer() {
   const { theme, toggleTheme } = useTheme();
   const { isExpanded, toggleSidebar } = useSidebar();
   const { close } = useThemeCustomizer();
+  const { menuLayout, setMenuLayout } = useLayout();
 
   return (
     <motion.aside
@@ -40,6 +43,26 @@ export default function ThemeCustomizerDrawer() {
 
       {/* Content */}
       <div className="p-5 space-y-6 text-sm">
+        {/* Menu Layout */}
+        <Section
+          title="Menu Layout"
+          subTitle="Choose Sidebar or Top Navigation"
+        >
+          <div className="flex gap-4">
+            <MenuPreview
+              label="Sidebar"
+              active={menuLayout === "sidebar"}
+              onClick={() => setMenuLayout("sidebar")}
+            />
+            <MenuPreview
+              label="Top Menu"
+              active={menuLayout === "top"}
+              onClick={() => setMenuLayout("top")}
+            />
+          </div>
+        </Section>
+
+        {/* Theme Scheme */}
         <Section title="Theme Scheme" subTitle="Choose Light or Dark Mode">
           <div className="flex gap-4">
             <ThemePreview
@@ -57,6 +80,7 @@ export default function ThemeCustomizerDrawer() {
           </div>
         </Section>
 
+        {/* Menu (Navigation) */}
         <Section
           title="Menu (Navigation)"
           subTitle="Choose Expanded or Collapsed"

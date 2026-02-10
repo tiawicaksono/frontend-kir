@@ -2,10 +2,9 @@
 
 import { useRef, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, Menu, MenuSquareIcon } from "lucide-react";
 
 interface SubItem {
   name: string;
@@ -15,7 +14,6 @@ interface SubItem {
 interface Props {
   index: number;
   name: string;
-  icon: string;
   path?: string;
   subItems?: SubItem[];
   expanded: boolean;
@@ -26,7 +24,6 @@ interface Props {
 
 export default function SidebarItem({
   name,
-  icon,
   path,
   subItems = [],
   expanded,
@@ -76,11 +73,8 @@ export default function SidebarItem({
             animate={{ scale: isActive ? 1.1 : 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <Image
-              src={icon}
-              alt=""
-              width={20}
-              height={20}
+            <MenuSquareIcon
+              size={20}
               className={`${isActive && "icon-active"} dark:invert`}
             />
           </motion.div>
@@ -106,11 +100,8 @@ export default function SidebarItem({
             animate={{ scale: isOpen ? 1.1 : 1 }}
             transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <Image
-              src={icon}
-              alt=""
-              width={20}
-              height={20}
+            <MenuSquareIcon
+              size={20}
               className={`${isActive && "icon-active"} dark:invert`}
             />
           </motion.div>
