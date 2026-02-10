@@ -1,5 +1,5 @@
 import { Outfit } from "next/font/google";
-import "./globals.css";
+import "../globals.css";
 
 import AppHeader from "@/layout/AppHeader";
 // import AppSidebar from "@/layout/AppSidebar";
@@ -37,7 +37,7 @@ export default function RootLayout({
                 <div className="flex flex-1 flex-col transition-all duration-300">
                   <AppHeader />
 
-                  <main className="flex-1 p-4 z-10 mx-auto w-full max-w-(--breakpoint-2xl) md:p-6">
+                  <main className="flex-1 p-4 mx-auto w-full max-w-(--breakpoint-2xl) md:p-6">
                     {children}
                   </main>
                 </div>
