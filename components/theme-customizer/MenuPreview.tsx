@@ -49,7 +49,7 @@ export default function MenuPreview({ label, active, onClick }: Props) {
         )}
       </motion.div>
 
-      <span className="text-sm font-medium">{label}</span>
+      <span className="text-sm font-medium dark:invert">{label}</span>
     </button>
   );
 }

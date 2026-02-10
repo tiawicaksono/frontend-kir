@@ -32,7 +32,9 @@ export default function ThemeCustomizerDrawer() {
     >
       {/* Header */}
       <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200 dark:border-white/10 bg-slate-100 dark:bg-slate-800">
-        <h2 className="font-semibold tracking-wide">Theme Customizer</h2>
+        <h2 className="font-semibold tracking-wide dark:invert">
+          Theme Customizer
+        </h2>
         <button
           onClick={close}
           className="text-slate-400 hover:text-slate-900 dark:hover:text-white transition"
