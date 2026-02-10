@@ -62,42 +62,74 @@ export default function SidebarItem({
 
   return (
     <li className="relative">
-      {/* ================= BUTTON ================= */}
-      <button
-        onClick={() => expanded && hasSubmenu && onToggle()}
-        onMouseEnter={() => compact && openHover()}
-        onMouseLeave={() => compact && closeHover()}
-        className={`
-          menu-item group
-          ${isActive ? "menu-item-active" : "hover:bg-black/5 dark:hover:bg-white/10"}
-          ${expanded ? "justify-start" : "justify-center"}
-        `}
-      >
-        <motion.div
-          animate={{ scale: isOpen ? 1.1 : 1 }}
-          transition={{ type: "spring", stiffness: 300, damping: 20 }}
+      {!hasSubmenu && path ? (
+        /* ============ LINK (NO SUBMENU) ============ */
+        <Link
+          href={path}
+          className={`
+        menu-item group
+        ${isActive ? "menu-item-active" : "hover:bg-black/5 dark:hover:bg-white/10"}
+        ${expanded ? "justify-start" : "justify-center"}
+      `}
         >
-          <Image
-            src={icon}
-            alt=""
-            width={20}
-            height={20}
-            className={`${isActive && "icon-active"} dark:invert`}
-          />
-        </motion.div>
-
-        {expanded && <span className="menu-item-text dark:invert">{name}</span>}
-
-        {expanded && hasSubmenu && (
           <motion.div
-            animate={{ rotate: isOpen ? 180 : 0 }}
-            transition={{ duration: 0.2 }}
-            className="ml-auto"
+            animate={{ scale: isActive ? 1.1 : 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
           >
-            <ChevronDown className="h-4 w-4 dark:invert" />
+            <Image
+              src={icon}
+              alt=""
+              width={20}
+              height={20}
+              className={`${isActive && "icon-active"} dark:invert`}
+            />
           </motion.div>
-        )}
-      </button>
+
+          {expanded && (
+            <span className="menu-item-text dark:invert">{name}</span>
+          )}
+        </Link>
+      ) : (
+        /* ============ BUTTON (HAS SUBMENU) ============ */
+        <button
+          type="button"
+          onClick={() => expanded && hasSubmenu && onToggle()}
+          onMouseEnter={() => compact && openHover()}
+          onMouseLeave={() => compact && closeHover()}
+          className={`
+        menu-item group
+        ${isActive ? "menu-item-active" : "hover:bg-black/5 dark:hover:bg-white/10"}
+        ${expanded ? "justify-start" : "justify-center"}
+      `}
+        >
+          <motion.div
+            animate={{ scale: isOpen ? 1.1 : 1 }}
+            transition={{ type: "spring", stiffness: 300, damping: 20 }}
+          >
+            <Image
+              src={icon}
+              alt=""
+              width={20}
+              height={20}
+              className={`${isActive && "icon-active"} dark:invert`}
+            />
+          </motion.div>
+
+          {expanded && (
+            <span className="menu-item-text dark:invert">{name}</span>
+          )}
+
+          {expanded && hasSubmenu && (
+            <motion.div
+              animate={{ rotate: isOpen ? 180 : 0 }}
+              transition={{ duration: 0.2 }}
+              className="ml-auto"
+            >
+              <ChevronDown className="h-4 w-4 dark:invert" />
+            </motion.div>
+          )}
+        </button>
+      )}
 
       {/* ================= FLUID SUBMENU ================= */}
       {expanded && hasSubmenu && (
