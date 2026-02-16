@@ -201,7 +201,14 @@
     cursor: pointer;
   }
   body {
-    @apply relative font-normal font-outfit z-1 bg-gray-50;
+    @apply relative font-normal font-outfit z-1;
+  }
+  html {
+    @apply bg-gray-50;
+  }
+
+  html.dark {
+    @apply bg-gray-900;
   }
 }
 

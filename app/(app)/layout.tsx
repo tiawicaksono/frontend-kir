@@ -9,14 +9,10 @@ const outfit = Outfit({ subsets: ["latin"] });
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning>
-      <body className={outfit.className}>
-        <AppProviders>
-          <BackToTopButton />
-          <SettingsButton />
-          <AppMenu>{children}</AppMenu>
-        </AppProviders>
-      </body>
-    </html>
+    <AppProviders>
+      <BackToTopButton />
+      <SettingsButton />
+      <AppMenu>{children}</AppMenu>
+    </AppProviders>
   );
 }
