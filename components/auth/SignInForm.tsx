@@ -2,14 +2,49 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import Button from "@/components/button/Button";
+import Button from "@/components/form/Button";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { AxiosError } from "axios";
+import { useAuth } from "@/context/AuthContext";
+import LoadingButton from "../common/LoadingButton";
 
 export default function SignInForm() {
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [isChecked, setIsChecked] = useState(false);
+
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const router = useRouter();
+  const { user, login, loading } = useAuth();
+
+  // ✅ Auto redirect kalau user sudah login
+  useEffect(() => {
+    if (!loading && user) router.replace("/dashboard");
+  }, [loading, user, router]);
+
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    try {
+      await login(email, password);
+    } catch (error) {
+      const axiosError = error as AxiosError<{ message: string }>;
+
+      console.error(axiosError.response || axiosError);
+      alert(
+        "Login gagal: " +
+          (axiosError.response?.data?.message || axiosError.message),
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">
@@ -23,13 +58,19 @@ export default function SignInForm() {
             </p>
           </div>
           <div>
-            <form>
+            <form onSubmit={handleLogin}>
               <div className="space-y-6">
                 <div>
                   <Label>
                     Email <span className="text-error-500">*</span>{" "}
                   </Label>
-                  <Input placeholder="info@gmail.com" type="email" />
+                  <Input
+                    disabled={isSubmitting}
+                    placeholder="info@gmail.com"
+                    type="email"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                  />
                 </div>
                 <div>
                   <Label>
@@ -37,8 +78,11 @@ export default function SignInForm() {
                   </Label>
                   <div className="relative">
                     <Input
+                      disabled={isSubmitting}
                       type={showPassword ? "text" : "password"}
                       placeholder="Enter your password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                     />
                     <span
                       onClick={() => setShowPassword(!showPassword)}
@@ -67,9 +111,14 @@ export default function SignInForm() {
                   </Link>
                 </div>
                 <div>
-                  <Button className="w-full" size="sm">
+                  <LoadingButton
+                    type="submit"
+                    size="sm"
+                    loading={isSubmitting}
+                    loadingText="Signing in..."
+                  >
                     Sign in
-                  </Button>
+                  </LoadingButton>
                 </div>
               </div>
             </form>

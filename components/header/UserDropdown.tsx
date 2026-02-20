@@ -2,6 +2,8 @@
 import Image from "next/image";
 import Link from "next/link";
 import { Dropdown, DropdownItem } from "@/components/dropdown";
+import { useAuth } from "@/context/AuthContext";
+import { useRouter } from "next/navigation";
 
 export default function UserDropdown({
   isOpen,
@@ -12,6 +14,13 @@ export default function UserDropdown({
   onToggle: () => void;
   onClose: () => void;
 }) {
+  const { logout } = useAuth();
+  const router = useRouter();
+
+  const handleLogout = async () => {
+    await logout();
+    router.replace("/signin"); // 👈 DI SINI
+  };
   return (
     <div className="relative">
       <button
@@ -143,8 +152,8 @@ export default function UserDropdown({
             </DropdownItem>
           </li>
         </ul>
-        <Link
-          href="/signin"
+        <button
+          onClick={() => handleLogout()}
           className="flex items-center gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
         >
           <svg
@@ -163,7 +172,7 @@ export default function UserDropdown({
             />
           </svg>
           Sign out
-        </Link>
+        </button>
       </Dropdown>
     </div>
   );
