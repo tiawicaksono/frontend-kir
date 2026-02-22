@@ -2,9 +2,8 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import Button from "@/components/form/Button";
 import Link from "next/link";
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
@@ -22,16 +21,16 @@ export default function SignInForm() {
   const router = useRouter();
   const { user, login, loading } = useAuth();
 
-  // ✅ Auto redirect kalau user sudah login
-  useEffect(() => {
-    if (!loading && user) router.replace("/dashboard");
-  }, [loading, user, router]);
-
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
+
     try {
       await login(email, password);
+
+      // Redirect langsung setelah login sukses
+      router.replace("/dashboard");
+      router.refresh();
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
 
@@ -45,6 +44,7 @@ export default function SignInForm() {
     }
   };
 
+  if (loading || user) return null;
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full">
       <div className="flex flex-col justify-center flex-1 w-full max-w-md mx-auto">

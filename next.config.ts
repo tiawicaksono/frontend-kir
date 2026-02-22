@@ -6,7 +6,7 @@ const nextConfig: NextConfig = {
     return [
       {
         source: '/',
-        destination: '/dashboard',
+        destination: '/signin',
         permanent: true, // atau false jika redirect sementara
       },
     ];

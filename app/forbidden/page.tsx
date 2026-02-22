@@ -2,7 +2,7 @@ import GridShape from "@/components/common/GridShape";
 import Image from "next/image";
 import Link from "next/link";
 
-export default function NotFound() {
+export default function ForbiddenPage() {
   return (
     <div className="relative flex flex-col items-center justify-center min-h-screen p-6 overflow-hidden z-1">
       <GridShape />
@@ -12,22 +12,23 @@ export default function NotFound() {
         </h1>
 
         <Image
-          src="/images/error/404.svg"
-          alt="404"
+          src="/images/error/503.svg"
+          alt="503"
           className="dark:hidden"
           width={472}
           height={152}
         />
         <Image
-          src="/images/error/404-dark.svg"
-          alt="404"
+          src="/images/error/503-dark.svg"
+          alt="503"
           className="hidden dark:block"
           width={472}
           height={152}
         />
 
         <p className="mt-10 mb-6 text-base text-gray-700 dark:text-gray-400 sm:text-lg">
-          We can’t seem to find the page you are looking for!
+          You are not authorized to access this page. Please contact the
+          administrator if you think this is a mistake.
         </p>
 
         <Link

@@ -2,8 +2,8 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "@/services/api";
+import { User } from "@/types/user";
 
-type User = { id: number; name: string; email: string };
 type AuthContextType = {
   user: User | null;
   loading: boolean;
@@ -21,7 +21,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const fetchUser = async () => {
     try {
       const res = await api.get("/api/user");
-      setUser(res.data);
+      const userData = res.data;
+
+      // fetch menus
+      const menuRes = await api.get("/api/menus/me");
+      userData.menus = menuRes.data;
+      setUser(userData);
     } catch {
       setUser(null);
     } finally {

@@ -1,29 +1,38 @@
 "use client";
 
-import { Outfit } from "next/font/google";
 import "../globals.css";
 import AppMenu from "@/layout/AppMenu";
 import BackToTopButton from "@/components/common/BackToTopButton";
 import SettingsButton from "@/components/common/SettingsButton";
 import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
-import FullScreenLoader from "@/components/common/FullScreenLoader";
 import RouteTransition from "@/components/layout/RouteTransition";
-
-const outfit = Outfit({ subsets: ["latin"] });
+import { hasRouteAccess } from "@/utils/permission";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading && !user) {
-      router.replace("/signin");
-    }
-  }, [loading, user, router]);
+    if (!loading) {
+      if (!user) {
+        router.replace("/signin");
+        return;
+      }
 
-  if (loading) return <FullScreenLoader />;
+      const publicRoutes = ["/dashboard", "/ubah-password"];
+
+      if (!publicRoutes.includes(pathname)) {
+        const allowed = hasRouteAccess(user.menus || [], pathname);
+
+        if (!allowed) {
+          router.replace("/forbidden");
+        }
+      }
+    }
+  }, [loading, user, pathname, router]);
 
   if (!user) return null;
 

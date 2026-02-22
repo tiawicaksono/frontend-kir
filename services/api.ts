@@ -32,10 +32,31 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
 });
 
 
-// Auto redirect kalau 401
 api.interceptors.response.use(
   (response) => response,
   (error) => {
+    const status = error.response?.status;
+    const currentPath = window.location.pathname;
+    const requestUrl = error.config?.url || "";
+
+    // Jangan intercept request auth/me
+    const isAuthRequest =
+      requestUrl.includes("/api/user") ||
+      requestUrl.includes("/api/menus/me");
+
+    if (status === 401 && !isAuthRequest) {
+      if (currentPath !== "/signin") {
+        window.location.href = "/signin";
+      }
+    }
+
+    if (status === 403) {
+      // Jangan redirect kalau sudah di forbidden
+      if (currentPath !== "/forbidden") {
+        window.location.href = "/forbidden";
+      }
+    }
+
     return Promise.reject(error);
   }
 );

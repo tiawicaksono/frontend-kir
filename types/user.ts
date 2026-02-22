@@ -4,4 +4,5 @@ export interface User {
   name: string;
   email: string;
   password: string;
+  menus?: { id: number; route: string | null }[];
 }
