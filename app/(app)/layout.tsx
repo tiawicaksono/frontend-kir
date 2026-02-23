@@ -9,6 +9,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useEffect } from "react";
 import RouteTransition from "@/components/layout/RouteTransition";
 import { hasRouteAccess } from "@/utils/permission";
+import SplashScreen from "@/components/common/SplashScreen";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, loading } = useAuth();
@@ -22,7 +23,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   }, [loading, user, router]);
 
   // ⛔ Jangan render apa pun saat loading
-  if (loading) return null;
+  if (loading) {
+    return <SplashScreen show />;
+  }
 
   // ⛔ Jangan render kalau belum ada user
   if (!user) return null;
