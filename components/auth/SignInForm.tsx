@@ -26,15 +26,11 @@ export default function SignInForm() {
     setIsSubmitting(true);
 
     try {
-      await login(email, password);
+      const redirectTo = await login(email, password);
 
-      // Redirect langsung setelah login sukses
-      router.replace("/dashboard");
-      router.refresh();
+      router.replace(redirectTo);
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;
-
-      console.error(axiosError.response || axiosError);
       alert(
         "Login gagal: " +
           (axiosError.response?.data?.message || axiosError.message),

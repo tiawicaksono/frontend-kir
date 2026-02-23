@@ -8,7 +8,7 @@ import { extractRoutes } from "@/utils/permission";
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<void>;
+  login: (email: string, password: string) => Promise<string>; // ⬅ return route
   logout: () => Promise<void>;
 };
 
@@ -18,21 +18,43 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
+  useEffect(() => {
+    const syncLogout = (event: StorageEvent) => {
+      if (event.key === "logout_event") {
+        setUser(null);
+        window.location.href = "/signin";
+      }
+
+      if (event.key === "login_event") {
+        fetchUser(); // 🔥 refetch user
+        window.location.reload(); // supaya middleware + UI sinkron
+      }
+    };
+
+    window.addEventListener("storage", syncLogout);
+
+    return () => {
+      window.removeEventListener("storage", syncLogout);
+    };
+  }, []);
+
   // fetch user dari session cookie Laravel
-  const fetchUser = async () => {
+  const fetchUser = async (skipLoading = false) => {
+    if (!skipLoading) setLoading(true);
+
     try {
       const res = await api.get("/api/user");
       const userData = res.data;
 
-      // fetch menus
       const menuRes = await api.get("/api/menus/me");
       userData.menus = menuRes.data;
+
       setUser(userData);
       return userData;
     } catch {
       setUser(null);
     } finally {
-      setLoading(false);
+      if (!skipLoading) setLoading(false);
     }
   };
 
@@ -40,22 +62,33 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     fetchUser();
   }, []);
 
-  const login = async (email: string, password: string) => {
+  const login = async (email: string, password: string): Promise<string> => {
     await api.get("/sanctum/csrf-cookie");
     await api.post("/api/login", { email, password });
 
-    const userData = await fetchUser();
+    const res = await api.get("/api/user");
+    const menuRes = await api.get("/api/menus/me");
+
+    const userData = res.data;
+    userData.menus = menuRes.data;
+
+    setUser(userData);
 
     const routes = extractRoutes(userData.menus);
 
     const expiry = Date.now() + 120 * 60 * 1000;
 
-    // ✅ Set cookies
     document.cookie = `auth_token=true; path=/`;
     document.cookie = `auth_expiry=${expiry}; path=/`;
     document.cookie = `user_routes=${encodeURIComponent(
       JSON.stringify(routes),
     )}; path=/`;
+
+    // 🔥 Broadcast login ke tab lain
+    localStorage.setItem("login_event", Date.now().toString());
+
+    if (userData.roleId === 3) return "/penguji";
+    return "/dashboard";
   };
 
   const logout = async () => {
@@ -70,6 +103,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     document.cookie = "auth_token=; path=/; max-age=0";
     document.cookie = "auth_expiry=; path=/; max-age=0";
     document.cookie = "user_routes=; path=/; max-age=0";
+
+    // 🔥 Broadcast logout ke tab lain
+    localStorage.setItem("logout_event", Date.now().toString());
 
     // Redirect ke signin
     window.location.href = "/signin";
