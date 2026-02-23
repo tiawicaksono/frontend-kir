@@ -1,7 +1,7 @@
 "use client";
 import Image from "next/image";
 import Link from "next/link";
-import { Dropdown, DropdownItem } from "@/components/dropdown";
+import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
 import { useState } from "react";
 
 export default function NotificationDropdown({

@@ -49,10 +49,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   // ===============================
-  // INITIAL LOAD + LISTENER
+  // INITIAL LOAD + BROADCAST LISTENER
   // ===============================
   useEffect(() => {
-    fetchUser();
+    const init = async () => {
+      await fetchUser();
+      setLoading(false);
+    };
+
+    init();
 
     if (!authChannel) return;
 
@@ -61,12 +66,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (type === "LOGOUT") {
         setUser(null);
-        window.location.href = "/signin";
       }
 
       if (type === "LOGIN") {
         await fetchUser(true);
-        window.location.reload(); // biar middleware sinkron
       }
     };
 
@@ -74,7 +77,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       authChannel?.close();
     };
   }, []);
-
   // ===============================
   // LOGIN
   // ===============================

@@ -6,25 +6,27 @@ import { ThemeCustomizerProvider } from "@/context/ThemeCustomizerContext";
 import { LayoutProvider } from "@/context/LayoutContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import SplashScreen from "@/components/common/SplashScreen";
+import { ToastProvider } from "@/context/ToastContext";
 
 function SplashController() {
   const { loading } = useAuth();
 
-  if (!loading) return null;
-  return <SplashScreen />;
+  return loading ? <SplashScreen show /> : null;
 }
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
     <AuthProvider>
       <SplashController />
-      <ThemeProvider>
-        <LayoutProvider>
-          <SidebarProvider>
-            <ThemeCustomizerProvider>{children}</ThemeCustomizerProvider>
-          </SidebarProvider>
-        </LayoutProvider>
-      </ThemeProvider>
+      <ToastProvider>
+        <ThemeProvider>
+          <LayoutProvider>
+            <SidebarProvider>
+              <ThemeCustomizerProvider>{children}</ThemeCustomizerProvider>
+            </SidebarProvider>
+          </LayoutProvider>
+        </ThemeProvider>
+      </ToastProvider>
     </AuthProvider>
   );
 }

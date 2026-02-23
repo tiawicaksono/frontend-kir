@@ -19,7 +19,7 @@ const parseExpiry = (value?: string): number | null => {
 };
 
 // 🔥 Public routes (no auth required)
-const publicRoutes = ["/signin", "/signup", "/reset-password"];
+const publicRoutes = ["/signup", "/reset-password"];
 
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
@@ -63,7 +63,8 @@ export function proxy(request: NextRequest) {
   if (normalizedPath === "/signin") {
     if (isLoggedIn) {
       const allowedRoutes = parseRoutes(routesCookie);
-      const firstRoute = allowedRoutes.length > 0 ? allowedRoutes[0] : "/dashboard";
+      const firstRoute =
+        allowedRoutes.length > 0 ? allowedRoutes[0] : "/dashboard";
 
       return NextResponse.redirect(new URL(firstRoute, request.url));
     }
