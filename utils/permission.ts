@@ -1,34 +1,47 @@
-export interface MenuItem {
-  route: string | null;
-  children?: MenuItem[];
-}
+import { Menu } from "@/types/menu";
+
+/**
+ * Normalisasi path
+ */
+const normalize = (url: string) => url.replace(/\/+$/, "");
 
 /**
  * Flatten semua route termasuk children
  */
-export const extractRoutes = (menus: MenuItem[]): string[] => {
-  return menus.flatMap((menu) => {
-    const current = menu.route ? [normalize(menu.route)] : [];
-    const children = menu.children
-      ? extractRoutes(menu.children)
-      : [];
-    return [...current, ...children];
-  });
-};
+export const extractRoutes = (menus: Menu[]): string[] => {
+  const routes: string[] = [];
 
-const normalize = (url: string) => url.replace(/\/$/, "");
+  const traverse = (items: Menu[]) => {
+    for (const item of items) {
+      if (item.route) {
+        routes.push(normalize(item.route));
+      }
+
+      if (item.children?.length) {
+        traverse(item.children);
+      }
+    }
+  };
+
+  traverse(menus);
+
+  return routes;
+};
 
 /**
  * Cek apakah user punya akses ke suatu path
  */
 export const hasRouteAccess = (
-  menus: MenuItem[],
+  menus: Menu[],
   pathname: string
 ): boolean => {
   const routes = extractRoutes(menus);
   const current = normalize(pathname);
 
-  return routes.some((route) =>
-    current === route || current.startsWith(route + "/")
-  );
+  return routes.some((route) => {
+    return (
+      current === route ||
+      current.startsWith(route + "/")
+    );
+  });
 };

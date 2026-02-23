@@ -16,24 +16,15 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
 
   useEffect(() => {
-    if (!loading) {
-      if (!user) {
-        router.replace("/signin");
-        return;
-      }
-
-      const publicRoutes = ["/dashboard", "/ubah-password"];
-
-      if (!publicRoutes.includes(pathname)) {
-        const allowed = hasRouteAccess(user.menus || [], pathname);
-
-        if (!allowed) {
-          router.replace("/forbidden");
-        }
-      }
+    if (!loading && !user) {
+      router.replace("/signin");
     }
-  }, [loading, user, pathname, router]);
+  }, [loading, user, router]);
 
+  // ⛔ Jangan render apa pun saat loading
+  if (loading) return null;
+
+  // ⛔ Jangan render kalau belum ada user
   if (!user) return null;
 
   return (
