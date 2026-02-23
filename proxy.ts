@@ -18,8 +18,12 @@ const parseExpiry = (value?: string): number | null => {
   return isNaN(n) ? null : n;
 };
 
+// 🔥 Public routes (no auth required)
+const publicRoutes = ["/signin", "/signup", "/reset-password"];
+
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  const normalizedPath = normalize(pathname);
 
   // Skip internals & static
   if (
@@ -31,6 +35,11 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Public routes -> allow
+  if (publicRoutes.includes(normalizedPath)) {
+    return NextResponse.next();
+  }
+
   const authToken = request.cookies.get("auth_token")?.value;
   const expiry = request.cookies.get("auth_expiry")?.value;
   const routesCookie = request.cookies.get("user_routes")?.value;
@@ -38,10 +47,7 @@ export function proxy(request: NextRequest) {
   const now = Date.now();
   const expiryNumber = parseExpiry(expiry);
 
-  // Login status
-  const isLoggedIn = !!authToken && !!expiryNumber && expiryNumber > now;
-
-  // Handle expired session
+  // Handle expired session -> clear & redirect
   if (expiryNumber && expiryNumber <= now) {
     const res = NextResponse.redirect(new URL("/signin", request.url));
     res.cookies.delete("auth_token");
@@ -50,7 +56,8 @@ export function proxy(request: NextRequest) {
     return res;
   }
 
-  const normalizedPath = normalize(pathname);
+  // Login status
+  const isLoggedIn = !!authToken && !!expiryNumber && expiryNumber > now;
 
   // Signin page behavior
   if (normalizedPath === "/signin") {
@@ -64,17 +71,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // Public route
+  // Public route (already handled)
   if (normalizedPath === "/forbidden") {
     return NextResponse.next();
   }
 
-  // Not logged in → redirect
+  // Not logged in -> redirect to signin
   if (!isLoggedIn) {
     return NextResponse.redirect(new URL("/signin", request.url));
   }
 
-  // If routes cookie not ready → allow (prevent flick)
+  // If routes cookie not ready -> allow (prevent flick)
   if (!routesCookie) {
     return NextResponse.next();
   }
