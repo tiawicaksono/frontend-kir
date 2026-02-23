@@ -3,7 +3,7 @@ import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Link from "next/link";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { AxiosError } from "axios";
@@ -18,8 +18,25 @@ export default function SignInForm() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const router = useRouter();
   const { user, login, loading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!loading && user) {
+      const routesCookie = document.cookie
+        .split("; ")
+        .find((row) => row.startsWith("user_routes="));
+
+      if (routesCookie) {
+        const routes = JSON.parse(
+          decodeURIComponent(routesCookie.split("=")[1]),
+        );
+        router.replace(routes[0] || "/dashboard");
+      } else {
+        router.replace("/dashboard");
+      }
+    }
+  }, [loading, user]);
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -27,7 +44,6 @@ export default function SignInForm() {
 
     try {
       const redirectTo = await login(email, password);
-
       router.replace(redirectTo);
     } catch (error) {
       const axiosError = error as AxiosError<{ message: string }>;

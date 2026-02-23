@@ -28,7 +28,12 @@ const Input: React.FC<InputProps> = ({
 
   return (
     <div className="relative">
-      <input {...props} disabled={disabled} className={inputClasses} />
+      <input
+        {...props}
+        disabled={disabled}
+        className={inputClasses}
+        autoComplete="off"
+      />
 
       {hint && (
         <p

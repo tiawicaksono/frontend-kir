@@ -8,37 +8,26 @@ import { extractRoutes } from "@/utils/permission";
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<string>; // ⬅ return route
+  login: (email: string, password: string) => Promise<string>;
   logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// 🔥 BroadcastChannel instance
+let authChannel: BroadcastChannel | null = null;
+
+if (typeof window !== "undefined") {
+  authChannel = new BroadcastChannel("auth_channel");
+}
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const syncLogout = (event: StorageEvent) => {
-      if (event.key === "logout_event") {
-        setUser(null);
-        window.location.href = "/signin";
-      }
-
-      if (event.key === "login_event") {
-        fetchUser(); // 🔥 refetch user
-        window.location.reload(); // supaya middleware + UI sinkron
-      }
-    };
-
-    window.addEventListener("storage", syncLogout);
-
-    return () => {
-      window.removeEventListener("storage", syncLogout);
-    };
-  }, []);
-
-  // fetch user dari session cookie Laravel
+  // ===============================
+  // FETCH USER
+  // ===============================
   const fetchUser = async (skipLoading = false) => {
     if (!skipLoading) setLoading(true);
 
@@ -53,26 +42,49 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       return userData;
     } catch {
       setUser(null);
+      return null;
     } finally {
       if (!skipLoading) setLoading(false);
     }
   };
 
+  // ===============================
+  // INITIAL LOAD + LISTENER
+  // ===============================
   useEffect(() => {
     fetchUser();
+
+    if (!authChannel) return;
+
+    authChannel.onmessage = async (event) => {
+      const { type } = event.data;
+
+      if (type === "LOGOUT") {
+        setUser(null);
+        window.location.href = "/signin";
+      }
+
+      if (type === "LOGIN") {
+        await fetchUser(true);
+        window.location.reload(); // biar middleware sinkron
+      }
+    };
+
+    return () => {
+      authChannel?.close();
+    };
   }, []);
 
+  // ===============================
+  // LOGIN
+  // ===============================
   const login = async (email: string, password: string): Promise<string> => {
     await api.get("/sanctum/csrf-cookie");
     await api.post("/api/login", { email, password });
 
-    const res = await api.get("/api/user");
-    const menuRes = await api.get("/api/menus/me");
+    const userData = await fetchUser();
 
-    const userData = res.data;
-    userData.menus = menuRes.data;
-
-    setUser(userData);
+    if (!userData) throw new Error("Failed to fetch user");
 
     const routes = extractRoutes(userData.menus);
 
@@ -84,30 +96,31 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       JSON.stringify(routes),
     )}; path=/`;
 
-    // 🔥 Broadcast login ke tab lain
-    localStorage.setItem("login_event", Date.now().toString());
+    // 🔥 Broadcast ke tab lain
+    authChannel?.postMessage({ type: "LOGIN" });
 
+    await new Promise((resolve) => setTimeout(resolve, 100));
     if (userData.roleId === 3) return "/penguji";
     return "/dashboard";
   };
 
+  // ===============================
+  // LOGOUT
+  // ===============================
   const logout = async () => {
     try {
       await api.get("/sanctum/csrf-cookie");
-      await api.post("/api/logout"); // Sanctum logout
+      await api.post("/api/logout");
     } catch (error) {
       console.error("Logout error:", error);
     }
 
-    // Hapus semua cookie
     document.cookie = "auth_token=; path=/; max-age=0";
     document.cookie = "auth_expiry=; path=/; max-age=0";
     document.cookie = "user_routes=; path=/; max-age=0";
 
-    // 🔥 Broadcast logout ke tab lain
-    localStorage.setItem("logout_event", Date.now().toString());
+    authChannel?.postMessage({ type: "LOGOUT" });
 
-    // Redirect ke signin
     window.location.href = "/signin";
   };
 
