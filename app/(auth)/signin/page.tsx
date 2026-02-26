@@ -1,4 +1,4 @@
-import SignInForm from "@/components/auth/SignInForm";
+import SignInForm from "@/components/pages/auth/SignInForm";
 import { Metadata } from "next";
 
 // export const metadata: Metadata = {
@@ -6,6 +6,6 @@ import { Metadata } from "next";
 //   description: "This is Next.js Signin Page TailAdmin Dashboard Template",
 // };
 
-export default function SignIn() {
+export default function SignInPage() {
   return <SignInForm />;
 }

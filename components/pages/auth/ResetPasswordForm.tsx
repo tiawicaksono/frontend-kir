@@ -3,7 +3,7 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Link from "next/link";
 import { useState } from "react";
-import LoadingButton from "../common/LoadingButton";
+import LoadingButton from "../../common/LoadingButton";
 import { ChevronLeftIcon } from "lucide-react";
 
 export default function ResetPasswordForm() {

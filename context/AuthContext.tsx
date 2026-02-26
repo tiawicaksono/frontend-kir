@@ -32,10 +32,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (!skipLoading) setLoading(true);
 
     try {
-      const res = await api.get("/api/user");
+      const res = await api.get("/user");
       const userData = res.data;
 
-      const menuRes = await api.get("/api/menus/me");
+      const menuRes = await api.get("/menus/me");
       userData.menus = menuRes.data;
 
       setUser(userData);
@@ -81,8 +81,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // LOGIN
   // ===============================
   const login = async (email: string, password: string): Promise<string> => {
-    await api.get("/sanctum/csrf-cookie");
-    await api.post("/api/login", { email, password });
+    await api.post("/login", { email, password });
 
     const userData = await fetchUser();
 
@@ -111,8 +110,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   // ===============================
   const logout = async () => {
     try {
-      await api.get("/sanctum/csrf-cookie");
-      await api.post("/api/logout");
+      await api.post("/logout");
     } catch (error) {
       console.error("Logout error:", error);
     }

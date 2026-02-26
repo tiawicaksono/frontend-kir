@@ -6,7 +6,8 @@ import React, { useEffect, useState } from "react";
 import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
-import LoadingButton from "../common/LoadingButton";
+import PasswordInput from "@/components/form/form-elements/PasswordField";
+import LoadingButton from "@/components/common/LoadingButton";
 
 export default function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -81,28 +82,11 @@ export default function SignInForm() {
               </div>
 
               <div>
-                <Label>
-                  Password <span className="text-error-500">*</span>
-                </Label>
-                <div className="relative">
-                  <Input
-                    disabled={isSubmitting}
-                    type={showPassword ? "text" : "password"}
-                    placeholder="Enter your password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                  />
-                  <span
-                    onClick={() => setShowPassword(!showPassword)}
-                    className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                  >
-                    {showPassword ? (
-                      <EyeIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    ) : (
-                      <EyeClosedIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                    )}
-                  </span>
-                </div>
+                <PasswordInput
+                  label="Password"
+                  value={password}
+                  onChange={setPassword}
+                />
               </div>
 
               <div>

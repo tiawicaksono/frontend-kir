@@ -2,9 +2,14 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import type { InternalAxiosRequestConfig } from "axios";
 
-
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL,
+  baseURL: process.env.NEXT_PUBLIC_API_URL, // http://localhost:8000/api
+  withCredentials: true,
+});
+
+// 🔥 axios instance khusus TANPA /api
+const sanctum = axios.create({
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL, // http://localhost:8000
   withCredentials: true,
 });
 
@@ -14,7 +19,7 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     let token = Cookies.get("XSRF-TOKEN");
 
     if (!token) {
-      await api.get("/sanctum/csrf-cookie");
+      await sanctum.get("/sanctum/csrf-cookie");
       token = Cookies.get("XSRF-TOKEN");
     }
 
@@ -31,7 +36,6 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
   return config;
 });
 
-
 api.interceptors.response.use(
   (response) => response,
   (error) => {
@@ -41,8 +45,7 @@ api.interceptors.response.use(
 
     // Jangan intercept request auth/me
     const isAuthRequest =
-      requestUrl.includes("/api/user") ||
-      requestUrl.includes("/api/menus/me");
+      requestUrl.includes("/user") || requestUrl.includes("/menus/me");
 
     if (status === 401 && !isAuthRequest) {
       if (currentPath !== "/signin") {
@@ -58,7 +61,7 @@ api.interceptors.response.use(
     }
 
     return Promise.reject(error);
-  }
+  },
 );
 
 export default api;

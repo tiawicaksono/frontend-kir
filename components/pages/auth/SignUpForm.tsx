@@ -2,12 +2,14 @@
 import Checkbox from "@/components/form/input/Checkbox";
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import { ChevronLeftIcon, EyeClosedIcon, EyeIcon } from "lucide-react";
+import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
-import React, { useState } from "react";
+import { useState } from "react";
+import PasswordInput from "../../form/form-elements/PasswordField";
 
 export default function SignUpForm() {
-  const [showPassword, setShowPassword] = useState(false);
+  const [password, setPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [isChecked, setIsChecked] = useState(false);
   return (
     <div className="flex flex-col flex-1 lg:w-1/2 w-full overflow-y-auto no-scrollbar">
@@ -73,25 +75,18 @@ export default function SignUpForm() {
                 </div>
                 {/* <!-- Password --> */}
                 <div>
-                  <Label>
-                    Password<span className="text-error-500">*</span>
-                  </Label>
-                  <div className="relative">
-                    <Input
-                      placeholder="Enter your password"
-                      type={showPassword ? "text" : "password"}
-                    />
-                    <span
-                      onClick={() => setShowPassword(!showPassword)}
-                      className="absolute z-30 -translate-y-1/2 cursor-pointer right-4 top-1/2"
-                    >
-                      {showPassword ? (
-                        <EyeIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      ) : (
-                        <EyeClosedIcon className="w-5 h-5 text-gray-500 dark:text-gray-400" />
-                      )}
-                    </span>
-                  </div>
+                  <PasswordInput
+                    label="Password"
+                    value={password}
+                    onChange={setPassword}
+                  />
+                </div>
+                <div>
+                  <PasswordInput
+                    label="Confirm Password"
+                    value={confirmPassword}
+                    onChange={setConfirmPassword}
+                  />
                 </div>
                 {/* <!-- Checkbox --> */}
                 <div className="flex items-center gap-3">
