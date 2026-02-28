@@ -6,7 +6,6 @@ import { ThemeCustomizerProvider } from "@/context/ThemeCustomizerContext";
 import { LayoutProvider } from "@/context/LayoutContext";
 import { AuthProvider, useAuth } from "@/context/AuthContext";
 import SplashScreen from "@/components/common/SplashScreen";
-import { ToastProvider } from "@/context/ToastContext";
 import { AlertProvider } from "@/context/AlertContext";
 
 function SplashController() {

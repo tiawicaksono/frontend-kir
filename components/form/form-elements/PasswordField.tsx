@@ -29,7 +29,11 @@ export default function PasswordInput({
 
   return (
     <div className="w-full space-y-2">
-      {label && <label className="text-sm font-medium">{label}</label>}
+      {label && (
+        <label className="text-sm font-medium text-gray-500 dark:text-white">
+          {label}
+        </label>
+      )}
 
       <div className="relative">
         <Input
