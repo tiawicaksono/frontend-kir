@@ -10,7 +10,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
     <>
       <BackToTopButton />
       <SettingsButton />
-      <AppMenu>{children}</AppMenu>
+      <AppMenu>
+        <div className="p-4 mx-auto max-w-(--breakpoint-2xl)">{children}</div>
+      </AppMenu>
     </>
   );
 }

@@ -2,7 +2,7 @@
 
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "@/services/api";
-import { User } from "@/types/user";
+import { User } from "@/types/user.type";
 import { extractRoutes } from "@/utils/permission";
 
 type AuthContextType = {

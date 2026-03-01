@@ -9,7 +9,7 @@ import { usePathname } from "next/navigation";
 import SidebarItem from "./SidebarItem";
 import { getMenus } from "@/services/menu.service";
 import { formatMenuName } from "@/utils/formatMenuName";
-import { Menu } from "@/types/menu";
+import { Menu } from "@/types/menu.type";
 
 export default function Sidebar() {
   const { isExpanded } = useSidebar();

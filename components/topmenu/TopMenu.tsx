@@ -9,7 +9,7 @@ import clsx from "clsx";
 
 import { useSidebar } from "@/context/SidebarContext";
 import { getMenus } from "@/services/menu.service";
-import { Menu } from "@/types/menu";
+import { Menu } from "@/types/menu.type";
 import { formatMenuName } from "@/utils/formatMenuName";
 import { useLayout } from "@/context/LayoutContext";
 

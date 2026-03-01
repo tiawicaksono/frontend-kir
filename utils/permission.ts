@@ -1,4 +1,4 @@
-import { Menu } from "@/types/menu";
+import { Menu } from "@/types/menu.type";
 
 /**
  * Normalisasi path
@@ -31,17 +31,11 @@ export const extractRoutes = (menus: Menu[]): string[] => {
 /**
  * Cek apakah user punya akses ke suatu path
  */
-export const hasRouteAccess = (
-  menus: Menu[],
-  pathname: string
-): boolean => {
+export const hasRouteAccess = (menus: Menu[], pathname: string): boolean => {
   const routes = extractRoutes(menus);
   const current = normalize(pathname);
 
   return routes.some((route) => {
-    return (
-      current === route ||
-      current.startsWith(route + "/")
-    );
+    return current === route || current.startsWith(route + "/");
   });
 };

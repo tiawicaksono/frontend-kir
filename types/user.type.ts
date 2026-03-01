@@ -1,4 +1,4 @@
-import { Menu } from "./menu";
+import { Menu } from "./menu.type";
 
 export interface User {
   id: number;

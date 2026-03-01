@@ -1,18 +1,18 @@
-import { Menu } from "@/types/menu";
+import { Menu } from "@/types/menu.type";
 
 const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL;
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 export async function getMenus(): Promise<Menu[]> {
   try {
-    // Ambil CSRF cookie dulu
-    await fetch(`${BACKEND_URL}/sanctum/csrf-cookie`, {
-      credentials: "include",
-      cache: "no-store",
-    });
-
+    // // Ambil CSRF cookie dulu
+    // await fetch(`${BACKEND_URL}/sanctum/csrf-cookie`, {
+    //   credentials: "include",
+    //   cache: "no-store",
+    // });
     // Ambil menus dengan cookie
     const res = await fetch(`${API_URL}/menus/me`, {
+      method: "GET",
       credentials: "include", // ✅ wajib biar laravel_session + XSRF-TOKEN dikirim
       cache: "no-store",
       headers: {

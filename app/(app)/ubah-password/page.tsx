@@ -1,6 +1,5 @@
 "use client";
 
-import InputGroup from "@/components/form/form-elements/InputGroup";
 import ChangePassword from "@/components/pages/change-password/ChangePassword";
 import NoteChangePassword from "@/components/pages/change-password/NoteChangePassword";
 
