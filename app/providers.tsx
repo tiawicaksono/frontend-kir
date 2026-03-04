@@ -7,6 +7,7 @@ import { LayoutProvider } from "@/context/LayoutContext";
 import { AuthProvider } from "@/context/AuthContext";
 import { AlertProvider } from "@/context/AlertContext";
 import SplashController from "@/context/SplashController";
+import { RouteGuardProvider } from "@/context/RouteGuardProvider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -16,7 +17,9 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
         <ThemeProvider>
           <LayoutProvider>
             <SidebarProvider>
-              <ThemeCustomizerProvider>{children}</ThemeCustomizerProvider>
+              <ThemeCustomizerProvider>
+                <RouteGuardProvider>{children}</RouteGuardProvider>
+              </ThemeCustomizerProvider>
             </SidebarProvider>
           </LayoutProvider>
         </ThemeProvider>

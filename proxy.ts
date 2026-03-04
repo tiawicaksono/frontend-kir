@@ -4,7 +4,6 @@ import type { NextRequest } from "next/server";
 export function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
-  // skip internal & static
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
@@ -13,11 +12,17 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  // session check
+  // session check only
   const session = request.cookies.get("laravel-session")?.value;
 
+  // 🚫 Belum login → redirect ke signin
   if (!session && pathname !== "/signin") {
     return NextResponse.redirect(new URL("/signin", request.url));
+  }
+
+  // ✅ Sudah login → jangan boleh ke signin lagi
+  if (session && pathname === "/signin") {
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();
