@@ -7,19 +7,22 @@ import { User } from "@/types/user.type";
 type AuthContextType = {
   user: User | null;
   loading: boolean;
-  login: (email: string, password: string) => Promise<string>;
+  login: (email: string, password: string) => Promise<void>;
   logout: () => Promise<void>;
 };
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
+// BroadcastChannel
+const authChannel = new BroadcastChannel("auth");
+
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
-  // ===============================
-  // INITIAL BOOT
-  // ===============================
+  // ============================
+  // INITIAL BOOT (session source)
+  // ============================
   useEffect(() => {
     const init = async () => {
       try {
@@ -27,9 +30,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(res.data);
       } catch (err: any) {
         if (err.response?.status === 401) {
-          localStorage.setItem("auth_event", `logout_${Date.now()}`);
+          setUser(null);
         }
-        setUser(null);
       } finally {
         setLoading(false);
       }
@@ -37,31 +39,30 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     init();
 
-    // 🔥 Crosstab sync
-    const syncAuth = (event: StorageEvent) => {
-      if (event.key !== "auth_event") return;
+    // Crosstab listener
+    authChannel.onmessage = (event) => {
+      const { type } = event.data;
 
-      if (event.newValue === "logout") {
+      if (type === "LOGOUT") {
         setUser(null);
         window.location.href = "/signin";
       }
 
-      if (event.newValue === "login") {
+      if (type === "LOGIN") {
         window.location.href = "/dashboard";
       }
     };
 
-    window.addEventListener("storage", syncAuth);
-    return () => window.removeEventListener("storage", syncAuth);
+    return () => {
+      authChannel.close();
+    };
   }, []);
 
-  // ===============================
+  // ============================
   // LOGIN
-  // ===============================
-  const login = async (email: string, password: string): Promise<string> => {
+  // ============================
+  const login = async (email: string, password: string): Promise<void> => {
     await api.post("/login", { email, password });
-
-    document.cookie = "next_auth=1; path=/";
 
     try {
       const res = await api.get("/user");
@@ -70,27 +71,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setUser(null);
     }
 
-    // 🔥 trigger semua tab
-    localStorage.setItem("auth_event", "login");
-
-    return "/dashboard";
+    // broadcast
+    authChannel.postMessage({ type: "LOGIN" });
   };
 
-  // ===============================
+  // ============================
   // LOGOUT
-  // ===============================
+  // ============================
   const logout = async () => {
     try {
       await api.post("/logout");
     } catch {}
 
-    document.cookie = "next_auth=; path=/; max-age=0";
     setUser(null);
 
-    // crosstab only signal
-    localStorage.setItem("auth_event", "logout");
+    // broadcast
+    authChannel.postMessage({ type: "LOGOUT" });
 
-    // redirect single source
     window.location.href = "/signin";
   };
 

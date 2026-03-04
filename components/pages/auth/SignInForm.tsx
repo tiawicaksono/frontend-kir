@@ -42,8 +42,8 @@ export default function SignInForm() {
     setError(null);
 
     try {
-      const redirectTo = await login(email, password);
-      router.replace(redirectTo);
+      await login(email, password);
+      router.replace("/dashboard");
     } catch {
       setError("Email atau password salah. Silakan coba lagi.");
       setShowError(true);
