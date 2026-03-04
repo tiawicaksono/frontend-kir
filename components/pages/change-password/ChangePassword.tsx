@@ -8,6 +8,10 @@ import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndic
 import { getPasswordStrength } from "@/utils/validatePassword";
 import api from "@/services/api";
 import { useAlert } from "@/context/AlertContext";
+import {
+  showError,
+  showSuccess,
+} from "@/components/common/ShowAlertErrorSuccess";
 
 export default function ChangePassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,43 +42,13 @@ export default function ChangePassword() {
         password_confirmation: confirmPassword,
       });
 
-      showAlert({
-        variant: "success",
-        title: "Berhasil",
-        message: "Password berhasil diubah",
-      });
+      showSuccess(showAlert);
 
       setOldPassword("");
       setPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      if (error.response?.status === 422) {
-        const errors = error.response.data.errors;
-
-        if (errors) {
-          const firstError = Object.values(errors)[0] as string[];
-          showAlert({
-            variant: "error",
-            title: "Error",
-            message: firstError[0],
-          });
-        } else {
-          showAlert({
-            variant: "error",
-            title: "Error",
-            message: error.response.data.message,
-          });
-        }
-      } else {
-        showAlert({
-          variant: "error",
-          title: "Error",
-          message:
-            error.response?.data?.message ||
-            error.message ||
-            "Something went wrong",
-        });
-      }
+      showError(showAlert, error);
     } finally {
       setIsSubmitting(false);
     }
