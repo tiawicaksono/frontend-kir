@@ -20,3 +20,8 @@ export async function updateApiKeyStatus(id: number, isActive: boolean) {
   });
   return res.data;
 }
+
+export async function deleteApiKey(id: number) {
+  const res = await api.delete(`${API_URL}/pengaturan/api-keys/delete/${id}`);
+  return res.data;
+}

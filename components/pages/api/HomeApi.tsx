@@ -2,8 +2,7 @@
 
 import { useEffect, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
-import Button from "@/components/form/Button";
-import { Plus } from "lucide-react";
+import { MoreHorizontalIcon, MoreVerticalIcon } from "lucide-react";
 import {
   Table,
   TableBody,
@@ -11,12 +10,22 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { getApiKey, updateApiKeyStatus } from "@/services/api-keys.service";
+import {
+  deleteApiKey,
+  getApiKey,
+  updateApiKeyStatus,
+} from "@/services/api-keys.service";
 import { ApiKeys } from "@/types/api-keys.type";
 import ApiKeyField from "./ApiKeyField";
 import DateText from "@/components/common/DateText";
 import ToggleSwitch from "@/components/form/switch/ToggleSwitch";
 import { useAlert } from "@/context/AlertContext";
+import {
+  showError,
+  showSuccess,
+} from "@/components/common/ShowAlertErrorSuccess";
+import { useConfirm } from "@/context/ConfirmActionContext";
+import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
 
 const headerCellClass =
   "py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400";
@@ -29,7 +38,26 @@ export default function HomeApi() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
+  const [openId, setOpenId] = useState<number | null>(null);
+  const [isHeaderOpen, setIsHeaderOpen] = useState(false);
+
+  const toggleHeaderDropdown = () => {
+    setIsHeaderOpen((prev) => !prev);
+  };
+
+  const closeHeaderDropdown = () => {
+    setIsHeaderOpen(false);
+  };
+
+  const toggleDropdown = (id: number) => {
+    setOpenId((prev) => (prev === id ? null : id));
+  };
+  const closeDropdown = () => {
+    setOpenId(null);
+  };
   const { showAlert } = useAlert();
+  const { confirm } = useConfirm();
 
   const fetchApiKeys = async () => {
     try {
@@ -55,38 +83,49 @@ export default function HomeApi() {
 
     try {
       await updateApiKeyStatus(id, value);
-      showAlert({
-        variant: "success",
-        title: "Success",
-        message: "Status API Key berhasil diperbarui.",
-      });
+      showSuccess(showAlert);
     } catch (error: any) {
-      // console.log("STATUS:", error?.response?.status);
-      // console.log("DATA:", error?.response?.data);
-      // console.log("FULL ERROR:", error);
-
       // rollback kalau gagal
       setApiKeys((prev) =>
         prev.map((item) =>
           item.id === id ? { ...item, isActive: !value } : item,
         ),
       );
-
-      // ambil error message dari backend kalau ada
-      const firstError = error.response.data.errors
-        ? (Object.values(error.response.data.errors)[0] as String)
-        : null;
-
-      showAlert({
-        variant: "error",
-        title: "Error",
-        message:
-          firstError?.[0] ||
-          error?.response?.data?.message ||
-          "Gagal memperbarui status API Key.",
-      });
+      showError(showAlert, error);
     } finally {
       setLoadingId(null);
+    }
+  };
+
+  const handleDelete = async (id: number) => {
+    const confirmed = await confirm({
+      title: "Hapus API Key",
+      message: "Data yang dihapus tidak bisa dikembalikan.",
+      confirmText: "Hapus",
+      variant: "destructive",
+    });
+
+    if (!confirmed) return;
+
+    setLoadingDeleteId(id);
+
+    // 🟢 Simpan data lama untuk rollback
+    const previousData = apiKeys;
+
+    // 🟢 Optimistic remove
+    setApiKeys((prev) => prev.filter((item) => item.id !== id));
+
+    try {
+      await deleteApiKey(id);
+
+      showSuccess(showAlert, "Data berhasil dihapus");
+    } catch (error: any) {
+      // 🔴 rollback kalau gagal
+      setApiKeys(previousData);
+
+      showError(showAlert, error);
+    } finally {
+      setLoadingDeleteId(null);
     }
   };
 
@@ -99,13 +138,40 @@ export default function HomeApi() {
       title="API Keys"
       desc="API keys are used to authentication requests to the tailadmin API"
       headerRight={
-        <Button size="sm" variant="primary" startIcon={<Plus size={16} />}>
-          Add API Key
-        </Button>
+        <div className="relative inline-block">
+          <button
+            onClick={toggleHeaderDropdown}
+            className="dropdown-toggle h-9 w-9 flex items-center justify-center rounded-lg border border-gray-200 bg-white hover:bg-gray-50 transition"
+          >
+            <MoreVerticalIcon className="text-gray-500" />
+          </button>
+
+          <Dropdown
+            isOpen={isHeaderOpen}
+            onClose={closeHeaderDropdown}
+            className="w-40 p-2"
+          >
+            <DropdownItem>Add API Key </DropdownItem>
+            <DropdownItem
+              onItemClick={() => {
+                closeHeaderDropdown();
+                fetchApiKeys();
+              }}
+              className="flex w-full text-sm text-gray-600 rounded-lg px-3 py-2 hover:bg-gray-100"
+            >
+              Reload Data
+            </DropdownItem>
+          </Dropdown>
+        </div>
       }
     >
       <div className="max-w-full overflow-x-auto">
-        {loading && <p className="p-4">Loading...</p>}
+        {loading && (
+          <div className="flex items-center gap-2 pb-5">
+            <div className="h-3 w-3 animate-spin rounded-full border border-gray-400 border-t-transparent" />
+            Reloading...
+          </div>
+        )}
         {error && <p className="p-4 text-red-500">{error}</p>}
         {!loading && !error && (
           <Table>
@@ -145,9 +211,16 @@ export default function HomeApi() {
               )}
 
               {apiKeys.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow
+                  key={item.id}
+                  className={`transition-all duration-200 ${
+                    loadingId === item.id
+                      ? "opacity-50 pointer-events-none"
+                      : ""
+                  }`}
+                >
                   <TableCell className={bodyCellClass}>
-                    {item.name}
+                    <div className="mb-2">{item.name}</div>
                     <ApiKeyField value={item.token} />
                   </TableCell>
                   <TableCell className={bodyCellClass}>
@@ -172,7 +245,49 @@ export default function HomeApi() {
                       )}
                     </div>
                   </TableCell>
-                  <TableCell className={bodyCellClass}>&nbsp;</TableCell>
+                  <TableCell className={bodyCellClass}>
+                    <div className="relative inline-block">
+                      <button
+                        onClick={() => toggleDropdown(item.id)}
+                        disabled={loadingDeleteId === item.id}
+                        className={`dropdown-toggle ${
+                          openId === item.id ? "dropdown-toggle-active" : ""
+                        } p-1 rounded-md hover:bg-gray-100 transition`}
+                      >
+                        {loadingDeleteId === item.id ? (
+                          <div className="h-4 w-4 animate-spin rounded-full border border-gray-400 border-t-transparent" />
+                        ) : (
+                          <MoreHorizontalIcon className="text-gray-400 hover:text-gray-700 dark:hover:text-gray-300" />
+                        )}
+                      </button>
+
+                      <Dropdown
+                        isOpen={openId === item.id}
+                        onClose={closeDropdown}
+                        className="w-40 p-2"
+                      >
+                        <DropdownItem
+                          onItemClick={() => {
+                            closeDropdown();
+                            // handle edit / view
+                          }}
+                          className="flex w-full text-sm text-gray-600 rounded-lg px-3 py-2 hover:bg-gray-100 dark:hover:bg-white/5"
+                        >
+                          View
+                        </DropdownItem>
+
+                        <DropdownItem
+                          onItemClick={async () => {
+                            closeDropdown();
+                            await handleDelete(item.id);
+                          }}
+                          className="flex w-full text-sm text-red-500 rounded-lg px-3 py-2 hover:bg-red-50 dark:hover:bg-red-500/10"
+                        >
+                          Delete
+                        </DropdownItem>
+                      </Dropdown>
+                    </div>
+                  </TableCell>
                 </TableRow>
               ))}
             </TableBody>
