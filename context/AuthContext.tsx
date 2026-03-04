@@ -3,7 +3,6 @@
 import { createContext, useContext, useEffect, useState } from "react";
 import api from "@/services/api";
 import { User } from "@/types/user.type";
-import { extractRoutes } from "@/utils/permission";
 
 type AuthContextType = {
   user: User | null;
@@ -14,94 +13,66 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-// 🔥 BroadcastChannel instance
-let authChannel: BroadcastChannel | null = null;
-
-if (typeof window !== "undefined") {
-  authChannel = new BroadcastChannel("auth_channel");
-}
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
 
   // ===============================
-  // FETCH USER
-  // ===============================
-  const fetchUser = async (skipLoading = false) => {
-    if (!skipLoading) setLoading(true);
-
-    try {
-      const res = await api.get("/user");
-      const userData = res.data;
-
-      const menuRes = await api.get("/menus/me");
-      userData.menus = menuRes.data;
-
-      setUser(userData);
-      return userData;
-    } catch {
-      setUser(null);
-      return null;
-    } finally {
-      if (!skipLoading) setLoading(false);
-    }
-  };
-
-  // ===============================
-  // INITIAL LOAD + BROADCAST LISTENER
+  // INITIAL BOOT
   // ===============================
   useEffect(() => {
     const init = async () => {
-      await fetchUser();
-      setLoading(false);
+      try {
+        const res = await api.get("/user");
+        setUser(res.data);
+      } catch (err: any) {
+        if (err.response?.status === 401) {
+          localStorage.setItem("auth_event", `logout_${Date.now()}`);
+        }
+        setUser(null);
+      } finally {
+        setLoading(false);
+      }
     };
 
     init();
 
-    if (!authChannel) return;
+    // 🔥 Crosstab sync
+    const syncAuth = (event: StorageEvent) => {
+      if (event.key !== "auth_event") return;
 
-    authChannel.onmessage = async (event) => {
-      const { type } = event.data;
-
-      if (type === "LOGOUT") {
+      if (event.newValue === "logout") {
         setUser(null);
+        window.location.href = "/signin";
       }
 
-      if (type === "LOGIN") {
-        await fetchUser(true);
+      if (event.newValue === "login") {
+        window.location.href = "/dashboard";
       }
     };
 
-    return () => {
-      authChannel?.close();
-    };
+    window.addEventListener("storage", syncAuth);
+    return () => window.removeEventListener("storage", syncAuth);
   }, []);
+
   // ===============================
   // LOGIN
   // ===============================
   const login = async (email: string, password: string): Promise<string> => {
     await api.post("/login", { email, password });
 
-    const userData = await fetchUser();
+    document.cookie = "next_auth=1; path=/";
 
-    if (!userData) throw new Error("Failed to fetch user");
+    try {
+      const res = await api.get("/user");
+      setUser(res.data);
+    } catch {
+      setUser(null);
+    }
 
-    const routes = extractRoutes(userData.menus);
+    // 🔥 trigger semua tab
+    localStorage.setItem("auth_event", "login");
 
-    const expiry = Date.now() + 120 * 60 * 1000;
-
-    document.cookie = `auth_token=true; path=/`;
-    document.cookie = `auth_expiry=${expiry}; path=/`;
-    document.cookie = `user_routes=${encodeURIComponent(
-      JSON.stringify(routes),
-    )}; path=/`;
-
-    // 🔥 Broadcast ke tab lain
-    authChannel?.postMessage({ type: "LOGIN" });
-
-    await new Promise((resolve) => setTimeout(resolve, 100));
-    if (userData.roleId === 3) return "/penguji";
     return "/dashboard";
   };
 
@@ -111,16 +82,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const logout = async () => {
     try {
       await api.post("/logout");
-    } catch (error) {
-      console.error("Logout error:", error);
-    }
+    } catch {}
 
-    document.cookie = "auth_token=; path=/; max-age=0";
-    document.cookie = "auth_expiry=; path=/; max-age=0";
-    document.cookie = "user_routes=; path=/; max-age=0";
+    document.cookie = "next_auth=; path=/; max-age=0";
+    setUser(null);
 
-    authChannel?.postMessage({ type: "LOGOUT" });
+    // crosstab only signal
+    localStorage.setItem("auth_event", "logout");
 
+    // redirect single source
     window.location.href = "/signin";
   };
 

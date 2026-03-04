@@ -14,7 +14,7 @@ const Input: React.FC<InputProps> = ({
   disabled = false,
   ...props
 }) => {
-  let inputClasses = `h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-3 ${className}`;
+  let inputClasses = `h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 ${className}`;
 
   if (disabled) {
     inputClasses += ` text-gray-500 border-gray-300 cursor-not-allowed`;
@@ -23,7 +23,7 @@ const Input: React.FC<InputProps> = ({
   } else if (success) {
     inputClasses += ` text-green-500 border-green-400`;
   } else {
-    inputClasses += ` bg-transparent text-gray-800 border-gray-300`;
+    inputClasses += ` bg-transparent text-gray-800 dark:text-white border-gray-300`;
   }
 
   return (

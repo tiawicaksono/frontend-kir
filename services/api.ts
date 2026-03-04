@@ -43,14 +43,14 @@ api.interceptors.response.use(
     const currentPath = window.location.pathname;
     const requestUrl = error.config?.url || "";
 
-    // Jangan intercept request auth/me
     const isAuthRequest =
-      requestUrl.includes("/user") || requestUrl.includes("/menus/me");
-
-    if (status === 401 && !isAuthRequest) {
-      if (currentPath !== "/signin") {
-        window.location.href = "/signin";
-      }
+      requestUrl.includes("/login") ||
+      requestUrl.includes("/logout") ||
+      requestUrl.includes("/user") ||
+      requestUrl.includes("/menus/me");
+    if (status === 401) {
+      // console.warn("401 detected, let proxy handle redirect");
+      localStorage.setItem("auth_event", `logout_${Date.now()}`);
     }
 
     if (status === 403) {

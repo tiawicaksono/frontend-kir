@@ -3,7 +3,6 @@ import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { EyeClosedIcon, EyeIcon } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/context/AuthContext";
 import PasswordInput from "@/components/form/form-elements/PasswordField";
