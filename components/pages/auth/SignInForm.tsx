@@ -76,7 +76,7 @@ export default function SignInForm() {
                   placeholder="info@gmail.com"
                   type="email"
                   value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  onChange={setEmail}
                 />
               </div>
 

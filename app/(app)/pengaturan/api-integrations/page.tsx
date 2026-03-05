@@ -1,6 +1,6 @@
 "use client";
 
-import HomeApi from "@/components/pages/api/HomeApi";
+import HomeApi from "@/components/pages/api-key/HomeApiKey";
 
 export default function ApiIntegrationsPage() {
   return (

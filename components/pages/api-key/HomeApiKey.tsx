@@ -1,0 +1,46 @@
+"use client";
+
+import ComponentCard from "@/components/common/ComponentCard";
+import { useApiKeys } from "./hook/useApiKeys";
+import { useApiKeyActions } from "./hook/useApiKeyAction";
+import { useApiKeyDropdown } from "./hook/useApiKeyDropdown";
+import ApiKeyHeaderMenu from "./components/ApiKeyHeaderMenu";
+import ApiKeyTable from "./components/ApiKeyTable";
+import { useState } from "react";
+import ApiKeyModal from "@/components/pages/api-key/modal/modal";
+
+export default function HomeApiKey() {
+  const { apiKeys, setApiKeys, loading, refetch } = useApiKeys();
+  const actions = useApiKeyActions(apiKeys, setApiKeys);
+  const dropdown = useApiKeyDropdown();
+  const [openModal, setOpenModal] = useState(false);
+
+  return (
+    <ComponentCard
+      title="API Keys"
+      desc="API keys are used to authentication requests to the tailadmin API"
+      headerRight={
+        <ApiKeyHeaderMenu
+          isOpen={dropdown.isHeaderOpen}
+          onToggle={dropdown.toggleHeader}
+          onClose={dropdown.closeHeader}
+          onReload={refetch}
+          onAdd={() => setOpenModal(true)}
+        />
+      }
+    >
+      <ApiKeyTable
+        apiKeys={apiKeys}
+        loading={loading}
+        dropdown={dropdown}
+        actions={actions}
+      />
+      <ApiKeyModal
+        isOpen={openModal}
+        onClose={() => setOpenModal(false)}
+        onSubmit={actions.handleCreate}
+        editing={null}
+      />
+    </ComponentCard>
+  );
+}

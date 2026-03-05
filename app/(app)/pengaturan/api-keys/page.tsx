@@ -1,7 +1,7 @@
 "use client";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import HomeApi from "@/components/pages/api/HomeApi";
+import HomeApiKey from "@/components/pages/api-key/HomeApiKey";
 
 export default function ApiKeysPage() {
   return (
@@ -9,7 +9,7 @@ export default function ApiKeysPage() {
       <AutoBreadcrumb pageTitle="API Keys" />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12">
-          <HomeApi />
+          <HomeApiKey />
         </div>
       </div>
     </div>

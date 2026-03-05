@@ -1,8 +1,7 @@
 "use client";
 import Image from "next/image";
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
-import { useAuth } from "@/context/AuthContext";
-import { useRouter } from "next/navigation";
+import { useAuth } from "@/core/auth/auth.context";
 
 export default function UserDropdown({
   isOpen,
@@ -14,11 +13,9 @@ export default function UserDropdown({
   onClose: () => void;
 }) {
   const { user, logout } = useAuth();
-  const router = useRouter();
 
   const handleLogout = async () => {
     await logout();
-    router.replace("/signin"); // 👈 DI SINI
   };
   return (
     <div className="relative">
@@ -27,7 +24,9 @@ export default function UserDropdown({
           e.stopPropagation();
           onToggle();
         }}
-        className="flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle"
+        className={`dropdown-toggle ${
+          isOpen ? "dropdown-toggle-active" : ""
+        } flex items-center text-gray-700 dark:text-gray-400 dropdown-toggle`}
       >
         <span className="mr-3 overflow-hidden rounded-full h-11 w-11">
           <Image
