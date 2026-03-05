@@ -3,14 +3,8 @@ import api from "@/services/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function getApiKey(): Promise<ApiKeys[]> {
-  try {
-    const res = await api.get(`${API_URL}/pengaturan/api-keys`);
-
-    return res.data.map((item: ApiKeyResponse) => mapApiKey(item));
-  } catch (err) {
-    console.error(err);
-    return [];
-  }
+  const res = await api.get(`${API_URL}/pengaturan/api-keys`);
+  return res.data.map((item: ApiKeyResponse) => mapApiKey(item));
 }
 
 export async function updateApiKeyStatus(id: number, isActive: boolean) {

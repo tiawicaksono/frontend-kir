@@ -1,22 +1,26 @@
+"use client";
+
+import { useAlert } from "@/context/AlertContext";
 import { getErrorMessage } from "@/utils/errorHandler";
 
-export function showError(showAlert: any, error: any, fallback?: string) {
-  showAlert({
-    variant: "error",
-    title: "Error",
-    message: getErrorMessage(error, fallback),
-  });
-}
+export function useShowAlert() {
+  const { showAlert } = useAlert();
 
-export function showSuccess(
-  showAlert: any,
-  title = "Success",
-  message?: string,
-) {
-  message = message || "Success";
-  showAlert({
-    variant: "success",
-    title,
-    message,
-  });
+  const showErrorAlert = (error: any, fallback?: string) => {
+    showAlert({
+      variant: "error",
+      title: "Error",
+      message: getErrorMessage(error, fallback),
+    });
+  };
+
+  const showSuccessAlert = (message = "Success") => {
+    showAlert({
+      variant: "success",
+      title: "Success",
+      message,
+    });
+  };
+
+  return { showErrorAlert, showSuccessAlert };
 }

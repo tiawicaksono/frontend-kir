@@ -19,13 +19,9 @@ import { ApiKeys } from "@/types/api-keys.type";
 import ApiKeyField from "./ApiKeyField";
 import DateText from "@/components/common/DateText";
 import ToggleSwitch from "@/components/form/switch/ToggleSwitch";
-import { useAlert } from "@/context/AlertContext";
-import {
-  showError,
-  showSuccess,
-} from "@/components/common/ShowAlertErrorSuccess";
-import { useConfirm } from "@/context/ConfirmActionContext";
+import { useShowAlert } from "@/components/common/ShowAlertErrorSuccess";
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
+import { useConfirm } from "@/confirm/confirm.hook";
 
 const headerCellClass =
   "py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400";
@@ -41,6 +37,7 @@ export default function HomeApi() {
   const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
   const [openId, setOpenId] = useState<number | null>(null);
   const [isHeaderOpen, setIsHeaderOpen] = useState(false);
+  const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
   const toggleHeaderDropdown = () => {
     setIsHeaderOpen((prev) => !prev);
@@ -56,7 +53,6 @@ export default function HomeApi() {
   const closeDropdown = () => {
     setOpenId(null);
   };
-  const { showAlert } = useAlert();
   const { confirm } = useConfirm();
 
   const fetchApiKeys = async () => {
@@ -66,6 +62,7 @@ export default function HomeApi() {
       setApiKeys(data);
     } catch (err: any) {
       setError(err.message);
+      showErrorAlert(err, "Gagal memuat data");
     } finally {
       setLoading(false);
     }
@@ -83,7 +80,7 @@ export default function HomeApi() {
 
     try {
       await updateApiKeyStatus(id, value);
-      showSuccess(showAlert);
+      showSuccessAlert("Status berhasil diubah");
     } catch (error: any) {
       // rollback kalau gagal
       setApiKeys((prev) =>
@@ -91,7 +88,7 @@ export default function HomeApi() {
           item.id === id ? { ...item, isActive: !value } : item,
         ),
       );
-      showError(showAlert, error);
+      showErrorAlert(error, "Status gagal diubah");
     } finally {
       setLoadingId(null);
     }
@@ -118,12 +115,12 @@ export default function HomeApi() {
     try {
       await deleteApiKey(id);
 
-      showSuccess(showAlert, "Data berhasil dihapus");
+      showSuccessAlert("Data berhasil dihapus");
     } catch (error: any) {
       // 🔴 rollback kalau gagal
       setApiKeys(previousData);
 
-      showError(showAlert, error);
+      showErrorAlert(error, "Data gagal dihapus");
     } finally {
       setLoadingDeleteId(null);
     }
@@ -172,8 +169,8 @@ export default function HomeApi() {
             Reloading...
           </div>
         )}
-        {error && <p className="p-4 text-red-500">{error}</p>}
-        {!loading && !error && (
+
+        {!loading && (
           <Table>
             {/* Table Header */}
             <TableHeader className="border-gray-100 dark:border-gray-800 border-y">

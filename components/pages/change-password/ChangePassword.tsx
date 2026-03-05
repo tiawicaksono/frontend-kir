@@ -7,11 +7,7 @@ import PasswordInput from "@/components/form/form-elements/PasswordField";
 import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
 import { getPasswordStrength } from "@/utils/validatePassword";
 import api from "@/services/api";
-import { useAlert } from "@/context/AlertContext";
-import {
-  showError,
-  showSuccess,
-} from "@/components/common/ShowAlertErrorSuccess";
+import { useShowAlert } from "@/components/common/ShowAlertErrorSuccess";
 
 export default function ChangePassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,7 +17,7 @@ export default function ChangePassword() {
   const [confirmPassword, setConfirmPassword] = useState("");
 
   const strength = getPasswordStrength(password);
-  const { showAlert } = useAlert();
+  const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
   const isFormValid =
     oldPassword &&
@@ -36,19 +32,19 @@ export default function ChangePassword() {
     try {
       setIsSubmitting(true);
 
-      const response = await api.post("/change-password", {
+      await api.post("/change-password", {
         old_password: oldPassword,
         password: password,
         password_confirmation: confirmPassword,
       });
 
-      showSuccess(showAlert);
+      showSuccessAlert("Password berhasil diubah");
 
       setOldPassword("");
       setPassword("");
       setConfirmPassword("");
     } catch (error: any) {
-      showError(showAlert, error);
+      showErrorAlert(error, "Password gagal diubah");
     } finally {
       setIsSubmitting(false);
     }
