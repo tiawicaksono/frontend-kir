@@ -7,26 +7,18 @@ import { useSidebar } from "@/context/SidebarContext";
 import { usePathname } from "next/navigation";
 
 import SidebarItem from "./SidebarItem";
-import { getMenus } from "@/services/menu.service";
 import { formatMenuName } from "@/utils/formatMenuName";
-import { Menu } from "@/types/menu.type";
+import { useAuth } from "@/auth/auth.context";
 
 export default function SidebarMenu() {
   const { isExpanded } = useSidebar();
   const pathname = usePathname();
+  const { menus } = useAuth();
 
   const expanded = isExpanded;
   const compact = !isExpanded;
 
-  const [menus, setMenus] = useState<Menu[]>([]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
-
-  /* ================= FETCH MENU ================= */
-  useEffect(() => {
-    getMenus().then((res) => {
-      setMenus(res ?? []);
-    });
-  }, []);
 
   /* ===== AUTO OPEN BASED ON ROUTE ===== */
   useEffect(() => {

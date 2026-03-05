@@ -8,34 +8,18 @@ import { useEffect, useState } from "react";
 import clsx from "clsx";
 
 import { useSidebar } from "@/context/SidebarContext";
-import { getMenus } from "@/services/menu.service";
-import { Menu } from "@/types/menu.type";
 import { formatMenuName } from "@/utils/formatMenuName";
 import { useLayout } from "@/context/LayoutContext";
+import { useAuth } from "@/auth/auth.context";
 
 export default function TopMenu() {
   const pathname = usePathname();
   const { toggleSidebar } = useSidebar();
+  const { menus } = useAuth();
 
-  const [menus, setMenus] = useState<Menu[]>([]);
   const [openIndex, setOpenIndex] = useState<number | null>(null);
   const { menuLayout } = useLayout();
 
-  /* ================= FETCH MENU ================= */
-  useEffect(() => {
-    getMenus().then((res) => {
-      setMenus(res ?? []);
-    });
-  }, []);
-
-  /* ===== AUTO OPEN BASED ON ROUTE ===== */
-  // useEffect(() => {
-  //   menus.forEach((menu, index) => {
-  //     if (menu.children?.some((c) => c.route === pathname)) {
-  //       setOpenIndex(index);
-  //     }
-  //   });
-  // }, [pathname, menus]);
   useEffect(() => {
     const handleMenuLayoutChange = () => {
       if (menuLayout === "top") {
