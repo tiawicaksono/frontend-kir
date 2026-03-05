@@ -7,7 +7,9 @@ export const useAuthGuard = () => {
   const router = useRouter();
 
   useEffect(() => {
-    if (!loading && !user) {
+    if (loading) return;
+
+    if (user === null) {
       router.replace("/signin");
     }
   }, [user, loading]);
