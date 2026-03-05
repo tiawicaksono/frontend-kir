@@ -1,12 +1,12 @@
 "use client";
 
-import { useAlert } from "@/context/AlertContext";
+import { useAlert } from "@/core/alert/alert.context";
 import { getErrorMessage } from "@/utils/errorHandler";
 
 export function useShowAlert() {
   const { showAlert } = useAlert();
 
-  const showErrorAlert = (error: any, fallback?: string) => {
+  const showErrorAlert = (error: unknown, fallback?: string) => {
     showAlert({
       variant: "error",
       title: "Error",

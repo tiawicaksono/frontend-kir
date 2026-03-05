@@ -10,7 +10,7 @@ import clsx from "clsx";
 import { useSidebar } from "@/context/SidebarContext";
 import { formatMenuName } from "@/utils/formatMenuName";
 import { useLayout } from "@/context/LayoutContext";
-import { useAuth } from "@/auth/auth.context";
+import { useAuth } from "@/core/auth/auth.context";
 
 export default function TopMenu() {
   const pathname = usePathname();

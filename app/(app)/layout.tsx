@@ -4,7 +4,7 @@ import "../globals.css";
 import AppMenu from "@/layout/AppMenu";
 import BackToTopButton from "@/components/common/BackToTopButton";
 import SettingsButton from "@/components/common/SettingsButton";
-import { ConfirmProvider } from "@/confirm/confirm.provider";
+import { ConfirmProvider } from "@/core/confirm/confirm.provider";
 
 export default function AppLayout({ children }: { children: React.ReactNode }) {
   return (

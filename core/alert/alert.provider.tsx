@@ -1,16 +1,10 @@
 "use client";
 
-import {
-  createContext,
-  useContext,
-  useState,
-  useCallback,
-  useRef,
-} from "react";
+import { useState, useCallback, useRef, ReactNode } from "react";
+
 import { AnimatePresence, motion } from "framer-motion";
 import Alert from "@/components/ui/alert/Alert";
-
-type AlertVariant = "success" | "error" | "warning" | "info";
+import { AlertContext, AlertVariant } from "@/core/alert/alert.context";
 
 interface Toast {
   id: number;
@@ -19,13 +13,7 @@ interface Toast {
   message: string;
 }
 
-interface AlertContextType {
-  showAlert: (data: Omit<Toast, "id">) => void;
-}
-
-const AlertContext = createContext<AlertContextType | null>(null);
-
-export function AlertProvider({ children }: { children: React.ReactNode }) {
+export function AlertProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<Toast[]>([]);
   const idRef = useRef(0);
 
@@ -80,9 +68,3 @@ export function AlertProvider({ children }: { children: React.ReactNode }) {
     </AlertContext.Provider>
   );
 }
-
-export const useAlert = () => {
-  const ctx = useContext(AlertContext);
-  if (!ctx) throw new Error("useAlert must be used inside AlertProvider");
-  return ctx;
-};

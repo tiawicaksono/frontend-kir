@@ -11,6 +11,7 @@ type LoadingButtonProps = {
   size?: "sm" | "md";
   type?: "button" | "submit" | "reset";
   onClick?: () => void;
+  variant?: "primary" | "outline"; // Button variant
 };
 
 export default function LoadingButton({
@@ -21,6 +22,7 @@ export default function LoadingButton({
   size = "sm",
   type = "button",
   onClick,
+  variant = "primary",
 }: LoadingButtonProps) {
   return (
     <Button
@@ -29,6 +31,7 @@ export default function LoadingButton({
       className={`w-full ${className}`}
       disabled={loading}
       onClick={onClick}
+      variant={variant}
     >
       {loading ? (
         <span className="flex items-center justify-center gap-2">

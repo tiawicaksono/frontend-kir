@@ -8,7 +8,7 @@ import { usePathname } from "next/navigation";
 
 import SidebarItem from "./SidebarItem";
 import { formatMenuName } from "@/utils/formatMenuName";
-import { useAuth } from "@/auth/auth.context";
+import { useAuth } from "@/core/auth/auth.context";
 
 export default function SidebarMenu() {
   const { isExpanded } = useSidebar();

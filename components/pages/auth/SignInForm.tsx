@@ -4,7 +4,7 @@ import Label from "@/components/form/Label";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useAuth } from "@/auth/auth.context";
+import { useAuth } from "@/core/auth/auth.context";
 import PasswordInput from "@/components/form/form-elements/PasswordField";
 import LoadingButton from "@/components/common/LoadingButton";
 

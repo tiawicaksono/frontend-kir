@@ -1,6 +1,6 @@
 "use client";
 
-import { useAuth } from "@/auth/auth.context";
+import { useAuth } from "@/core/auth/auth.context";
 import SplashScreen from "@/components/common/SplashScreen";
 
 export default function SplashController() {

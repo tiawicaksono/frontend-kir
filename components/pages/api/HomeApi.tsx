@@ -19,9 +19,9 @@ import { ApiKeys } from "@/types/api-keys.type";
 import ApiKeyField from "./ApiKeyField";
 import DateText from "@/components/common/DateText";
 import ToggleSwitch from "@/components/form/switch/ToggleSwitch";
-import { useShowAlert } from "@/components/common/ShowAlertErrorSuccess";
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
-import { useConfirm } from "@/confirm/confirm.hook";
+import { useConfirm } from "@/core/confirm/confirm.hook";
+import { useShowAlert } from "@/core/alert/alert.hook";
 
 const headerCellClass =
   "py-3 font-medium text-gray-500 text-start text-theme-xs dark:text-gray-400";

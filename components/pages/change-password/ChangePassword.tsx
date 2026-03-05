@@ -7,7 +7,7 @@ import PasswordInput from "@/components/form/form-elements/PasswordField";
 import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
 import { getPasswordStrength } from "@/utils/validatePassword";
 import api from "@/services/api";
-import { useShowAlert } from "@/components/common/ShowAlertErrorSuccess";
+import { useShowAlert } from "@/core/alert/alert.hook";
 
 export default function ChangePassword() {
   const [isSubmitting, setIsSubmitting] = useState(false);

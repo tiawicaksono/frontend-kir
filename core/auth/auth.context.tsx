@@ -40,8 +40,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const initAuth = async () => {
     try {
       const res = await getCurrentUser();
-
-      setUser(res.data.user);
+      const data = res.data;
+      setUser({
+        id: data.id,
+        name: data.name,
+        email: data.email,
+      });
       setMenus(res.data.menus);
 
       const routes = extractRoutes(res.data.menus);
