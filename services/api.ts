@@ -1,21 +1,19 @@
-import axios from "axios";
+import axios, { InternalAxiosRequestConfig } from "axios";
 import Cookies from "js-cookie";
-import type { InternalAxiosRequestConfig } from "axios";
 
 const api = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_URL, // http://localhost:8000/api
+  baseURL: process.env.NEXT_PUBLIC_API_URL,
   withCredentials: true,
 });
 
-// 🔥 axios instance khusus TANPA /api
 const sanctum = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL, // http://localhost:8000
+  baseURL: process.env.NEXT_PUBLIC_BACKEND_URL,
   withCredentials: true,
 });
 
-// Interceptor type-safe untuk CSRF
+// ✅ CSRF Interceptor (transport concern only)
 api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
-  if (["post", "put", "delete", "patch"].includes(config.method || "")) {
+  if (["post", "put", "patch", "delete"].includes(config.method || "")) {
     let token = Cookies.get("XSRF-TOKEN");
 
     if (!token) {
@@ -24,42 +22,17 @@ api.interceptors.request.use(async (config: InternalAxiosRequestConfig) => {
     }
 
     if (token) {
-      // pastikan config.headers adalah AxiosHeaders
-      if (!config.headers) {
-        config.headers = new axios.AxiosHeaders();
-      }
-
-      config.headers.set("X-XSRF-TOKEN", token); // ✅ type-safe
+      config.headers.set("X-XSRF-TOKEN", token);
     }
   }
 
   return config;
 });
 
+// ✅ Response pass-through (NO redirect here)
 api.interceptors.response.use(
   (response) => response,
   (error) => {
-    const status = error.response?.status;
-    const currentPath = window.location.pathname;
-    const requestUrl = error.config?.url || "";
-
-    const isAuthRequest =
-      requestUrl.includes("/login") ||
-      requestUrl.includes("/logout") ||
-      requestUrl.includes("/user") ||
-      requestUrl.includes("/menus/me");
-    if (status === 401) {
-      // console.warn("401 detected, let proxy handle redirect");
-      localStorage.setItem("auth_event", `logout_${Date.now()}`);
-    }
-
-    if (status === 403) {
-      // Jangan redirect kalau sudah di forbidden
-      if (currentPath !== "/forbidden") {
-        window.location.href = "/forbidden";
-      }
-    }
-
     return Promise.reject(error);
   },
 );

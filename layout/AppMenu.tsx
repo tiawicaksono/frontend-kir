@@ -1,8 +1,8 @@
 "use client";
 
 import { useLayout } from "@/context/LayoutContext";
-import Sidebar from "@/components/sidebar/Sidebar";
-import TopMenu from "@/components/topmenu/TopMenu";
+import SidebarMenu from "@/components/menu/sidebar-menu/SidebarMenu";
+import TopMenu from "@/components/menu/top-menu/TopMenu";
 import AppHeader from "@/layout/AppHeader";
 import ThemeCustomizer from "@/layout/ThemeCustomizer";
 
@@ -11,7 +11,7 @@ export default function AppMenu({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen flex">
-      {menuLayout === "sidebar" && <Sidebar />}
+      {menuLayout === "sidebar" && <SidebarMenu />}
 
       <div className="flex flex-1 flex-col">
         <AppHeader />

@@ -11,7 +11,7 @@ import { getMenus } from "@/services/menu.service";
 import { formatMenuName } from "@/utils/formatMenuName";
 import { Menu } from "@/types/menu.type";
 
-export default function Sidebar() {
+export default function SidebarMenu() {
   const { isExpanded } = useSidebar();
   const pathname = usePathname();
 

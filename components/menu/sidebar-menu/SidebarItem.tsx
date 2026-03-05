@@ -4,7 +4,7 @@ import { useRef, useState } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
 import { usePathname } from "next/navigation";
-import { ChevronDown, Menu, MenuSquareIcon } from "lucide-react";
+import { ChevronDown, MenuSquareIcon } from "lucide-react";
 
 interface SubItem {
   name: string;
