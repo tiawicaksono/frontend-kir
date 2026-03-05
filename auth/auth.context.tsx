@@ -1,10 +1,24 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, useRef } from "react";
+import { createContext, useContext, useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import api from "@/services/api";
+
 import { User } from "@/types/user.type";
 import { Menu } from "@/types/menu.type";
+
+import { loginRequest, logoutRequest, getCurrentUser } from "./auth.service";
+
+import {
+  broadcastLogin,
+  broadcastLogout,
+  getAuthChannel,
+} from "./auth.broadcast";
+
+import {
+  extractRoutes,
+  setRoutesCookie,
+  clearRoutesCookie,
+} from "./permission.service";
 
 type AuthContextType = {
   user: User | null;
@@ -16,20 +30,6 @@ type AuthContextType = {
 
 const AuthContext = createContext<AuthContextType | null>(null);
 
-export const extractRoutes = (menus: Menu[]): string[] => {
-  const routes: string[] = [];
-
-  const traverse = (items: Menu[]) => {
-    for (const item of items) {
-      if (item.route) routes.push(item.route.replace(/\/+$/, ""));
-      if (item.children?.length) traverse(item.children);
-    }
-  };
-
-  traverse(menus);
-  return routes;
-};
-
 export function AuthProvider({ children }: { children: React.ReactNode }) {
   const router = useRouter();
 
@@ -37,27 +37,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [menus, setMenus] = useState<Menu[]>([]);
   const [loading, setLoading] = useState(true);
 
-  const channelRef = useRef<BroadcastChannel | null>(null);
-
-  const setRoutesCookie = (menus: Menu[]) => {
-    document.cookie = `user_routes=${encodeURIComponent(
-      JSON.stringify(extractRoutes(menus)),
-    )}; path=/`;
-  };
-
-  const clearRoutesCookie = () => {
-    document.cookie =
-      "user_routes=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;";
-  };
-
   const initAuth = async () => {
     try {
-      const res = await api.get("/user");
+      const res = await getCurrentUser();
 
       setUser(res.data.user);
       setMenus(res.data.menus);
 
-      setRoutesCookie(res.data.menus);
+      const routes = extractRoutes(res.data.menus);
+      setRoutesCookie(routes);
     } catch {
       setUser(null);
       setMenus([]);
@@ -67,11 +55,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   };
 
   useEffect(() => {
-    channelRef.current = new BroadcastChannel("auth");
+    const channel = getAuthChannel();
 
     initAuth();
 
-    channelRef.current.onmessage = (event) => {
+    channel.onmessage = (event) => {
       if (event.data === "LOGOUT") {
         setUser(null);
         setMenus([]);
@@ -85,23 +73,23 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
 
     return () => {
-      channelRef.current?.close();
+      channel.close();
     };
   }, []);
 
   const login = async (email: string, password: string) => {
-    await api.post("/login", { email, password });
+    await loginRequest(email, password);
 
     await initAuth();
 
-    channelRef.current?.postMessage("LOGIN");
+    broadcastLogin();
 
     router.replace("/dashboard");
   };
 
   const logout = async () => {
     try {
-      await api.post("/logout");
+      await logoutRequest();
     } catch {}
 
     setUser(null);
@@ -109,7 +97,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     clearRoutesCookie();
 
-    channelRef.current?.postMessage("LOGOUT");
+    broadcastLogout();
 
     router.replace("/signin");
   };
