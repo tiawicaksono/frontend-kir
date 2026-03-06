@@ -58,14 +58,18 @@ export default function SidebarItem({
   };
 
   return (
-    <li className="relative">
+    <li
+      className="relative"
+      onMouseEnter={() => compact && openHover()}
+      onMouseLeave={() => compact && closeHover()}
+    >
       {!hasSubmenu && path ? (
         /* ============ LINK (NO SUBMENU) ============ */
         <Link
           href={path}
           className={`
         menu-item group
-        ${isActive ? "menu-item-active" : "hover:bg-black/5 dark:hover:bg-white/10"}
+        ${isActive ? "menu-item-active" : "menu-item-inactive"}
         ${expanded ? "justify-start" : "justify-center"}
       `}
         >
@@ -75,13 +79,11 @@ export default function SidebarItem({
           >
             <MenuSquareIcon
               size={20}
-              className={`${isActive && "icon-active"} dark:invert`}
+              className={`${isActive && "icon-active"} icon-inactive`}
             />
           </motion.div>
 
-          {expanded && (
-            <span className="menu-item-text dark:invert">{name}</span>
-          )}
+          {expanded && <span>{name}</span>}
         </Link>
       ) : (
         /* ============ BUTTON (HAS SUBMENU) ============ */
@@ -92,7 +94,7 @@ export default function SidebarItem({
           onMouseLeave={() => compact && closeHover()}
           className={`
         menu-item group
-        ${isActive ? "menu-item-active" : "hover:bg-black/5 dark:hover:bg-white/10"}
+        ${isActive ? "menu-item-active" : "menu-item-inactive"}
         ${expanded ? "justify-start" : "justify-center"}
       `}
         >
@@ -102,13 +104,11 @@ export default function SidebarItem({
           >
             <MenuSquareIcon
               size={20}
-              className={`${isActive && "icon-active"} dark:invert`}
+              className={`${isActive && "icon-active"} icon-inactive`}
             />
           </motion.div>
 
-          {expanded && (
-            <span className="menu-item-text dark:invert">{name}</span>
-          )}
+          {expanded && <span>{name}</span>}
 
           {expanded && hasSubmenu && (
             <motion.div
@@ -116,7 +116,7 @@ export default function SidebarItem({
               transition={{ duration: 0.2 }}
               className="ml-auto"
             >
-              <ChevronDown className="h-4 w-4 dark:invert" />
+              <ChevronDown className="h-4 w-4" />
             </motion.div>
           )}
         </button>
@@ -142,11 +142,11 @@ export default function SidebarItem({
                     ${
                       pathname === sub.path
                         ? "menu-dropdown-item-active"
-                        : "hover:bg-black/5 dark:hover:bg-white/10"
+                        : "menu-dropdown-item-inactive"
                     }
                   `}
                 >
-                  <span className="dark:invert">{sub.name}</span>
+                  <span>{sub.name}</span>
                 </Link>
               </li>
             ))}
@@ -156,7 +156,7 @@ export default function SidebarItem({
 
       {/* ================= FLYOUT ================= */}
       <AnimatePresence>
-        {compact && hovered && hasSubmenu && (
+        {compact && hovered && (
           <motion.div
             initial={{ opacity: 0, x: -8, scale: 0.98 }}
             animate={{ opacity: 1, x: 0, scale: 1 }}
@@ -168,30 +168,36 @@ export default function SidebarItem({
             }}
             onMouseLeave={() => closeHover()}
           >
+            {/* HOVER BRIDGE */}
+            <div className="absolute -left-4 top-0 h-full w-4" />
+
             {/* ARROW */}
             <div className="absolute -left-2 top-4 w-3 h-3 rotate-45 bg-white/80 dark:bg-slate-800/80 backdrop-blur-md shadow-sm" />
 
             {/* PANEL */}
             <div className="min-w-55 rounded-xl bg-white/80 dark:bg-slate-900/80 backdrop-blur-xl shadow-xl border p-4">
-              <p className="mb-2 text-sm font-semibold">{name}</p>
-              <ul className="space-y-1">
-                {subItems.map((sub) => (
-                  <li key={sub.path}>
-                    <Link
-                      href={sub.path}
-                      className={`block rounded-md px-3 py-2 text-sm
-                        ${
-                          pathname === sub.path
-                            ? "menu-dropdown-item-active"
-                            : "hover:bg-black/5 dark:hover:bg-white/10"
-                        }
-                      `}
-                    >
-                      {sub.name}
-                    </Link>
-                  </li>
-                ))}
-              </ul>
+              <p className="menu-item">{name}</p>
+
+              {subItems.length > 0 && (
+                <ul className="space-y-1">
+                  {subItems.map((sub) => (
+                    <li key={sub.path}>
+                      <Link
+                        href={sub.path}
+                        className={`block rounded-md px-3 py-2 text-sm
+                ${
+                  pathname === sub.path
+                    ? "menu-dropdown-item-active"
+                    : "menu-dropdown-item-inactive"
+                }
+              `}
+                      >
+                        {sub.name}
+                      </Link>
+                    </li>
+                  ))}
+                </ul>
+              )}
             </div>
           </motion.div>
         )}

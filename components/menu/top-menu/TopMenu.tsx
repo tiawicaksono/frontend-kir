@@ -64,8 +64,8 @@ export default function TopMenu() {
                     className={clsx(
                       "flex items-center gap-1 text-sm font-medium transition",
                       isActive
-                        ? "text-blue-600"
-                        : "text-slate-700 dark:text-slate-300",
+                        ? "text-brand-500"
+                        : "text-gray-700 dark:text-gray-300",
                     )}
                   >
                     {formatMenuName(menu.code)}
@@ -77,6 +77,9 @@ export default function TopMenu() {
                       )}
                     />
                   </button>
+
+                  {/* bridge supaya cursor tidak keluar */}
+                  <div className="absolute left-0 top-full h-3 w-full" />
 
                   <AnimatePresence>
                     {isOpen && (
@@ -97,8 +100,8 @@ export default function TopMenu() {
                                 className={clsx(
                                   "block px-4 py-2 text-sm transition-colors",
                                   pathname === child.route
-                                    ? "bg-blue-50 text-blue-600"
-                                    : "hover:bg-black/5 dark:hover:bg-white/10",
+                                    ? "menu-dropdown-item-active"
+                                    : "menu-dropdown-item-inactive",
                                 )}
                               >
                                 {formatMenuName(child.code)}
