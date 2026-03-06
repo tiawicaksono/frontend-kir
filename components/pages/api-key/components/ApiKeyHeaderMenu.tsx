@@ -9,6 +9,8 @@ interface Props {
   onAdd: () => void;
 }
 
+const dropDownItem =
+  "flex w-full text-sm text-gray-600 dark:text-gray-400 rounded-lg px-3 py-2 hover:bg-gray-100";
 export default function ApiKeyHeaderMenu({
   isOpen,
   onToggle,
@@ -30,6 +32,7 @@ export default function ApiKeyHeaderMenu({
 
       <Dropdown isOpen={isOpen} onClose={onClose} className="w-40 p-2">
         <DropdownItem
+          className={dropDownItem}
           onItemClick={() => {
             onClose();
             onAdd();
@@ -39,11 +42,11 @@ export default function ApiKeyHeaderMenu({
         </DropdownItem>
 
         <DropdownItem
+          className={dropDownItem}
           onItemClick={() => {
             onClose();
             onReload();
           }}
-          className="flex w-full text-sm text-gray-600 rounded-lg px-3 py-2 hover:bg-gray-100"
         >
           Reload Data
         </DropdownItem>

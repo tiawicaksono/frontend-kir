@@ -8,7 +8,12 @@ interface Props {
   isOpen: boolean;
   onClose: () => void;
   editing?: ApiKeys | null;
-  onSubmit: (data: { name: string; urlApi: string; token: string }) => void;
+  onSubmit: (data: {
+    name: string;
+    urlApi: string;
+    token: string;
+  }) => Promise<boolean>;
+  isSubmitting?: boolean;
 }
 
 export default function ApiKeyModal({
@@ -16,18 +21,20 @@ export default function ApiKeyModal({
   onClose,
   editing,
   onSubmit,
+  isSubmitting,
 }: Props) {
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg p-6">
+    <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg">
       <h2 className="text-lg font-semibold mb-4">
         {editing ? "Edit API Key" : "Create API Key"}
       </h2>
 
       <ApiKeyForm
         data={editing}
-        onSubmit={(form) => {
-          onSubmit(form);
-          onClose();
+        isSubmitting={isSubmitting}
+        onSubmit={async (form) => {
+          const success = await onSubmit(form);
+          if (success) onClose();
         }}
       />
     </Modal>

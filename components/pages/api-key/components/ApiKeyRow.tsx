@@ -20,9 +20,10 @@ interface Props {
   item: ApiKeys;
   dropdown: ReturnType<typeof useApiKeyDropdown>;
   actions: ReturnType<typeof useApiKeyActions>;
+  onEdit: (item: ApiKeys) => void;
 }
 
-export default function ApiKeyRow({ item, dropdown, actions }: Props) {
+export default function ApiKeyRow({ item, dropdown, actions, onEdit }: Props) {
   const isLoading = actions.loadingId === item.id;
   const isDeleting = actions.loadingDeleteId === item.id;
 
@@ -61,7 +62,10 @@ export default function ApiKeyRow({ item, dropdown, actions }: Props) {
 
       <TableCell className={bodyCellClass}>
         <div className="flex items-center gap-2">
-          <EditIcon className="text-gray-400 cursor-pointer size-4.5" />
+          <EditIcon
+            onClick={() => onEdit(item)}
+            className="text-gray-400 cursor-pointer size-4.5"
+          />
           <TrashIcon
             onClick={async () => await actions.handleDelete(item.id)}
             className="text-red-500 cursor-pointer size-4.5"

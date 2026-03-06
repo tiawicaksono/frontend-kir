@@ -8,12 +8,19 @@ import ApiKeyHeaderMenu from "./components/ApiKeyHeaderMenu";
 import ApiKeyTable from "./components/ApiKeyTable";
 import { useState } from "react";
 import ApiKeyModal from "@/components/pages/api-key/modal/modal";
+import { ApiKeys } from "@/types/api-keys.type";
 
 export default function HomeApiKey() {
   const { apiKeys, setApiKeys, loading, refetch } = useApiKeys();
   const actions = useApiKeyActions(apiKeys, setApiKeys);
   const dropdown = useApiKeyDropdown();
   const [openModal, setOpenModal] = useState(false);
+  const [editing, setEditing] = useState<ApiKeys | null>(null);
+
+  const handleEdit = (item: ApiKeys) => {
+    setEditing(item);
+    setOpenModal(true);
+  };
 
   return (
     <ComponentCard
@@ -34,12 +41,19 @@ export default function HomeApiKey() {
         loading={loading}
         dropdown={dropdown}
         actions={actions}
+        onEdit={handleEdit}
       />
+
       <ApiKeyModal
         isOpen={openModal}
         onClose={() => setOpenModal(false)}
-        onSubmit={actions.handleCreate}
-        editing={null}
+        onSubmit={
+          editing
+            ? (data) => actions.handleUpdate(editing.id, data)
+            : actions.handleCreate
+        }
+        editing={editing}
+        isSubmitting={actions.isSubmitting}
       />
     </ComponentCard>
   );

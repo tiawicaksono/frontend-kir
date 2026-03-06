@@ -52,7 +52,7 @@ export default function ChangePassword() {
 
   return (
     <ComponentCard title="Change Password">
-      <div className="space-y-5">
+      <div className="space-y-5 pb-5">
         <PasswordInput
           label="Old Password"
           value={oldPassword}

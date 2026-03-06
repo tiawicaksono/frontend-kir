@@ -30,14 +30,16 @@ const Input: React.FC<InputProps> = ({
     "h-11 w-full rounded-lg border appearance-none px-4 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 ";
 
   if (disabled) {
-    inputClasses += "text-gray-500 border-gray-300 cursor-not-allowed ";
+    inputClasses +=
+      "bg-gray-100 opacity-50 text-gray-500 border-gray-300 cursor-not-allowed dark:bg-gray-800 dark:text-gray-400 dark:border-gray-700 ";
   } else if (error) {
-    inputClasses += "text-red-800 border-red-500 ";
+    inputClasses +=
+      "bg-transparent text-gray-400 border-gray-300 focus:border-error-300 focus:ring-3 focus:ring-error-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-error-800 ";
   } else if (success) {
     inputClasses += "text-green-500 border-green-400 ";
   } else {
     inputClasses +=
-      "bg-transparent text-gray-800 dark:text-white border-gray-300 ";
+      "bg-transparent text-gray-400 border-gray-300 focus:border-brand-300 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:focus:border-brand-800 ";
   }
 
   inputClasses += className;

@@ -86,7 +86,7 @@ export const Dropdown: React.FC<DropdownProps> = ({
     <div
       ref={dropdownRef}
       className={`absolute z-50 right-0 rounded-xl border border-gray-200 bg-white shadow-theme-lg 
-        dark:border-gray-800 dark:bg-gray-dark
+        dark:border-white/20 dark:bg-gray-dark
         ${position === "bottom" ? "mt-2 top-full" : "mb-2 bottom-full"}
         ${className}`}
     >

@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import { ConfirmOptions } from "./confirm.context";
 
 type Props = {
@@ -8,6 +9,20 @@ type Props = {
 };
 
 export default function ConfirmDialog({ options, onClose }: Props) {
+  useEffect(() => {
+    const handleEscape = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        onClose(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleEscape);
+
+    return () => {
+      document.removeEventListener("keydown", handleEscape);
+    };
+  }, [onClose]);
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-[400px] rounded-2xl bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">

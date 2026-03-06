@@ -10,13 +10,15 @@ import ApiKeyRow from "./ApiKeyRow";
 import { useApiKeyDropdown } from "../hook/useApiKeyDropdown";
 import { useApiKeyActions } from "../hook/useApiKeyAction";
 
-const headerCellClass = "py-3 font-medium text-left";
+const headerCellClass =
+  "py-3 font-medium text-left text-gray-500 dark:text-gray-400";
 
 interface Props {
   apiKeys: ApiKeys[];
   loading: boolean;
   dropdown: ReturnType<typeof useApiKeyDropdown>;
   actions: ReturnType<typeof useApiKeyActions>;
+  onEdit: (item: ApiKeys) => void;
 }
 
 export default function ApiKeyTable({
@@ -24,6 +26,7 @@ export default function ApiKeyTable({
   loading,
   dropdown,
   actions,
+  onEdit,
 }: Props) {
   return (
     <div className="max-w-full overflow-x-auto">
@@ -66,6 +69,7 @@ export default function ApiKeyTable({
                 item={item}
                 dropdown={dropdown}
                 actions={actions}
+                onEdit={onEdit}
               />
             ))}
           </TableBody>

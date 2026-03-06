@@ -17,6 +17,7 @@ export function useApiKeyActions(
   const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
   const { confirm } = useConfirm();
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleToggle = async (id: number, value: boolean) => {
     setLoadingId(id);
@@ -69,11 +70,16 @@ export function useApiKeyActions(
     token: string;
   }) => {
     try {
+      setIsSubmitting(true);
       const newItem = await createApiKey(data);
       setApiKeys((prev) => [newItem, ...prev]);
       showSuccessAlert("API Key berhasil dibuat");
+      return true;
     } catch (err) {
       showErrorAlert(err, "API Key gagal dibuat");
+      return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -84,7 +90,7 @@ export function useApiKeyActions(
       urlApi: string;
       token: string;
     },
-  ) => {
+  ): Promise<boolean> => {
     const previous = apiKeys;
 
     setApiKeys(
@@ -101,11 +107,16 @@ export function useApiKeyActions(
     );
 
     try {
+      setIsSubmitting(true);
       await updateApiKey(id, data);
       showSuccessAlert("API Key berhasil diupdate");
+      return true;
     } catch (err) {
       setApiKeys(previous);
       showErrorAlert(err, "API Key gagal diupdate");
+      return false;
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -116,5 +127,6 @@ export function useApiKeyActions(
     handleUpdate,
     loadingId,
     loadingDeleteId,
+    isSubmitting,
   };
 }
