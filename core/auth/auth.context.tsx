@@ -19,6 +19,7 @@ import {
   setRoutesCookie,
   clearRoutesCookie,
 } from "./permission.service";
+import { useAutoLogout } from "./use-auto-logout";
 
 type AuthContextType = {
   user: User | null;
@@ -105,6 +106,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     router.replace("/signin");
   };
+  useAutoLogout(logout);
 
   return (
     <AuthContext.Provider value={{ user, menus, loading, login, logout }}>
