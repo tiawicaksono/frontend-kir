@@ -1,0 +1,74 @@
+import ComponentCard from "@/components/common/ComponentCard";
+import DateText from "@/components/common/DateText";
+import HrShimmer from "@/components/common/HrShimmer";
+import LoadingButton from "@/components/common/LoadingButton";
+import SyncButton from "@/components/common/SyncButton";
+import { useShowAlert } from "@/core/alert/alert.hook";
+import { syncApi } from "@/services/api-integrations.service";
+import { ApiIntegrations } from "@/types/api-integrations.type";
+import { useState } from "react";
+
+interface Props {
+  data: ApiIntegrations;
+}
+
+export default function ApiIntegrationCard({ data }: Props) {
+  const [loading, setLoading] = useState(false);
+  const { showErrorAlert, showSuccessAlert } = useShowAlert();
+  const [lastTransaction, setLastTransaction] = useState(data.lastTransaction);
+
+  async function handleSync() {
+    setLoading(true);
+
+    try {
+      const res = await syncApi(data.prefix, {
+        api_integration_id: data.id,
+        name: data.name,
+        prefix: data.prefix,
+        url_api: "https://ujiberkala-middle.kemenhub.go.id/api/v1/global",
+        token:
+          "eyJpdiI6IjRJVTlHaUZFb0FFUnNCQVR1VXRtRXc9PSIsInZhbHVlIjoiRitGRDdvbVNTWTdrWFQvZ1FDWXhsR0tQeEkwZTA0ZGMvSGxQdm80YlJsYnVOYU9HYUZmYUxTL0N2eGl0QkJiSWdna1RUdHJZVVQxR1Qwa0FxUGt0U2xzNitYRVF4MCtLQ0hvQXQwdERyWEhjZXYwL3MzcUIvS05KTGFPcDlvT0MiLCJtYWMiOiJlOTFlOGM5M2ZmZmY1YTMxZTA0OGYyNDhiM2NkYzQyMDA3ZmU2ZmQyMDFiMzhiNTM1ZjJkZTE1MjYwYzM3MzQ4IiwidGFnIjoiIn0=",
+      });
+      setLastTransaction(res.transaction);
+      showSuccessAlert("Password berhasil diubah");
+    } catch (error: any) {
+      const transaction = error?.response?.data?.transaction;
+
+      if (transaction) {
+        setLastTransaction(transaction);
+      }
+      showErrorAlert(error, "Password gagal diubah");
+    } finally {
+      setLoading(false);
+    }
+  }
+  return (
+    <ComponentCard
+      className="pb-5"
+      title={data.name}
+      desc={data.description}
+      headerRight={
+        <div className="flex items-center gap-2">
+          <SyncButton onSync={handleSync} />
+        </div>
+      }
+    >
+      <HrShimmer loading={loading} />
+      <div className="flex items-center justify-between">
+        <p className="text-xs text-gray-400 mt-2">
+          Last Sinkron: <DateText value={lastTransaction?.createdAt} withTime />
+        </p>
+
+        <span
+          className={`text-xs px-2 py-1 rounded ${
+            lastTransaction?.status
+              ? "bg-green-100 text-green-700"
+              : "bg-red-100 text-red-500"
+          }`}
+        >
+          {lastTransaction?.status ? "Success" : "Failed"}
+        </span>
+      </div>
+    </ComponentCard>
+  );
+}

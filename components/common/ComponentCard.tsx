@@ -22,7 +22,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
       className={`rounded-2xl border border-gray-200 bg-white dark:border-gray-800 dark:bg-white/[0.03] ${className}`}
     >
       {/* Card Header */}
-      <div className="flex flex-col gap-2 mb-4 pt-5 px-5 sm:px-6 sm:flex-row sm:items-center sm:justify-between">
+      <div className="flex flex-col gap-2 mb-4 pt-5 px-5 sm:px-6 sm:flex-row sm:items-start sm:justify-between">
         {/* Left */}
         <div>
           <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">

@@ -1,12 +1,14 @@
-"use client";
-
-import HomeApi from "@/components/pages/api-key/HomeApiKey";
+import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
+import HomeApiIntegration from "@/components/pages/api-integration/HomeApiIntegration";
 
 export default function ApiIntegrationsPage() {
   return (
-    <div className="grid grid-cols-12 gap-4 md:gap-6">
-      <div className="col-span-12">
-        <HomeApi />
+    <div>
+      <AutoBreadcrumb pageTitle="API Integrations" />
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <div className="col-span-12">
+          <HomeApiIntegration />
+        </div>
       </div>
     </div>
   );

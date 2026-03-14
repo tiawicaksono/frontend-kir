@@ -1,10 +1,16 @@
 import { formatDate } from "@/utils/formatDate";
 
 interface DateTextProps {
-  value: string | Date;
+  value: string | Date | undefined;
   withTime?: boolean;
 }
 
 export default function DateText({ value, withTime = false }: DateTextProps) {
-  return <>{formatDate(value, { withTime })}</>;
+  if (!value) return <>-</>;
+
+  const date = new Date(value);
+
+  if (isNaN(date.getTime())) return <>-</>;
+
+  return <>{withTime ? date.toLocaleString() : date.toLocaleDateString()}</>;
 }
