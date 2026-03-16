@@ -34,11 +34,12 @@ export default function SidebarMenu() {
       animate={{ width: expanded ? 288 : 80 }}
       transition={{ type: "spring", stiffness: 300, damping: 30 }}
       className="
-        fixed lg:static top-0 left-0 z-40
-        h-screen border-r
+        sticky top-0
+        h-screen
+        border-r
         bg-white dark:bg-slate-900
         border-slate-200 dark:border-slate-800
-        overflow-visible
+        overflow-y-auto
       "
     >
       {/* ===== LOGO ===== */}
