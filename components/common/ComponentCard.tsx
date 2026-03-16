@@ -43,7 +43,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
 
       {/* Card Body */}
       <div
-        className={`px-4 ${
+        className={`px-4 pb-6 ${
           borderTop
             ? "pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-800"
             : ""

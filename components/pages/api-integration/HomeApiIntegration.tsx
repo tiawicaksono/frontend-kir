@@ -7,20 +7,24 @@ import { ApiIntegrations } from "@/types/api-integrations.type";
 
 export default function HomeApiIntegration() {
   const [data, setData] = useState<ApiIntegrations[]>([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchData();
   }, []);
 
   async function fetchData() {
-    const res = await getApiIntegrations();
-    console.log("API RESPONSE:", res);
-    setData(res);
+    try {
+      const res = await getApiIntegrations();
+      setData(res);
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
     <>
-      <ApiIntegrationGrid data={data} />
+      <ApiIntegrationGrid data={data} loading={loading} />
     </>
   );
 }

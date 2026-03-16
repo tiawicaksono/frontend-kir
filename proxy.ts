@@ -47,7 +47,12 @@ export function proxy(request: NextRequest) {
     return NextResponse.next();
   }
 
-  if (!allowed.includes(clean)) {
+  const isAllowed = allowed.some((route) => {
+    const normalized = normalize(route);
+    return clean === normalized || clean.startsWith(normalized + "/");
+  });
+
+  if (!isAllowed) {
     return NextResponse.redirect(new URL("/forbidden", request.url));
   }
 
