@@ -18,7 +18,9 @@ export default function AppMenu({ children }: { children: React.ReactNode }) {
         {menuLayout === "top" && <TopMenu />}
 
         {/* CONTENT YANG SCROLL */}
-        <main className="flex-1 overflow-y-auto p-4">{children}</main>
+        <main id="main-scroll" className="flex-1 overflow-y-auto p-4">
+          {children}
+        </main>
       </div>
 
       <ThemeCustomizer />

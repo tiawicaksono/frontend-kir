@@ -7,15 +7,25 @@ const BackToTopButton = () => {
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
+    const container = document.getElementById("main-scroll");
     const toggleVisibility = () => {
-      setVisible(window.scrollY > 50);
+      if (container) {
+        setVisible(container.scrollTop > 150);
+      }
     };
-    window.addEventListener("scroll", toggleVisibility);
-    return () => window.removeEventListener("scroll", toggleVisibility);
+
+    toggleVisibility(); // cek posisi awal (misal reload di tengah)
+
+    container?.addEventListener("scroll", toggleVisibility);
+
+    return () => {
+      container?.removeEventListener("scroll", toggleVisibility);
+    };
   }, []);
 
   const scrollToTop = () => {
-    window.scrollTo({ top: 0, behavior: "smooth" });
+    const container = document.getElementById("main-scroll");
+    container?.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   if (!visible) return null;
@@ -23,8 +33,7 @@ const BackToTopButton = () => {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-24 right-6 bg-red-300 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform flex items-center justify-center z-10"
-      aria-label="Back to Top"
+      className="fixed bottom-24 right-6 p-4 bg-red-300 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-50"
     >
       <ChevronUp size={24} />
     </button>
