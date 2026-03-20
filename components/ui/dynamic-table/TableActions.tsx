@@ -1,35 +1,40 @@
 "use client";
 
-import { MoreVertical } from "lucide-react";
-import { useState } from "react";
+import { Dropdown, MenuProps } from "antd";
+import { MoreOutlined } from "@ant-design/icons";
 
-export default function TableActions({ row, actions }: any) {
-  const [open, setOpen] = useState(false);
+interface Props {
+  record: any;
+  rowKeyField?: string;
+}
 
-  if (!actions) return null;
+export default function TableActions({ record, rowKeyField }: Props) {
+  const id = rowKeyField
+    ? record[rowKeyField]
+    : record.id ||
+      record[Object.keys(record).find((k) => k.endsWith("_id")) || ""];
+
+  const items: MenuProps["items"] = [
+    {
+      key: "view",
+      label: "View",
+      onClick: () => console.log("view", id),
+    },
+    {
+      key: "edit",
+      label: "Edit",
+      onClick: () => console.log("edit", id),
+    },
+    {
+      key: "delete",
+      label: "Delete",
+      onClick: () => console.log("delete", id),
+    },
+  ];
 
   return (
-    <div className="relative">
-      <button onClick={() => setOpen(!open)}>
-        <MoreVertical size={18} />
-      </button>
-
-      {open && (
-        <div className="absolute right-0 bg-white shadow rounded text-sm z-10">
-          {actions.map((a: any, i: number) => (
-            <button
-              key={i}
-              className="block px-4 py-2 hover:bg-gray-100 w-full text-left"
-              onClick={() => {
-                a.onClick(row);
-                setOpen(false);
-              }}
-            >
-              {a.label}
-            </button>
-          ))}
-        </div>
-      )}
-    </div>
+    <Dropdown menu={{ items }} trigger={["click"]}>
+      <MoreOutlined className="cursor-pointer text-lg" />
+    </Dropdown>
   );
 }

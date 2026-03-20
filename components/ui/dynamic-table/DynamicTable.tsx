@@ -1,243 +1,166 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Table, Input, Button, Space, Select } from "antd";
+import { ReloadOutlined } from "@ant-design/icons";
+import { useEffect, useState } from "react";
+import TableActions from "./TableActions";
 
 interface Props {
-  data: any[];
-  loading?: boolean;
-
-  page: number;
-  perPage: number;
-  total: number;
-
-  onPageChange: (page: number) => void;
-
-  onSearch?: (search: string, column: string) => void;
-
-  actions?: {
-    label: string;
-    onClick: (row: any) => void;
-  }[];
+  columns: any[];
+  fetchData: (params: any) => Promise<{ data: any[]; total: number }>;
+  showActions?: boolean;
+  renderActions?: (record: any) => React.ReactNode;
+  rowKeyField?: string;
 }
 
 export default function DynamicTable({
-  data,
-  loading = false,
-  page,
-  perPage,
-  total,
-  onPageChange,
-  onSearch,
-  actions = [],
+  columns,
+  fetchData,
+  showActions = false,
+  renderActions,
+  rowKeyField,
 }: Props) {
-  const [selectedRows, setSelectedRows] = useState<number[]>([]);
-  const [sortKey, setSortKey] = useState<string>();
-  const [sortDir, setSortDir] = useState<"asc" | "desc">("asc");
-
+  const [data, setData] = useState<any[]>([]);
+  const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
-  const [filterColumn, setFilterColumn] = useState("");
+  const [searchBy, setSearchBy] = useState<string | undefined>();
 
-  const totalPages = Math.ceil(total / perPage);
+  const [pagination, setPagination] = useState({
+    current: 1,
+    pageSize: 10,
+    total: 0,
+  });
 
-  const columns = useMemo(() => {
-    if (!data.length) return [];
+  const [filters, setFilters] = useState<any>({});
+  const [sorter, setSorter] = useState<any>({});
 
-    const hidden = ["id", "created_at", "updated_at"];
-
-    return Object.keys(data[0])
-      .filter((key) => !hidden.includes(key))
-      .map((key) => ({
-        key,
-        label: key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()),
-      }));
-  }, [data]);
-
-  function toggleRow(i: number) {
-    setSelectedRows((prev) =>
-      prev.includes(i) ? prev.filter((x) => x !== i) : [...prev, i],
-    );
-  }
-
-  function toggleAll() {
-    if (selectedRows.length === data.length) {
-      setSelectedRows([]);
-    } else {
-      setSelectedRows(data.map((_, i) => i));
-    }
-  }
-
-  function toggleSort(key: string) {
-    if (sortKey === key) {
-      setSortDir(sortDir === "asc" ? "desc" : "asc");
-    } else {
-      setSortKey(key);
-      setSortDir("asc");
-    }
-  }
-
-  function formatValue(val: any) {
-    if (val === null || val === undefined) return "-";
-
-    if (typeof val === "number") {
-      return val.toLocaleString();
-    }
-
-    if (typeof val === "string" && val.includes("T")) {
-      const d = new Date(val);
-      if (!isNaN(d.getTime())) return d.toLocaleDateString();
-    }
-
-    return val;
-  }
-
-  const sortedData = useMemo(() => {
-    if (!sortKey) return data;
-
-    return [...data].sort((a, b) => {
-      const aVal = a[sortKey];
-      const bVal = b[sortKey];
-
-      if (aVal < bVal) return sortDir === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortDir === "asc" ? 1 : -1;
-
-      return 0;
+  const loadData = async () => {
+    setLoading(true);
+    const cleanFilters: any = {};
+    Object.keys(filters || {}).forEach((key) => {
+      if (filters[key]) {
+        cleanFilters[key] = filters[key];
+      }
     });
-  }, [data, sortKey, sortDir]);
+    try {
+      const res = await fetchData({
+        page: pagination.current,
+        limit: pagination.pageSize,
+        search,
+        search_by: searchBy,
+        ...cleanFilters,
+        sorter,
+      });
+
+      setData(res.data);
+
+      setPagination((prev) => ({
+        ...prev,
+        total: res.total,
+      }));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadData();
+  }, [
+    pagination.current,
+    pagination.pageSize,
+    filters,
+    sorter,
+    search,
+    searchBy,
+  ]);
+
+  const handleChange = (pag: any, tableFilters: any, tableSorter: any) => {
+    setPagination((prev) => ({
+      ...prev,
+      current: tableSorter.field ? 1 : pag.current,
+      pageSize: pag.pageSize,
+    }));
+
+    setFilters(tableFilters);
+
+    setSorter({
+      field: tableSorter.field,
+      order: tableSorter.order,
+    });
+  };
+
+  const finalColumns = [
+    ...columns,
+    ...(showActions
+      ? [
+          {
+            title: "Actions",
+            render: (_: any, record: any) =>
+              renderActions ? (
+                renderActions(record)
+              ) : (
+                <TableActions record={record} rowKeyField={rowKeyField} />
+              ),
+          },
+        ]
+      : []),
+  ];
 
   return (
-    <div className="bg-white border rounded-xl shadow-sm">
-      {/* SEARCH */}
-      <div className="flex gap-2 p-4 border-b">
-        <select
-          className="border rounded px-3 py-2 text-sm"
-          value={filterColumn}
-          onChange={(e) => setFilterColumn(e.target.value)}
-        >
-          <option value="">All Columns</option>
+    <>
+      {/* 🔥 FILTER + RELOAD */}
+      <div className="flex justify-between mb-4">
+        <Space>
+          <Select
+            placeholder="Search By"
+            allowClear
+            style={{ width: 180 }}
+            value={searchBy}
+            onChange={(val) => setSearchBy(val)}
+            options={columns.map((col) => ({
+              label: col.title,
+              value: col.dataIndex,
+            }))}
+          />
 
-          {columns.map((c) => (
-            <option key={c.key} value={c.key}>
-              {c.label}
-            </option>
-          ))}
-        </select>
+          <Input.Search
+            placeholder="Search..."
+            allowClear
+            onSearch={(val) => {
+              setPagination((prev) => ({ ...prev, current: 1 }));
+              setSearch(val);
+            }}
+            style={{ width: 250 }}
+          />
+        </Space>
 
-        <input
-          type="text"
-          placeholder="Search..."
-          className="border rounded px-3 py-2 text-sm w-64"
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-        />
-
-        <button
-          onClick={() => onSearch?.(search, filterColumn)}
-          className="bg-blue-600 text-white px-4 py-2 rounded text-sm"
-        >
-          Search
-        </button>
+        <Button icon={<ReloadOutlined />} onClick={loadData}>
+          Reload
+        </Button>
       </div>
 
-      {/* TABLE */}
-
-      <div className="overflow-auto">
-        <table className="w-full text-sm">
-          <thead className="bg-gray-50 sticky top-0">
-            <tr>
-              <th className="px-4 py-3 w-10">
-                <input
-                  type="checkbox"
-                  checked={selectedRows.length === data.length}
-                  onChange={toggleAll}
-                />
-              </th>
-
-              {columns.map((col) => (
-                <th
-                  key={col.key}
-                  onClick={() => toggleSort(col.key)}
-                  className="px-4 py-3 text-left cursor-pointer"
-                >
-                  {col.label}
-                </th>
-              ))}
-
-              {actions.length > 0 && (
-                <th className="px-4 py-3 text-right">Actions</th>
-              )}
-            </tr>
-          </thead>
-
-          <tbody className="divide-y">
-            {loading && (
-              <tr>
-                <td colSpan={columns.length + 2} className="text-center p-6">
-                  Loading data...
-                </td>
-              </tr>
-            )}
-
-            {!loading &&
-              sortedData.map((row, i) => (
-                <tr key={i} className="hover:bg-gray-50">
-                  <td className="px-4 py-3">
-                    <input
-                      type="checkbox"
-                      checked={selectedRows.includes(i)}
-                      onChange={() => toggleRow(i)}
-                    />
-                  </td>
-
-                  {columns.map((col) => (
-                    <td key={col.key} className="px-4 py-3">
-                      {formatValue(row[col.key])}
-                    </td>
-                  ))}
-
-                  {actions.length > 0 && (
-                    <td className="px-4 py-3 text-right space-x-2">
-                      {actions.map((a, idx) => (
-                        <button
-                          key={idx}
-                          onClick={() => a.onClick(row)}
-                          className="text-blue-600 hover:underline text-sm"
-                        >
-                          {a.label}
-                        </button>
-                      ))}
-                    </td>
-                  )}
-                </tr>
-              ))}
-          </tbody>
-        </table>
-      </div>
-
-      {/* PAGINATION */}
-
-      <div className="flex items-center justify-between p-4 border-t text-sm">
-        <span>
-          Page {page} / {totalPages}
-        </span>
-
-        <div className="flex gap-2">
-          <button
-            disabled={page === 1}
-            onClick={() => onPageChange(page - 1)}
-            className="border px-3 py-1 rounded"
-          >
-            Prev
-          </button>
-
-          <button
-            disabled={page === totalPages}
-            onClick={() => onPageChange(page + 1)}
-            className="border px-3 py-1 rounded"
-          >
-            Next
-          </button>
-        </div>
-      </div>
-    </div>
+      <Table
+        rowKey={(record) =>
+          rowKeyField
+            ? record[rowKeyField]
+            : record.id ||
+              Object.keys(record).find((k) => k.endsWith("_id")) ||
+              JSON.stringify(record)
+        }
+        columns={finalColumns}
+        dataSource={data}
+        loading={loading || !columns.length}
+        pagination={{
+          ...pagination,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50", "100"],
+        }}
+        // rowSelection={{
+        //   selectedRowKeys,
+        //   onChange: setSelectedRowKeys,
+        // }}
+        onChange={handleChange}
+      />
+    </>
   );
 }

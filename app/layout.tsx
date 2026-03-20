@@ -1,5 +1,6 @@
 import { Outfit } from "next/font/google";
 import "./globals.css";
+// import "antd/dist/reset.css";
 
 import { AppProviders } from "./providers";
 

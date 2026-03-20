@@ -6,12 +6,8 @@ import DateText from "@/components/common/DateText";
 import HrShimmer from "@/components/common/HrShimmer";
 import SyncButton from "@/components/common/SyncButton";
 import { useShowAlert } from "@/core/alert/alert.hook";
-import {
-  detailApiIntegration,
-  syncApi,
-} from "@/services/api-integrations.service";
+import { syncApi } from "@/services/api-integrations.service";
 import { ApiIntegrations } from "@/types/api-integrations.type";
-import { tr } from "framer-motion/client";
 import { useState } from "react";
 
 interface Props {
