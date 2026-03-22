@@ -23,6 +23,7 @@ export default function DynamicTable({
   const [data, setData] = useState<any[]>([]);
   const [loading, setLoading] = useState(false);
   const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
   const [searchBy, setSearchBy] = useState<string | undefined>();
 
   const [pagination, setPagination] = useState({
@@ -71,7 +72,7 @@ export default function DynamicTable({
     filters,
     sorter,
     search,
-    searchBy,
+    // searchBy,
   ]);
 
   const handleChange = (pag: any, tableFilters: any, tableSorter: any) => {
@@ -126,11 +127,12 @@ export default function DynamicTable({
           <Input.Search
             placeholder="Search..."
             allowClear
-            onSearch={(val) => {
+            value={searchInput}
+            onChange={(e) => setSearchInput(e.target.value)}
+            onSearch={() => {
               setPagination((prev) => ({ ...prev, current: 1 }));
-              setSearch(val);
+              setSearch(searchInput); // trigger API
             }}
-            style={{ width: 250 }}
           />
         </Space>
 

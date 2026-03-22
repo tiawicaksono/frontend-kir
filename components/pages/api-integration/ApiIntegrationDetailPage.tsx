@@ -43,11 +43,10 @@ export default function ApiIntegrationDetail({ prefix }: { prefix: string }) {
     <DynamicTable
       columns={columns}
       fetchData={fetchData}
-      showActions
       rowKeyField={config?.primary_key}
-      renderActions={({ [config?.primary_key]: id }) => (
-        <button onClick={() => alert(id)}>Custom</button>
-      )}
+      // renderActions={({ [config?.primary_key]: id }) => (
+      //   <button onClick={() => alert(id)}>Custom</button>
+      // )}
     />
   );
 }
