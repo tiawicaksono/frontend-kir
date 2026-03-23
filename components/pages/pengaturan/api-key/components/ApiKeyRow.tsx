@@ -5,7 +5,7 @@ import {
   TrashIcon,
 } from "lucide-react";
 import { TableCell, TableRow } from "@/components/ui/table";
-import ApiKeyField from "@/components/pages/api-key/components/ApiKeyField";
+import ApiKeyField from "@/components/pages/pengaturan/api-key/components/ApiKeyField";
 import DateText from "@/components/common/DateText";
 import ToggleSwitch from "@/components/form/switch/ToggleSwitch";
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";

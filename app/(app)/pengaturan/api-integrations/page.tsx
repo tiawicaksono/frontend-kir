@@ -1,5 +1,5 @@
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import HomeApiIntegration from "@/components/pages/api-integration/HomeApiIntegration";
+import HomeApiIntegration from "@/components/pages/pengaturan/api-integration/HomeApiIntegration";
 
 export default function ApiIntegrationsPage() {
   return (
