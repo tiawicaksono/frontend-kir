@@ -18,7 +18,8 @@ export function proxy(request: NextRequest) {
 
   const routesCookie = request.cookies.get("user_routes")?.value;
 
-  const isAuthPage = clean === "/signin";
+  const AUTH_PAGES = ["/signin", "/signup", "/reset-password"];
+  const isAuthPage = AUTH_PAGES.includes(clean);
   const isForbidden = clean === "/forbidden";
 
   // 🔴 Belum login
