@@ -1,7 +1,12 @@
 "use client";
 
 import { Dropdown, MenuProps } from "antd";
-import { MoreOutlined } from "@ant-design/icons";
+import {
+  MoreOutlined,
+  EditOutlined,
+  DeleteOutlined,
+  EyeOutlined,
+} from "@ant-design/icons";
 
 interface Props {
   record: any;
@@ -9,6 +14,7 @@ interface Props {
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
   onView?: (record: any) => void;
+  actions?: ("view" | "edit" | "delete")[];
 }
 
 export default function TableActions({
@@ -17,29 +23,50 @@ export default function TableActions({
   onEdit,
   onDelete,
   onView,
+  actions = ["view", "edit", "delete"],
 }: Props) {
   const id = rowKeyField
     ? record[rowKeyField]
     : record.id ||
       record[Object.keys(record).find((k) => k.endsWith("_id")) || ""];
 
-  const items: MenuProps["items"] = [
-    {
+  const items: MenuProps["items"] = [];
+
+  if (actions.includes("view")) {
+    items.push({
       key: "view",
-      label: "View",
+      label: (
+        <span className="flex items-center gap-2">
+          <EyeOutlined /> View
+        </span>
+      ),
       onClick: () => onView?.(record),
-    },
-    {
+    });
+  }
+
+  if (actions.includes("edit")) {
+    items.push({
       key: "edit",
-      label: "Edit",
+      label: (
+        <span className="flex items-center gap-2">
+          <EditOutlined /> Edit
+        </span>
+      ),
       onClick: () => onEdit?.(record),
-    },
-    {
+    });
+  }
+
+  if (actions.includes("delete")) {
+    items.push({
       key: "delete",
-      label: "Delete",
-      onClick: () => onDelete?.(record),
-    },
-  ];
+      label: (
+        <span className="flex items-center gap-2 text-red-500">
+          <DeleteOutlined /> Delete
+        </span>
+      ),
+      onClick: () => onDelete?.(id),
+    });
+  }
 
   return (
     <Dropdown menu={{ items }} trigger={["click"]}>

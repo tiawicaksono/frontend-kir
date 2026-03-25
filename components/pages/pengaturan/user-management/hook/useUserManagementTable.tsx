@@ -60,34 +60,38 @@ export function useUserManagementTable() {
 
       if (json.data?.length) {
         setColumns(
-  generateColumnsFromData(json.data, json.config).map((col: any) => {
-    // 🔥 handle kolom roles
-    if (col.dataIndex === "roles") {
-      return {
-        ...col,
-        title: "Roles", // optional rename
-        render: (roles: any[]) => {
-          if (!roles?.length) return "-";
+          generateColumnsFromData(json.data, json.config).map((col: any) => {
+            // 🔥 handle kolom roles
+            if (col.dataIndex === "roles") {
+              return {
+                ...col,
+                title: "Roles", // optional rename
+                render: (roles: any[]) => {
+                  if (!roles?.length) return "-";
 
-          return (
-            <div className="flex flex-wrap gap-1">
-              {roles.map((role) => (
-                <span
-                  key={role.id}
-                  className="px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700"
-                >
-                  {role.name}
-                </span>
-              ))}
-            </div>
-          );
-        },
-      };
-    }
+                  return (
+                    <div className="flex gap-1 flex-wrap">
+                      {roles.map((role) => (
+                        <span
+                          key={role.id}
+                          className={`px-2 py-1 rounded text-xs ${
+                            role.is_active
+                              ? "bg-green-100 text-green-700"
+                              : "bg-red-100 text-red-600" // 🔥 merah kalau false
+                          }`}
+                        >
+                          {role.name}
+                        </span>
+                      ))}
+                    </div>
+                  );
+                },
+              };
+            }
 
-    return col;
-  }),
-);
+            return col;
+          }),
+        );
       }
 
       // 🔥 overwrite saat fetch (BENAR untuk pagination)
@@ -122,11 +126,17 @@ export function useUserManagementTable() {
   const updateData = (updatedItem: any) => {
     const key = config?.primary_key || "id";
 
-    setDataSource((prev) =>
-      prev.map((item) =>
+    setDataSource((prev) => {
+      // 🔥 HANDLE DELETE
+      if (updatedItem?._delete) {
+        return prev.filter((item) => item?.[key] !== updatedItem?.[key]);
+      }
+
+      // 🔥 HANDLE UPDATE
+      return prev.map((item) =>
         item?.[key] === updatedItem?.[key] ? updatedItem : item,
-      ),
-    );
+      );
+    });
   };
 
   return {

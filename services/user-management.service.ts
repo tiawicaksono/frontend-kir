@@ -31,6 +31,13 @@ export async function updateUser(id: number, data: any) {
   return res.data;
 }
 
+export async function deleteUser(id: number) {
+  const res = await api.delete(
+    `${API_URL}/pengaturan/user-management/delete/${id}`,
+  );
+  return res.data;
+}
+
 /**
  * ROLE
  */

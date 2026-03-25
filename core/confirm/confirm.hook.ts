@@ -7,7 +7,7 @@ export function useConfirm() {
   const ctx = useContext(ConfirmContext);
 
   if (!ctx) {
-    throw new Error("useConfirm must be used inside ConfirmProvider");
+    throw new Error("use Confirm must be used inside ConfirmProvider");
   }
 
   return ctx;

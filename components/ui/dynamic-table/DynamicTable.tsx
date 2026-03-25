@@ -35,6 +35,7 @@ interface Props {
   rowKeyField?: string;
 
   onEdit?: (record: any) => void;
+  onDelete?: (record: any) => void;
 }
 
 export default function DynamicTable({
@@ -50,6 +51,7 @@ export default function DynamicTable({
   renderActions,
   rowKeyField,
   onEdit,
+  onDelete,
 }: Props) {
   const [searchBy, setSearchBy] = useState<string | undefined>();
 
@@ -78,6 +80,7 @@ export default function DynamicTable({
                     record={record}
                     rowKeyField={rowKeyField}
                     onEdit={onEdit}
+                    onDelete={onDelete}
                   />
                 )}
               </div>

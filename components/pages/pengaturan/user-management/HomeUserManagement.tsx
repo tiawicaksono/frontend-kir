@@ -14,8 +14,6 @@ import { useUserManagementTable } from "./hook/useUserManagementTable";
 import { useUserManagementAction } from "./hook/useUserManagementAction";
 
 export default function HomeUserManagement() {
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [selectedUser, setSelectedUser] = useState<any>(null);
   const userTable = useUserManagementTable();
 
   const [counts, setCounts] = useState({
@@ -39,23 +37,30 @@ export default function HomeUserManagement() {
     loadCounts();
   }, []);
 
-  const { handleCreate, handleUpdate } = useUserManagementAction(
-    (newUser) => {
+  const { handleCreate, handleUpdate, handleDelete } = useUserManagementAction(
+    async (newUser) => {
       userTable.prependData(newUser);
 
-      setCounts((prev) => ({
-        ...prev,
-        user: prev.user + 1,
-      }));
+      await loadCounts(); // 🔥 real-time sync
     },
     (updatedUser) => {
       userTable.updateData?.(updatedUser);
     },
   );
 
-  const handleEdit = (record: any) => {
-    setSelectedUser(record);
-    setIsEditOpen(true);
+  const handleDeleteWrapper = async (id: number) => {
+    const success = await handleDelete(id);
+
+    if (success) {
+      await loadCounts(); // 🔥 real-time sync
+    }
+  };
+
+  const handleReload = async () => {
+    await Promise.all([
+      userTable.fetchData(), // reload table
+      loadCounts(), // 🔥 reload badge
+    ]);
   };
 
   return (
@@ -72,7 +77,12 @@ export default function HomeUserManagement() {
             ),
             badgeCount: counts.user,
             children: ({ openEdit }) => (
-              <UserTab table={userTable} onEdit={openEdit} />
+              <UserTab
+                table={userTable}
+                onEdit={openEdit}
+                onDelete={handleDeleteWrapper}
+                onReload={handleReload}
+              />
             ),
             showAction: true,
             actionLabel: "Add User",
