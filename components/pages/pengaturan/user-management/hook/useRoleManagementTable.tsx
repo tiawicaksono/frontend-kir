@@ -2,7 +2,7 @@
 
 import { useState, useCallback } from "react";
 import { generateColumnsFromData } from "@/components/ui/dynamic-table/helpers";
-import { fetchTableData } from "@/services/user-management.service";
+import { fetchTableData } from "@/services/role-management.service";
 
 type Sorter = {
   field?: string;
@@ -18,7 +18,7 @@ type TableParams = {
   sorter?: Sorter;
 };
 
-export function useUserManagementTable() {
+export function useRoleManagementTable() {
   const [columns, setColumns] = useState<any[]>([]);
   const [config, setConfig] = useState<any>({});
 
@@ -57,42 +57,10 @@ export function useUserManagementTable() {
       if (json.config) setConfig(json.config);
 
       if (json.data?.length) {
-        setColumns(
-          generateColumnsFromData(json.data, json.config).map((col: any) => {
-            // 🔥 handle kolom roles
-            if (col.dataIndex === "roles") {
-              return {
-                ...col,
-                title: "Roles", // optional rename
-                render: (roles: any[]) => {
-                  if (!roles?.length) return "-";
-
-                  return (
-                    <div className="flex gap-1 flex-wrap">
-                      {roles.map((role) => (
-                        <span
-                          key={role.id}
-                          className={`px-2 py-1 rounded text-xs ${
-                            role.is_active
-                              ? "bg-green-100 text-green-700"
-                              : "bg-red-100 text-red-600" // 🔥 merah kalau false
-                          }`}
-                        >
-                          {role.name}
-                        </span>
-                      ))}
-                    </div>
-                  );
-                },
-              };
-            }
-
-            return col;
-          }),
-        );
+        setColumns(generateColumnsFromData(json.data, json.config));
       }
 
-      // 🔥 overwrite saat fetch (BENAR untuk pagination)
+      // 🔥 overwrite saat fetch (untuk pagination)
       setDataSource(json.data);
 
       setTotal(json.meta.total);

@@ -1,34 +1,94 @@
 "use client";
 
-import { useState } from "react";
-import { Input, Button } from "antd";
+import { useEffect, useState } from "react";
+import Label from "@/components/form/Label";
+import Input from "@/components/form/input/InputField";
+import LoadingButton from "@/components/common/LoadingButton";
 
 interface Props {
+  mode?: "create" | "edit";
+  initialValues?: any;
   onSuccess?: () => void;
+  onSubmit?: (data: any) => Promise<boolean>;
 }
 
-export default function RoleForm({ onSuccess }: Props) {
+export default function RoleForm({
+  initialValues,
+  onSuccess,
+  onSubmit,
+}: Props) {
   const [loading, setLoading] = useState(false);
+  const [name, setName] = useState("");
+  const [errors, setErrors] = useState<{
+    name?: string;
+  }>({});
 
-  const handleSubmit = async () => {
+  useEffect(() => {
+    if (initialValues) {
+      setName(initialValues.name || "");
+    }
+  }, [initialValues]);
+
+  const validate = () => {
+    const newErrors: typeof errors = {};
+
+    if (!name.trim()) {
+      newErrors.name = "Name is required";
+    }
+    setErrors(newErrors);
+
+    return Object.keys(newErrors).length === 0;
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!validate()) return;
+
     setLoading(true);
 
-    // 🔥 simulate API
-    await new Promise((r) => setTimeout(r, 1000));
+    const payload = {
+      id: initialValues?.id,
+      name,
+    };
 
+    // 🔥 PENTING BANGET
+    const success = await onSubmit?.(payload);
+    // console.log("SUBMIT PAYLOAD:", payload);
     setLoading(false);
-    onSuccess?.();
+
+    if (success) {
+      onSuccess?.();
+    }
   };
 
   return (
-    <div className="space-y-4">
-      <Input placeholder="Role Name" />
-
-      <div className="flex justify-end">
-        <Button type="primary" loading={loading} onClick={handleSubmit}>
-          Submit
-        </Button>
+    <form onSubmit={handleSubmit} className="space-y-2">
+      <div>
+        <Label className="flex items-center justify-between">
+          <span>
+            <span className="text-red-500">*</span>
+            Name
+          </span>
+          {errors.name && (
+            <span className="text-xs text-red-500 mt-1">{errors.name}</span>
+          )}
+        </Label>
+        <Input
+          value={name}
+          onChange={setName}
+          className={errors.name ? "border-red-500 focus:border-none" : ""}
+        />
       </div>
-    </div>
+
+      <LoadingButton
+        type="submit"
+        size="sm"
+        loading={loading}
+        loadingText="Saving..."
+      >
+        Save
+      </LoadingButton>
+    </form>
   );
 }
