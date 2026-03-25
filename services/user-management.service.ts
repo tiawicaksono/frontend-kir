@@ -23,6 +23,14 @@ export async function createUser(data: any) {
   return res.data.data;
 }
 
+export async function updateUser(id: number, data: any) {
+  const res = await api.put(
+    `${API_URL}/pengaturan/user-management/update/${id}/roles`,
+    data,
+  );
+  return res.data;
+}
+
 /**
  * ROLE
  */

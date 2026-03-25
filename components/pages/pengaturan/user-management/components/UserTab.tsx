@@ -1,9 +1,10 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
+import TableActions from "@/components/ui/dynamic-table/TableActions";
 
-export default function UserTab({ table }: any) {
+export default function UserTab({ table, onEdit }: any) {
   useEffect(() => {
     table.fetchData();
   }, [table.params]);
@@ -20,6 +21,13 @@ export default function UserTab({ table }: any) {
       onReload={table.fetchData}
       rowKeyField={table.config?.primary_key}
       showActions
+      renderActions={(record) => (
+        <TableActions
+          record={record}
+          rowKeyField={table.config?.primary_key}
+          onEdit={() => onEdit(record)}
+        />
+      )}
     />
   );
 }

@@ -59,7 +59,35 @@ export function useUserManagementTable() {
       if (json.config) setConfig(json.config);
 
       if (json.data?.length) {
-        setColumns(generateColumnsFromData(json.data, json.config));
+        setColumns(
+  generateColumnsFromData(json.data, json.config).map((col: any) => {
+    // 🔥 handle kolom roles
+    if (col.dataIndex === "roles") {
+      return {
+        ...col,
+        title: "Roles", // optional rename
+        render: (roles: any[]) => {
+          if (!roles?.length) return "-";
+
+          return (
+            <div className="flex flex-wrap gap-1">
+              {roles.map((role) => (
+                <span
+                  key={role.id}
+                  className="px-2 py-0.5 text-xs rounded bg-blue-100 text-blue-700"
+                >
+                  {role.name}
+                </span>
+              ))}
+            </div>
+          );
+        },
+      };
+    }
+
+    return col;
+  }),
+);
       }
 
       // 🔥 overwrite saat fetch (BENAR untuk pagination)
@@ -91,6 +119,16 @@ export function useUserManagementTable() {
     setTotal((prev) => prev + 1);
   };
 
+  const updateData = (updatedItem: any) => {
+    const key = config?.primary_key || "id";
+
+    setDataSource((prev) =>
+      prev.map((item) =>
+        item?.[key] === updatedItem?.[key] ? updatedItem : item,
+      ),
+    );
+  };
+
   return {
     columns,
     config,
@@ -103,5 +141,6 @@ export function useUserManagementTable() {
     fetchData,
 
     prependData,
+    updateData,
   };
 }

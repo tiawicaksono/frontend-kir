@@ -1,9 +1,16 @@
+export type TabFormProps = {
+  close: () => void;
+  mode: "create" | "edit";
+  formData?: any;
+};
+
 export type TabItemConfig = {
   key: string;
   label: React.ReactNode;
-  children: React.ReactNode;
+  children: (props: { openEdit: (data: any) => void }) => React.ReactNode;
   badgeCount?: number;
-  // 🔥 optional features
+
+  // 🔥 action button
   showAction?: boolean;
   actionLabel?: string;
 
@@ -11,7 +18,8 @@ export type TabItemConfig = {
   actionType?: "modal" | "custom"; // default: modal
   onActionClick?: () => void;
 
-  renderForm?: (close: () => void) => React.ReactNode;
+  // 🔥 FORM RENDER (CREATE + EDIT)
+  renderForm?: (props: TabFormProps) => React.ReactNode;
 };
 
 export type AppTabsProps = {

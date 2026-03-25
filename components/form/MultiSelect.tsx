@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 
 interface Option {
   value: number;
@@ -11,20 +11,19 @@ interface Option {
 interface MultiSelectProps {
   label?: string;
   options: Option[];
-  defaultSelected?: number[]; // 🔥 number
-  onChange?: (selected: number[]) => void; // 🔥 number
+  value?: number[];
+  onChange?: (selected: number[]) => void;
   disabled?: boolean;
 }
 
 const MultiSelect: React.FC<MultiSelectProps> = ({
   label,
   options,
-  defaultSelected = [],
+  value = [],
   onChange,
   disabled = false,
 }) => {
-  const [selectedOptions, setSelectedOptions] =
-    useState<number[]>(defaultSelected); // 🔥 number
+  const [selectedOptions, setSelectedOptions] = useState<number[]>([]);
   const [isOpen, setIsOpen] = useState(false);
 
   const toggleDropdown = () => {
@@ -53,6 +52,11 @@ const MultiSelect: React.FC<MultiSelectProps> = ({
     (value) => options.find((option) => option.value === value)?.text || "",
   );
 
+  useEffect(() => {
+    if (value) {
+      setSelectedOptions(value);
+    }
+  }, [value]);
   return (
     <div className="w-full">
       <label className="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">

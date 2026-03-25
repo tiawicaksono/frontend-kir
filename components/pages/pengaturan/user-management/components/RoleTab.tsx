@@ -1,4 +1,4 @@
-export default function Roeltab() {
+export default function Roletab() {
   return (
     <section className="space-y-4">
       <h1 className="text-2xl font-semibold">Daftar Uji</h1>

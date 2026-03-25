@@ -6,9 +6,18 @@ import { MoreOutlined } from "@ant-design/icons";
 interface Props {
   record: any;
   rowKeyField?: string;
+  onEdit?: (record: any) => void;
+  onDelete?: (record: any) => void;
+  onView?: (record: any) => void;
 }
 
-export default function TableActions({ record, rowKeyField }: Props) {
+export default function TableActions({
+  record,
+  rowKeyField,
+  onEdit,
+  onDelete,
+  onView,
+}: Props) {
   const id = rowKeyField
     ? record[rowKeyField]
     : record.id ||
@@ -18,17 +27,17 @@ export default function TableActions({ record, rowKeyField }: Props) {
     {
       key: "view",
       label: "View",
-      onClick: () => console.log("view", id),
+      onClick: () => onView?.(record),
     },
     {
       key: "edit",
       label: "Edit",
-      onClick: () => console.log("edit", id),
+      onClick: () => onEdit?.(record),
     },
     {
       key: "delete",
       label: "Delete",
-      onClick: () => console.log("delete", id),
+      onClick: () => onDelete?.(record),
     },
   ];
 

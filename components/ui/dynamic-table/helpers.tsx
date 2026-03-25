@@ -1,3 +1,5 @@
+"use client";
+
 export const formatTitle = (key: string) => {
   return key.replace(/_/g, " ").replace(/\b\w/g, (l) => l.toUpperCase());
 };
@@ -6,8 +8,6 @@ export function generateColumnsFromData(data: any[], config: any) {
   if (!data?.length) return [];
 
   const keys = Object.keys(data[0]);
-
-  // 🔥 ambil order dari BE
   const order = config?.column_order || [];
 
   const sortedKeys = [...keys].sort((a, b) => {
@@ -23,9 +23,21 @@ export function generateColumnsFromData(data: any[], config: any) {
 
   return sortedKeys
     .filter((key) => !config?.hidden?.includes(key))
-    .map((key) => ({
-      title: config?.labels?.[key] || key,
-      dataIndex: key,
-      sorter: true,
-    }));
+    .map((key) => {
+      const searchableConfig = config?.searchable;
+
+      const isSearchable = Array.isArray(searchableConfig)
+        ? searchableConfig.length === 0
+          ? true
+          : searchableConfig.includes(key)
+        : true;
+
+      return {
+        key,
+        title: config?.labels?.[key] || formatTitle(key),
+        dataIndex: key,
+        sorter: config?.sortable?.includes(key) || false,
+        searchable: isSearchable,
+      };
+    });
 }

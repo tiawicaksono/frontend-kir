@@ -14,6 +14,8 @@ import { useUserManagementTable } from "./hook/useUserManagementTable";
 import { useUserManagementAction } from "./hook/useUserManagementAction";
 
 export default function HomeUserManagement() {
+  const [isEditOpen, setIsEditOpen] = useState(false);
+  const [selectedUser, setSelectedUser] = useState<any>(null);
   const userTable = useUserManagementTable();
 
   const [counts, setCounts] = useState({
@@ -37,17 +39,24 @@ export default function HomeUserManagement() {
     loadCounts();
   }, []);
 
-  // 🔥 FIX INTI DI SINI
-  const { handleCreate } = useUserManagementAction((newUser) => {
-    // console.log("INJECT KE TABLE:", newUser);
+  const { handleCreate, handleUpdate } = useUserManagementAction(
+    (newUser) => {
+      userTable.prependData(newUser);
 
-    userTable.prependData(newUser); // ✅ langsung ke table
+      setCounts((prev) => ({
+        ...prev,
+        user: prev.user + 1,
+      }));
+    },
+    (updatedUser) => {
+      userTable.updateData?.(updatedUser);
+    },
+  );
 
-    setCounts((prev) => ({
-      ...prev,
-      user: prev.user + 1,
-    }));
-  });
+  const handleEdit = (record: any) => {
+    setSelectedUser(record);
+    setIsEditOpen(true);
+  };
 
   return (
     <ComponentCard title="User Management">
@@ -62,26 +71,40 @@ export default function HomeUserManagement() {
               </>
             ),
             badgeCount: counts.user,
-            children: <UserTab table={userTable} />,
+            children: ({ openEdit }) => (
+              <UserTab table={userTable} onEdit={openEdit} />
+            ),
             showAction: true,
             actionLabel: "Add User",
-            renderForm: (close) => (
-              <UserForm onSubmit={handleCreate} onSuccess={close} />
+            renderForm: ({ close, mode, formData }) => (
+              <UserForm
+                mode={mode}
+                initialValues={formData}
+                onSubmit={mode === "create" ? handleCreate : handleUpdate}
+                onSuccess={close}
+              />
             ),
           },
-          {
-            key: "role",
-            label: (
-              <>
-                <SafetyOutlined /> Role
-              </>
-            ),
-            badgeCount: counts.role,
-            children: <RoleTab />,
-            showAction: true,
-            actionLabel: "Add Role",
-            renderForm: (close) => <RoleForm onSuccess={close} />,
-          },
+          // {
+          //   key: "role",
+          //   label: (
+          //     <>
+          //       <SafetyOutlined /> Role
+          //     </>
+          //   ),
+          //   badgeCount: counts.role,
+          //   children: ({ openEdit }) => <RoleTab onEdit={openEdit} />,
+          //   showAction: true,
+          //   actionLabel: "Add Role",
+          //   renderForm: ({ close, mode, formData }) => (
+          //     <RoleForm
+          //       mode={mode}
+          //       initialValues={formData}
+          //       onSubmit={mode === "create" ? handleCreate : handleUpdate}
+          //       onSuccess={close}
+          //     />
+          //   ),
+          // },
         ]}
       />
     </ComponentCard>

@@ -8,11 +8,17 @@ import MultiSelect from "@/components/form/MultiSelect";
 import { fetchRoles } from "@/services/user-management.service";
 
 interface Props {
+  mode?: "create" | "edit";
+  initialValues?: any;
   onSuccess?: () => void;
   onSubmit?: (data: any) => Promise<boolean>;
 }
 
-export default function UserForm({ onSuccess, onSubmit }: Props) {
+export default function UserForm({
+  initialValues,
+  onSuccess,
+  onSubmit,
+}: Props) {
   const [loading, setLoading] = useState(false);
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
@@ -46,6 +52,17 @@ export default function UserForm({ onSuccess, onSubmit }: Props) {
 
     loadRoles();
   }, []);
+
+  useEffect(() => {
+    if (initialValues) {
+      setName(initialValues.name || "");
+      setEmail(initialValues.email || "");
+      setPhone(initialValues.phone || "");
+
+      setSelectedValues(initialValues.roles?.map((r: any) => r.id) || []);
+    }
+  }, [initialValues]);
+
   const validateEmail = (value: string) => {
     const isValidEmail =
       /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value);
@@ -88,6 +105,7 @@ export default function UserForm({ onSuccess, onSubmit }: Props) {
     setLoading(true);
 
     const payload = {
+      id: initialValues?.id,
       name,
       email,
       phone,
@@ -168,6 +186,7 @@ export default function UserForm({ onSuccess, onSubmit }: Props) {
           )}
         </Label>
         <MultiSelect
+          value={selectedValues}
           options={roleOptions}
           onChange={(values) => setSelectedValues(values)}
         />

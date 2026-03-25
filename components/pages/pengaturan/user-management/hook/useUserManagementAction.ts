@@ -1,8 +1,11 @@
 import { useState } from "react";
-import { createUser } from "@/services/user-management.service";
+import { createUser, updateUser } from "@/services/user-management.service";
 import { useShowAlert } from "@/core/alert/alert.hook";
 
-export function useUserManagementAction(addNewUser: (data: any) => void) {
+export function useUserManagementAction(
+  prependData?: (data: any) => void,
+  updateData?: (data: any) => void,
+) {
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -11,9 +14,8 @@ export function useUserManagementAction(addNewUser: (data: any) => void) {
       setIsSubmitting(true);
 
       const newUser = await createUser(data);
-      console.log(newUser);
-      // 🔥 inject ke FE state (bukan table langsung)
-      addNewUser(newUser);
+
+      prependData?.(newUser);
 
       showSuccessAlert("User berhasil dibuat");
       return true;
@@ -25,8 +27,27 @@ export function useUserManagementAction(addNewUser: (data: any) => void) {
     }
   };
 
+  const handleUpdate = async (data: any) => {
+    try {
+      setIsSubmitting(true);
+
+      const res = await updateUser(data.id, data);
+
+      updateData?.(res.data); // 🔥 replace row
+
+      showSuccessAlert("User berhasil diupdate");
+      return true;
+    } catch (err) {
+      showErrorAlert(err, "User gagal diupdate");
+      return false;
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
   return {
     handleCreate,
+    handleUpdate,
     isSubmitting,
   };
 }

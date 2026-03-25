@@ -3,6 +3,7 @@
 import { Table, Input, Button, Space, Select } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import TableActions from "./TableActions";
+import { useState } from "react";
 
 interface Sorter {
   field?: string;
@@ -32,6 +33,8 @@ interface Props {
   showActions?: boolean;
   renderActions?: (record: any) => React.ReactNode;
   rowKeyField?: string;
+
+  onEdit?: (record: any) => void;
 }
 
 export default function DynamicTable({
@@ -46,7 +49,10 @@ export default function DynamicTable({
   showActions = false,
   renderActions,
   rowKeyField,
+  onEdit,
 }: Props) {
+  const [searchBy, setSearchBy] = useState<string | undefined>();
+
   const getRowKey = (record: any) => {
     return rowKeyField
       ? record?.[rowKeyField]
@@ -68,7 +74,11 @@ export default function DynamicTable({
                 {renderActions ? (
                   renderActions(record)
                 ) : (
-                  <TableActions record={record} rowKeyField={rowKeyField} />
+                  <TableActions
+                    record={record}
+                    rowKeyField={rowKeyField}
+                    onEdit={onEdit}
+                  />
                 )}
               </div>
             ),
@@ -85,17 +95,21 @@ export default function DynamicTable({
             placeholder="Search By"
             allowClear
             style={{ width: 180 }}
-            onChange={(val) => onChange({ search_by: val, page: 1 })}
-            options={columns.map((col) => ({
-              label: col.title,
-              value: col.dataIndex,
-            }))}
+            onChange={(val) => setSearchBy(val)}
+            options={columns
+              .filter((col: any) => col.searchable) // 🔥 dari BE
+              .map((col: any) => ({
+                label: col.title,
+                value: col.dataIndex,
+              }))}
           />
 
           <Input.Search
             placeholder="Search..."
             allowClear
-            onSearch={(val) => onChange({ search: val, page: 1 })}
+            onSearch={(val) =>
+              onChange({ search: val, search_by: searchBy, page: 1 })
+            }
           />
         </Space>
 

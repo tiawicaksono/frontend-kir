@@ -7,18 +7,25 @@ import { Modal } from "../modal";
 import { PlusOutlined } from "@ant-design/icons";
 
 export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
-  const { activeKey, setActiveKey, activeTab, open, openModal, closeModal } =
-    useAppTabs(items, defaultActiveKey);
+  const {
+    activeKey,
+    setActiveKey,
+    activeTab,
+    open,
+    mode,
+    formData,
+    openCreate,
+    openEdit,
+    closeModal,
+  } = useAppTabs(items, defaultActiveKey);
 
-  // 🔥 handle click action
   const handleActionClick = () => {
     if (activeTab?.actionType === "custom") {
       activeTab?.onActionClick?.();
       return;
     }
 
-    // default: modal
-    openModal();
+    openCreate();
   };
 
   return (
@@ -36,34 +43,32 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
         items={items.map((item) => ({
           key: item.key,
           label: (
-            <>
-              <div className="flex items-center gap-2">
-                <span className="flex items-center gap-1">{item.label}</span>
-
-                {typeof item.badgeCount === "number" && (
-                  <Badge
-                    count={item.badgeCount}
-                    size="small"
-                    overflowCount={999}
-                    className="ml-1"
-                  />
-                )}
-              </div>
-            </>
+            <div className="flex items-center gap-2">
+              <span>{item.label}</span>
+              {typeof item.badgeCount === "number" && (
+                <Badge count={item.badgeCount} size="small" />
+              )}
+            </div>
           ),
-          children: item.children,
+
+          // 🔥 inject openEdit ke children
+          children: item.children({
+            openEdit,
+          }),
         }))}
       />
 
-      {/* 🔥 Global Modal */}
-      {activeTab?.actionType !== "custom" && (
-        <Modal isOpen={open} onClose={closeModal} className="max-w-lg">
-          <h2 className="text-lg font-semibold mb-4">
-            {activeTab?.actionLabel}
-          </h2>
-          {activeTab?.renderForm?.(closeModal)}
-        </Modal>
-      )}
+      <Modal isOpen={open} onClose={closeModal} className="max-w-lg">
+        <h2 className="text-lg font-semibold mb-4">
+          {mode === "create" ? activeTab?.actionLabel : "Edit Data"}
+        </h2>
+
+        {activeTab?.renderForm?.({
+          close: closeModal,
+          mode,
+          formData,
+        })}
+      </Modal>
     </>
   );
 }
