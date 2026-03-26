@@ -64,7 +64,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     initAuth();
 
-    channel.onmessage = (event) => {
+    channel.onmessage = async (event) => {
       if (event.data === "LOGOUT") {
         setUser(null);
         setMenus([]);
@@ -73,6 +73,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
 
       if (event.data === "LOGIN") {
+        await initAuth();
         router.replace("/dashboard");
       }
     };
