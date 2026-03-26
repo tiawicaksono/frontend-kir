@@ -3,20 +3,7 @@
 import { useState, useCallback } from "react";
 import { generateColumnsFromData } from "@/components/ui/dynamic-table/helpers";
 import { fetchTableData } from "@/services/user-management.service";
-
-type Sorter = {
-  field?: string;
-  order?: "ascend" | "descend";
-};
-
-type TableParams = {
-  page: number;
-  limit: number;
-  search?: string;
-  search_by?: string;
-  filters?: Record<string, any>;
-  sorter?: Sorter;
-};
+import { TableParams } from "@/components/ui/dynamic-table/type";
 
 export function useUserManagementTable() {
   const [columns, setColumns] = useState<any[]>([]);
