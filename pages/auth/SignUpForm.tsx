@@ -5,7 +5,7 @@ import Label from "@/components/form/Label";
 import { ChevronLeftIcon } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
-import PasswordInput from "../../form/form-elements/PasswordField";
+import PasswordInput from "../../components/form/form-elements/PasswordField";
 
 export default function SignUpForm() {
   const [password, setPassword] = useState("");

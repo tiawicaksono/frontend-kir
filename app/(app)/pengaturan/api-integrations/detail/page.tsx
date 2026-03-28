@@ -1,6 +1,6 @@
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import ComponentCard from "@/components/common/ComponentCard";
-import ApiIntegrationDetail from "@/components/pages/pengaturan/api-integration/ApiIntegrationDetailPage";
+import ApiIntegrationDetail from "@/pages/pengaturan/api-integration/ApiIntegrationDetailPage";
 
 export default async function ApiIntegrationDetailPage({
   searchParams,

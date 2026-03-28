@@ -1,15 +1,15 @@
 "use client";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import HomeUserManagement from "@/pages/pengaturan/user-management/HomeUserManagement";
+import HomeWilayahManagement from "@/pages/pengaturan/wilayah-management/HomeWilayahManagement";
 
-export default function UserManagementPage() {
+export default function WilayahPage() {
   return (
     <div>
-      <AutoBreadcrumb pageTitle="User Management" />
+      <AutoBreadcrumb pageTitle="Wilayah" />
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12">
-          <HomeUserManagement />
+          <HomeWilayahManagement />
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 "use client";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import HomeApiKey from "@/components/pages/pengaturan/api-key/HomeApiKey";
+import HomeApiKey from "@/pages/pengaturan/api-key/HomeApiKey";
 
 export default function ApiKeysPage() {
   return (

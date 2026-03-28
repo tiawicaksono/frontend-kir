@@ -1,7 +1,7 @@
 "use client";
 
-import ChangePassword from "@/components/pages/change-password/ChangePassword";
-import NoteChangePassword from "@/components/pages/change-password/NoteChangePassword";
+import ChangePassword from "@/pages/change-password/ChangePassword";
+import NoteChangePassword from "@/pages/change-password/NoteChangePassword";
 
 export default function UbahPasswordPage() {
   return (
