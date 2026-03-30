@@ -45,6 +45,30 @@
   }
 }
 
+/* Tabs */
+.dark .dark-tabs .ant-tabs-tab {
+  color: #aaa;
+}
+
+.dark .dark-tabs .ant-tabs-tab-active .ant-tabs-tab-btn {
+  color: #fff;
+}
+
+.dark .dark-tabs .ant-tabs-ink-bar {
+  background: #465fff;
+}
+
+/* Background */
+.dark .ant-tabs-content {
+  background: #111;
+  color: #eee;
+}
+
+/* Badge */
+.dark .ant-badge-count {
+  background: #ef4444;
+}
+
 /* reusable */
 .animate-softFadeIn {
   animation: softFadeIn 0.35s cubic-bezier(0.22, 1, 0.36, 1) forwards;

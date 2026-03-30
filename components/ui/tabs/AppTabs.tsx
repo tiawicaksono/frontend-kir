@@ -31,6 +31,7 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
   return (
     <>
       <Tabs
+        className="dark-tabs"
         activeKey={activeKey}
         onChange={setActiveKey}
         tabBarExtraContent={
