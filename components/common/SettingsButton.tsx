@@ -16,8 +16,7 @@ export default function SettingsButton() {
       className="
         fixed bottom-6 right-6
         bg-cyan-600 text-white
-        p-4 rounded-full shadow-lg
-        transition-transform hover:scale-110 z-10
+        p-4 rounded-full shadow-lg z-10
       "
       aria-label="Theme Settings"
     >

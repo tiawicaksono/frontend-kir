@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 
 const BackToTopButton = () => {
   const [visible, setVisible] = useState(false);
+  const [hovered, setHovered] = useState(false);
 
   useEffect(() => {
     const container = document.getElementById("main-scroll");
@@ -33,9 +34,17 @@ const BackToTopButton = () => {
   return (
     <button
       onClick={scrollToTop}
-      className="fixed bottom-24 right-6 p-4 bg-red-300 text-white p-4 rounded-full shadow-lg hover:scale-110 transition-transform z-50"
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      className="fixed bottom-24 right-6 p-4 bg-red-300 text-white rounded-full shadow-lg z-10"
     >
-      <ChevronUp size={24} />
+      <ChevronUp
+        size={24}
+        style={{
+          transition: "transform 0.5s ease",
+          transform: hovered ? "translateY(-4px) scale(1.1)" : "none",
+        }}
+      />
     </button>
   );
 };
