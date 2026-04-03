@@ -100,7 +100,10 @@ export default function HomeUserManagement() {
   };
 
   return (
-    <ComponentCard title="User Management">
+    <ComponentCard
+      title="User & Role Management"
+      desc="Pengaturan hak akses fitur aplikasi yang disesuaikan dengan peran (role) pengguna, seperti Admin, Editor, atau Viewer"
+    >
       <AppTabs
         defaultActiveKey="user"
         items={[

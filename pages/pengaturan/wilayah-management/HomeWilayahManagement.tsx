@@ -25,7 +25,7 @@ import {
   deleteKelurahan,
   fetchTableDataKelurahan,
 } from "@/services/wilayah.service";
-import WilayahTable from "./WilayahTable";
+import AppsSupportTable from "../AppsSupportTable";
 // 🔥 COMPONENTS
 import ProvinsiForm from "./provinsi/ProvinsiForm";
 
@@ -34,7 +34,7 @@ import KotaForm from "./kota/KotaForm";
 import KecamatanForm from "./kecamatan/KecamatanForm";
 
 import KelurahanForm from "./kelurahan/KelurahanForm";
-import { useWilayahModule } from "./hook/useWilayahModule";
+import { useAppsSupportModule } from "../hook/useAppsSupportModule";
 
 export default function HomeWilayahManagement() {
   const [counts, setCounts] = useState({
@@ -63,7 +63,7 @@ export default function HomeWilayahManagement() {
   }, []);
 
   // 🔥 MODULES
-  const provinsi = useWilayahModule({
+  const provinsi = useAppsSupportModule({
     fetcher: fetchTableDataProvinsi,
     service: {
       create: createProvinsi,
@@ -74,7 +74,7 @@ export default function HomeWilayahManagement() {
     loadCounts,
   });
 
-  const kota = useWilayahModule({
+  const kota = useAppsSupportModule({
     fetcher: fetchTableDataKota,
     service: {
       create: createKota,
@@ -85,7 +85,7 @@ export default function HomeWilayahManagement() {
     loadCounts,
   });
 
-  const kecamatan = useWilayahModule({
+  const kecamatan = useAppsSupportModule({
     fetcher: fetchTableDataKecamatan,
     service: {
       create: createKecamatan,
@@ -96,7 +96,7 @@ export default function HomeWilayahManagement() {
     loadCounts,
   });
 
-  const kelurahan = useWilayahModule({
+  const kelurahan = useAppsSupportModule({
     fetcher: fetchTableDataKelurahan,
     service: {
       create: createKelurahan,
@@ -114,7 +114,7 @@ export default function HomeWilayahManagement() {
       label: "Provinsi",
       icon: <BookOutlined />,
       module: provinsi,
-      Table: WilayahTable,
+      Table: AppsSupportTable,
       Form: ProvinsiForm,
       badge: counts.provinsi,
     },
@@ -123,7 +123,7 @@ export default function HomeWilayahManagement() {
       label: "Kota",
       icon: <BookOutlined />,
       module: kota,
-      Table: WilayahTable,
+      Table: AppsSupportTable,
       Form: KotaForm,
       badge: counts.kota,
     },
@@ -132,7 +132,7 @@ export default function HomeWilayahManagement() {
       label: "Kecamatan",
       icon: <BookOutlined />,
       module: kecamatan,
-      Table: WilayahTable,
+      Table: AppsSupportTable,
       Form: KecamatanForm,
       badge: counts.kecamatan,
     },
@@ -141,14 +141,17 @@ export default function HomeWilayahManagement() {
       label: "Kelurahan",
       icon: <BookOutlined />,
       module: kelurahan,
-      Table: WilayahTable,
+      Table: AppsSupportTable,
       Form: KelurahanForm,
       badge: counts.kelurahan,
     },
   ];
 
   return (
-    <ComponentCard title="Wilayah Management">
+    <ComponentCard
+      title="Wilayah Management"
+      desc="Pengaturan data wilayah provinsi, kota/kabupaten, kecamatan, dan kelurahan/desa"
+    >
       <AppTabs
         defaultActiveKey="provinsi"
         items={wilayahConfig.map((item) => ({
@@ -183,11 +186,19 @@ export default function HomeWilayahManagement() {
               <FormComponent
                 mode={mode}
                 initialValues={formData}
-                onSubmit={
-                  mode === "create"
-                    ? item.module.handleCreate
-                    : item.module.handleUpdate
-                }
+                onSubmit={(data: any) => {
+                  const primaryKey = item.module.table.config.primary_key;
+                  // 🔥 DEBUG DI SINI
+                  console.log("FORM DATA:", formData);
+                  console.log("PRIMARY KEY:", primaryKey);
+                  console.log("ID VALUE:", formData?.[primaryKey]);
+                  return mode === "create"
+                    ? item.module.handleCreate(data)
+                    : item.module.handleUpdate({
+                        ...data,
+                        [primaryKey]: formData?.[primaryKey],
+                      });
+                }}
                 onSuccess={close}
               />
             );

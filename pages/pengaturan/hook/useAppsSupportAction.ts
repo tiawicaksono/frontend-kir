@@ -8,11 +8,12 @@ interface Service {
   delete: (id: string) => Promise<any>;
 }
 
-export function useWilayahAction(
+export function useAppsSupportAction(
   service: Service,
   label: string, // "Provinsi", "Kota", dll
   prependData?: (data: any) => void,
   updateData?: (data: any) => void,
+  primaryKey: string = "id",
 ) {
   const { confirm } = useConfirm();
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
@@ -40,7 +41,7 @@ export function useWilayahAction(
     try {
       setIsSubmitting(true);
 
-      const res = await service.update(data.id, data);
+      const res = await service.update(data[primaryKey], data);
 
       updateData?.(res.data);
 
@@ -68,7 +69,7 @@ export function useWilayahAction(
     try {
       await service.delete(id);
 
-      updateData?.({ id, _delete: true });
+      updateData?.({ [primaryKey]: id, _delete: true });
 
       showSuccessAlert(`${label} berhasil dihapus`);
       return true;

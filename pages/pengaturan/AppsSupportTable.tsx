@@ -11,7 +11,7 @@ interface Props {
   onReload?: () => void;
 }
 
-export default function WilayahTable({
+export default function AppsSupportTable({
   table,
   onEdit,
   onDelete,

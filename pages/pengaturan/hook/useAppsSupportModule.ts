@@ -1,11 +1,21 @@
 import { useEffect } from "react";
-import { useWilayahTable } from "./useWilayahTable";
-import { useWilayahAction } from "./useWilayahAction";
+import { useAppsSupportTable } from "./useAppsSupportTable";
+import { useAppsSupportAction } from "./useAppsSupportAction";
 
-export function useWilayahModule({ fetcher, service, label, loadCounts }: any) {
-  const table = useWilayahTable(fetcher);
+export function useAppsSupportModule({
+  fetcher,
+  service,
+  label,
+  loadCounts,
+}: any) {
+  const table = useAppsSupportTable(fetcher);
+  const primaryKey = table.config.primary_key;
 
-  const { handleCreate, handleUpdate, handleDelete } = useWilayahAction(
+  const {
+    handleCreate,
+    handleUpdate: rawUpdate,
+    handleDelete,
+  } = useAppsSupportAction(
     service,
     label,
     async (newData: any) => {
@@ -15,6 +25,7 @@ export function useWilayahModule({ fetcher, service, label, loadCounts }: any) {
     (updatedData: any) => {
       table.updateData?.(updatedData);
     },
+    primaryKey,
   );
 
   const handleDeleteWrapper = async (id: string) => {
@@ -36,7 +47,7 @@ export function useWilayahModule({ fetcher, service, label, loadCounts }: any) {
   return {
     table,
     handleCreate,
-    handleUpdate,
+    handleUpdate: rawUpdate,
     handleDeleteWrapper,
     handleReload,
   };

@@ -1,5 +1,5 @@
 import { useDynamicTable } from "@/components/ui/dynamic-table/useDynamicTable";
 
-export function useWilayahTable(fetcher: any) {
+export function useAppsSupportTable(fetcher: any) {
   return useDynamicTable(fetcher);
 }

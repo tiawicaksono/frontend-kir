@@ -5,10 +5,10 @@ import { usePathname } from "next/navigation";
 import { ChevronRight } from "lucide-react";
 
 interface BreadcrumbProps {
-  pageTitle: string;
+  pageTitle?: string;
 }
 const AutoBreadcrumb: React.FC<BreadcrumbProps> = ({ pageTitle }) => {
-  const pathname = usePathname();
+  const pathname = usePathname() || "/";
 
   const segments = pathname
     .split("/")

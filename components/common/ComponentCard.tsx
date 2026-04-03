@@ -1,7 +1,7 @@
 import React from "react";
 
 interface ComponentCardProps {
-  title: string;
+  title?: string;
   children: React.ReactNode;
   className?: string; // Additional custom classes for styling
   desc?: string; // Description text
@@ -25,9 +25,11 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
       <div className="flex flex-col gap-2 mb-4 pt-5 px-5 sm:px-6 sm:flex-row sm:items-start sm:justify-between">
         {/* Left */}
         <div>
-          <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
-            {title}
-          </h3>
+          {title && (
+            <h3 className="text-lg font-semibold text-gray-800 dark:text-white/90">
+              {title}
+            </h3>
+          )}
           {desc && (
             <p className="mt-1 text-gray-500 text-theme-sm dark:text-gray-400">
               {desc}
