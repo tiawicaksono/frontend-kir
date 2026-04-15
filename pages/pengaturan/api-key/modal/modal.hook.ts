@@ -8,7 +8,7 @@ export function useApiKeyModal() {
   const [editing, setEditing] = useState<ApiKeys | null>(null);
 
   const openCreate = () => {
-    setEditing(null);
+    setEditing(null); // 🔥 penting
     setIsOpen(true);
   };
 
@@ -19,7 +19,7 @@ export function useApiKeyModal() {
 
   const close = () => {
     setIsOpen(false);
-    setEditing(null);
+    setEditing(null); // 🔥 reset biar clean
   };
 
   return {

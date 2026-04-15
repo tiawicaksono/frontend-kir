@@ -29,7 +29,9 @@ export default function ApiKeyModal({
         {editing ? "Edit API Key" : "Create API Key"}
       </h2>
 
+      {/* 🔥 KEY FIX */}
       <ApiKeyForm
+        key={editing?.id ?? "create"}
         data={editing}
         isSubmitting={isSubmitting}
         onSubmit={async (form) => {

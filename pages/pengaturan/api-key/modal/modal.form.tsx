@@ -17,11 +17,29 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
   const [name, setName] = useState("");
   const [urlApi, setUrlApi] = useState("");
   const [token, setToken] = useState("");
+
   const [errors, setErrors] = useState<{
     name?: string;
     urlApi?: string;
     token?: string;
   }>({});
+
+  // 🔥 FIX: reset + fill
+  useEffect(() => {
+    if (data) {
+      // EDIT MODE
+      setName(data.name);
+      setUrlApi(data.urlApi);
+      setToken(data.token);
+    } else {
+      // CREATE MODE
+      setName("");
+      setUrlApi("");
+      setToken("");
+      setErrors({});
+    }
+  }, [data]);
+
   const validate = () => {
     const newErrors: typeof errors = {};
 
@@ -44,21 +62,13 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
     }
 
     setErrors(newErrors);
-
     return Object.keys(newErrors).length === 0;
   };
-
-  useEffect(() => {
-    if (data) {
-      setName(data.name);
-      setUrlApi(data.urlApi);
-      setToken(data.token);
-    }
-  }, [data]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (!validate()) return;
+
     onSubmit({
       name,
       urlApi,
@@ -68,6 +78,7 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
 
   return (
     <form onSubmit={handleSubmit} className="space-y-2">
+      {/* NAME */}
       <div>
         <Label className="flex items-center justify-between">
           <span>
@@ -75,16 +86,17 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
             Name
           </span>
           {errors.name && (
-            <span className="text-xs text-red-500 mt-1">{errors.name}</span>
+            <span className="text-xs text-red-500">{errors.name}</span>
           )}
         </Label>
         <Input
           value={name}
           onChange={setName}
-          className={errors.name ? "border-red-500 focus:border-none" : ""}
+          className={errors.name ? "border-red-500" : ""}
         />
       </div>
 
+      {/* URL */}
       <div>
         <Label className="flex items-center justify-between">
           <span>
@@ -92,17 +104,18 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
             URL API
           </span>
           {errors.urlApi && (
-            <span className="text-xs text-red-500 mt-1">{errors.urlApi}</span>
+            <span className="text-xs text-red-500">{errors.urlApi}</span>
           )}
         </Label>
         <Input
           value={urlApi}
           onChange={setUrlApi}
-          placeholder="https://wicaksono.tia"
+          placeholder="https://example.com"
           className={errors.urlApi ? "border-red-500" : ""}
         />
       </div>
 
+      {/* TOKEN */}
       <div>
         <Label className="flex items-center justify-between">
           <span>
@@ -110,7 +123,7 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
             Token
           </span>
           {errors.token && (
-            <span className="text-xs text-red-500 mt-1">{errors.token}</span>
+            <span className="text-xs text-red-500">{errors.token}</span>
           )}
         </Label>
         <TextArea
@@ -129,14 +142,6 @@ export default function ApiKeyForm({ data, onSubmit, isSubmitting }: Props) {
       >
         Save
       </LoadingButton>
-      {/* <div className="flex justify-end gap-2 pt-2">
-        <LoadingButton
-          type="submit"
-          className="px-4 py-2 text-sm rounded-lg bg-blue-600 text-white"
-        >
-          Save
-        </LoadingButton>
-      </div> */}
     </form>
   );
 }

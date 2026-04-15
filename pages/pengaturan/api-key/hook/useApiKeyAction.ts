@@ -23,14 +23,29 @@ export function useApiKeyActions(
     setLoadingId(id);
 
     const previous = apiKeys;
-    setApiKeys(
-      apiKeys.map((i) => (i.id === id ? { ...i, isActive: value } : i)),
-    );
+
+    // 🔥 CASE: Aktifkan → semua jadi false kecuali yang dipilih
+    if (value) {
+      setApiKeys(
+        apiKeys.map((i) => ({
+          ...i,
+          isActive: i.id === id,
+        })),
+      );
+    }
+
+    // 🔥 CASE: Nonaktifkan → normal (biar backend validasi)
+    else {
+      setApiKeys(
+        apiKeys.map((i) => (i.id === id ? { ...i, isActive: false } : i)),
+      );
+    }
 
     try {
       await updateApiKeyStatus(id, value);
       showSuccessAlert("Status berhasil diubah");
     } catch (err) {
+      // rollback kalau gagal
       setApiKeys(previous);
       showErrorAlert(err, "Status gagal diubah");
     } finally {
