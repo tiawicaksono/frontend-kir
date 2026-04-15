@@ -4,9 +4,16 @@ import ApiIntegrationCard from "@/pages/pengaturan/api-integration/ApiIntegratio
 interface Props {
   data: ApiIntegrations[];
   loading: boolean;
+  onSyncSingle?: (item: ApiIntegrations) => Promise<void>;
+  loadingMap?: Record<number, boolean>;
 }
 
-export default function ApiIntegrationGrid({ data, loading }: Props) {
+export default function ApiIntegrationGrid({
+  data,
+  loading,
+  onSyncSingle,
+  loadingMap = {},
+}: Props) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -24,7 +31,12 @@ export default function ApiIntegrationGrid({ data, loading }: Props) {
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
       {data.map((item) => (
-        <ApiIntegrationCard key={item.id} data={item} />
+        <ApiIntegrationCard
+          key={item.id}
+          data={item}
+          onSyncSingle={onSyncSingle}
+          loading={loadingMap?.[item.id] || false}
+        />
       ))}
     </div>
   );

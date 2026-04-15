@@ -5,10 +5,10 @@ export interface ApiIntegrations {
   name: string;
   description: string;
   prefix: string;
-  isActive: boolean;
-  createdAt: string;
-  updatedAt: string;
-  lastTransaction?: TrnSinkron | null;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+  last_transaction?: TrnSinkron | null;
 }
 
 export interface SyncApiRequest {
