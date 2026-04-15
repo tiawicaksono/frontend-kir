@@ -7,6 +7,7 @@ import { useEffect, useState } from "react";
 import {
   fetchBahanUtamaCounts,
   fetchStatusPenerbitanCounts,
+  fetchKonfigurasiSumbuCounts,
 } from "@/services/apps-support.service";
 
 // 🔥 SERVICES
@@ -19,11 +20,16 @@ import {
   updateBahanUtama,
   deleteBahanUtama,
   fetchTableDataBahanUtama,
+  createKonfigurasiSumbu,
+  updateKonfigurasiSumbu,
+  deleteKonfigurasiSumbu,
+  fetchTableDataKonfigurasiSumbu,
 } from "@/services/apps-support.service";
 import AppsSupportTable from "../AppsSupportTable";
 // 🔥 COMPONENTS
 import BahanUtamaKendaraanForm from "./form/BahanUtamaKendaraanForm";
 import StatusPenerbitanForm from "./form/StatusPenerbitanForm";
+import KonfigurasiSumbuForm from "./form/KonfigurasiSumbuForm";
 
 import { useAppsSupportModule } from "../hook/useAppsSupportModule";
 
@@ -31,15 +37,18 @@ export default function HomeAppsSupport() {
   const [counts, setCounts] = useState({
     countStatusPenerbitan: 0,
     countBahanUtama: 0,
+    countKonfigurasiSumbu: 0,
   });
 
   const loadCounts = async () => {
     try {
       const resSp = await fetchStatusPenerbitanCounts();
       const resBu = await fetchBahanUtamaCounts();
+      const resKs = await fetchKonfigurasiSumbuCounts();
       setCounts({
         countStatusPenerbitan: resSp.countData ?? 0,
         countBahanUtama: resBu.countData ?? 0,
+        countKonfigurasiSumbu: resKs.countData ?? 0,
       });
     } catch (err) {
       console.error(err);
@@ -73,6 +82,17 @@ export default function HomeAppsSupport() {
     loadCounts,
   });
 
+  const KonfigurasiSumbu = useAppsSupportModule({
+    fetcher: fetchTableDataKonfigurasiSumbu,
+    service: {
+      create: createKonfigurasiSumbu,
+      update: updateKonfigurasiSumbu,
+      delete: deleteKonfigurasiSumbu,
+    },
+    label: "Konfigurasi Sumbu",
+    loadCounts,
+  });
+
   // 🔥 CONFIG ARRAY
   const appsSupportConfig = [
     {
@@ -92,6 +112,15 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: BahanUtamaKendaraanForm,
       badge: counts.countBahanUtama,
+    },
+    {
+      key: "konfigurasi-sumbu",
+      label: "Konfigurasi Sumbu",
+      icon: <BookOutlined />,
+      module: KonfigurasiSumbu,
+      Table: AppsSupportTable,
+      Form: KonfigurasiSumbuForm,
+      badge: counts.countKonfigurasiSumbu,
     },
   ];
 

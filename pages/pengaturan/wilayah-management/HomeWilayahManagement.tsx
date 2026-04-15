@@ -27,13 +27,13 @@ import {
 } from "@/services/wilayah.service";
 import AppsSupportTable from "../AppsSupportTable";
 // 🔥 COMPONENTS
-import ProvinsiForm from "./provinsi/ProvinsiForm";
+import ProvinsiForm from "./form/ProvinsiForm";
 
-import KotaForm from "./kota/KotaForm";
+import KotaForm from "./form/KotaForm";
 
-import KecamatanForm from "./kecamatan/KecamatanForm";
+import KecamatanForm from "./form/KecamatanForm";
 
-import KelurahanForm from "./kelurahan/KelurahanForm";
+import KelurahanForm from "./form/KelurahanForm";
 import { useAppsSupportModule } from "../hook/useAppsSupportModule";
 
 export default function HomeWilayahManagement() {
@@ -120,7 +120,7 @@ export default function HomeWilayahManagement() {
     },
     {
       key: "kota",
-      label: "Kota",
+      label: "Kota/Kabupaten",
       icon: <BookOutlined />,
       module: kota,
       Table: AppsSupportTable,
@@ -138,7 +138,7 @@ export default function HomeWilayahManagement() {
     },
     {
       key: "kelurahan",
-      label: "Kelurahan",
+      label: "Kelurahan/Desa",
       icon: <BookOutlined />,
       module: kelurahan,
       Table: AppsSupportTable,
