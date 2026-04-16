@@ -1,101 +1,141 @@
 "use client";
 
 import { useState } from "react";
-import ComponentCard from "@/components/common/ComponentCard";
-import LoadingButton from "@/components/common/LoadingButton";
-import PasswordInput from "@/components/form/form-elements/PasswordField";
-import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
-import { getPasswordStrength } from "@/utils/validatePassword";
+import { Form, Input, Button, Card, Typography } from "antd";
 import api from "@/services/api";
 import { useShowAlert } from "@/core/alert/alert.hook";
+import PasswordStrengthIndicator from "@/components/common/PasswordStrengthIndicator";
+import { getPasswordStrength } from "@/utils/validatePassword";
+
+const { Title, Text } = Typography;
+
+type FormType = {
+  old_password: string;
+  password: string;
+  password_confirmation: string;
+};
 
 export default function ChangePassword() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const [oldPassword, setOldPassword] = useState("");
+  const [form] = Form.useForm<FormType>();
+  const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
 
-  const strength = getPasswordStrength(password);
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
-  const isFormValid =
-    oldPassword &&
-    password &&
-    confirmPassword &&
-    strength === 5 &&
-    password === confirmPassword;
-
-  const handleSubmit = async () => {
-    if (!isFormValid) return;
-
+  const handleSubmit = async (values: FormType) => {
     try {
-      setIsSubmitting(true);
+      setLoading(true);
 
-      await api.post("/change-password", {
-        old_password: oldPassword,
-        password: password,
-        password_confirmation: confirmPassword,
-      });
+      await api.post("/change-password", values);
 
       showSuccessAlert("Password berhasil diubah");
-
-      setOldPassword("");
+      form.resetFields();
       setPassword("");
-      setConfirmPassword("");
     } catch (error: any) {
       showErrorAlert(error, "Password gagal diubah");
     } finally {
-      setIsSubmitting(false);
+      setLoading(false);
     }
   };
 
   return (
-    <ComponentCard title="Change Password">
-      <div className="space-y-5 pb-5">
-        <PasswordInput
-          label="Old Password"
-          value={oldPassword}
-          onChange={setOldPassword}
-          disabled={isSubmitting}
-        />
+    <div className="flex justify-center py-10">
+      <div className="w-full max-w-md">
+        <Card className="shadow-sm rounded-xl">
+          {/* HEADER */}
+          <div className="mb-6 text-center">
+            <Title level={4} className="!mb-1">
+              Change Password
+            </Title>
+            <Text type="secondary">
+              Pastikan password kuat dan mudah diingat
+            </Text>
+          </div>
 
-        <div className="space-y-3">
-          <PasswordInput
-            label="New Password"
-            value={password}
-            onChange={setPassword}
-            disabled={isSubmitting}
-          />
+          <Form
+            form={form}
+            layout="vertical"
+            onFinish={handleSubmit}
+            autoComplete="off"
+          >
+            {/* OLD PASSWORD */}
+            <Form.Item
+              label="Old Password"
+              name="old_password"
+              rules={[{ required: true, message: "Wajib diisi" }]}
+            >
+              <Input.Password size="large" />
+            </Form.Item>
 
-          <PasswordStrengthIndicator password={password} />
-        </div>
+            {/* NEW PASSWORD */}
+            <Form.Item
+              label="New Password"
+              name="password"
+              rules={[
+                { required: true, message: "Wajib diisi" },
+                {
+                  validator: (_, value) => {
+                    if (!value) return Promise.resolve();
+                    const strength = getPasswordStrength(value);
+                    if (strength < 5) {
+                      return Promise.reject(
+                        new Error("Password belum cukup kuat"),
+                      );
+                    }
+                    return Promise.resolve();
+                  },
+                },
+              ]}
+            >
+              <Input.Password
+                size="large"
+                onChange={(e) => setPassword(e.target.value)}
+              />
+            </Form.Item>
 
-        <div>
-          <PasswordInput
-            label="Confirm New Password"
-            value={confirmPassword}
-            onChange={setConfirmPassword}
-            disabled={isSubmitting}
-          />
+            {/* STRENGTH */}
+            {password && (
+              <div className="mb-4">
+                <PasswordStrengthIndicator password={password} />
+              </div>
+            )}
 
-          {confirmPassword && password !== confirmPassword && (
-            <p className="text-sm text-red-500 mt-2">
-              Password confirmation does not match
-            </p>
-          )}
-        </div>
+            {/* CONFIRM */}
+            <Form.Item
+              label="Confirm Password"
+              name="password_confirmation"
+              dependencies={["password"]}
+              rules={[
+                { required: true, message: "Wajib diisi" },
+                ({ getFieldValue }) => ({
+                  validator(_, value) {
+                    if (!value || getFieldValue("password") === value) {
+                      return Promise.resolve();
+                    }
+                    return Promise.reject(new Error("Password tidak sama"));
+                  },
+                }),
+              ]}
+            >
+              <Input.Password size="large" />
+            </Form.Item>
 
-        <LoadingButton
-          type="button"
-          size="sm"
-          loading={isSubmitting}
-          loadingText="Changing..."
-          onClick={handleSubmit}
-        >
-          Change Password
-        </LoadingButton>
+            {/* BUTTON */}
+            <Form.Item className="mt-6">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading}
+                block
+                size="large"
+                className="rounded-lg"
+              >
+                {loading ? "Changing..." : "Change Password"}
+              </Button>
+            </Form.Item>
+          </Form>
+        </Card>
       </div>
-    </ComponentCard>
+    </div>
   );
 }
