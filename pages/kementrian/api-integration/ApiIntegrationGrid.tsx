@@ -1,5 +1,5 @@
 import { ApiIntegrations } from "@/types/api-integrations.type";
-import ApiIntegrationCard from "@/pages/pengaturan/api-integration/ApiIntegrationCard";
+import ApiIntegrationCard from "@/pages/kementrian/api-integration/ApiIntegrationCard";
 
 interface Props {
   data: ApiIntegrations[];

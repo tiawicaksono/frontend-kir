@@ -2,7 +2,7 @@
 
 import { Modal } from "@/components/ui/modal";
 import { ApiKeys } from "@/types/api-keys.type";
-import ApiKeyForm from "@/pages/pengaturan/api-key/modal/modal.form";
+import ApiKeyForm from "@/pages/kementrian/api-key/modal/modal.form";
 
 interface Props {
   isOpen: boolean;

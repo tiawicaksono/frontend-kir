@@ -7,7 +7,7 @@ import { useApiKeyDropdown } from "./hook/useApiKeyDropdown";
 import ApiKeyHeaderMenu from "./components/ApiKeyHeaderMenu";
 import ApiKeyTable from "./components/ApiKeyTable";
 import { useState } from "react";
-import ApiKeyModal from "@/pages/pengaturan/api-key/modal/modal";
+import ApiKeyModal from "@/pages/kementrian/api-key/modal/modal";
 import { ApiKeys } from "@/types/api-keys.type";
 
 export default function HomeApiKey() {

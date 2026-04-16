@@ -32,7 +32,7 @@ export default function ApiIntegrationCard({
 
   function handleOpenDetail() {
     router.push(
-      `/pengaturan/api-integrations/detail?prefix=${data.prefix}&name=${encodeURIComponent(data.name)}`,
+      `/kementrian/api-integrations/detail?prefix=${data.prefix}&name=${encodeURIComponent(data.name)}`,
     );
   }
   return (

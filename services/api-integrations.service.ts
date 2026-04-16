@@ -3,7 +3,7 @@ import api from "@/services/api";
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
 export async function getApiIntegrations(): Promise<ApiIntegrations[]> {
-  const res = await api.get(`${API_URL}/pengaturan/api-integrations`);
+  const res = await api.get(`${API_URL}/kementrian/api-integrations`);
   return res.data;
 }
 
@@ -24,7 +24,7 @@ export async function fetchTableData(
   params: Record<string, any> = {},
 ) {
   const res = await api.get(
-    `${API_URL}/pengaturan/api-integrations/detail/${prefix}`,
+    `${API_URL}/kementrian/api-integrations/detail/${prefix}`,
     {
       params,
     },
