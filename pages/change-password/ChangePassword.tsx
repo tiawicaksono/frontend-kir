@@ -44,7 +44,7 @@ export default function ChangePassword() {
         <Card className="shadow-sm rounded-xl">
           {/* HEADER */}
           <div className="mb-6 text-center">
-            <Title level={4} className="!mb-1">
+            <Title level={4} className="mb-1!">
               Change Password
             </Title>
             <Text type="secondary">
