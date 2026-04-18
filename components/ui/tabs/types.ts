@@ -6,20 +6,22 @@ export type TabFormProps = {
 
 export type TabItemConfig = {
   key: string;
-  label: React.ReactNode;
-  children: (props: { openEdit: (data: any) => void }) => React.ReactNode;
-  badgeCount?: number;
+  label: string;
+  icon?: React.ReactNode;
 
-  // 🔥 action button
+  badge?: number;
+
+  module: any;
+  Table: any;
+  Form?: any;
+
   showAction?: boolean;
   actionLabel?: string;
 
-  // 🔥 custom action (modal/form biasa)
-  actionType?: "modal" | "custom"; // default: modal
+  actionType?: "modal" | "page" | "custom";
   onActionClick?: () => void;
 
-  // 🔥 FORM RENDER (CREATE + EDIT)
-  renderForm?: (props: TabFormProps) => React.ReactNode;
+  onEditPage?: (row: any) => void;
 };
 
 export type AppTabsProps = {

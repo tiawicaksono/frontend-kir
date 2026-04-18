@@ -20,18 +20,23 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
   } = useAppTabs(items, defaultActiveKey);
 
   const handleActionClick = () => {
+    if (activeTab?.actionType === "page") {
+      closeModal();
+      activeTab?.onActionClick?.();
+      return;
+    }
+
     if (activeTab?.actionType === "custom") {
       activeTab?.onActionClick?.();
       return;
     }
 
-    openCreate();
+    openCreate(); // default modal
   };
 
   return (
     <>
       <Tabs
-        className="dark-tabs"
         activeKey={activeKey}
         onChange={setActiveKey}
         tabBarExtraContent={
@@ -41,35 +46,68 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
             </Button>
           ) : null
         }
-        items={items.map((item) => ({
-          key: item.key,
-          label: (
-            <div className="flex items-center gap-2">
-              <span>{item.label}</span>
-              {typeof item.badgeCount === "number" && (
-                <Badge count={item.badgeCount} size="small" />
-              )}
-            </div>
-          ),
+        items={items.map((item) => {
+          const TableComponent = item.Table;
 
-          // 🔥 inject openEdit ke children
-          children: item.children({
-            openEdit,
-          }),
-        }))}
+          return {
+            key: item.key,
+            label: (
+              <div className="flex items-center gap-2">
+                <span>
+                  {item.icon} {item.label}
+                </span>
+                {typeof item.badge === "number" && (
+                  <Badge count={item.badge} size="small" />
+                )}
+              </div>
+            ),
+
+            children: (
+              <TableComponent
+                table={item.module.table}
+                onEdit={(row: any) => {
+                  if (item.actionType === "page") {
+                    item.onEditPage?.(row);
+                  } else {
+                    openEdit(row);
+                  }
+                }}
+                onDelete={item.module.handleDeleteWrapper}
+                onReload={item.module.handleReload}
+              />
+            ),
+          };
+        })}
       />
 
-      <Modal isOpen={open} onClose={closeModal} className="max-w-lg">
-        <h2 className="text-lg font-semibold mb-4">
-          {mode === "create" ? activeTab?.actionLabel : "Edit Data"}
-        </h2>
+      {/* 🔥 MODAL (hanya kalau bukan page) */}
+      {activeTab?.actionType !== "page" && open && (
+        <Modal isOpen={open} onClose={closeModal} className="max-w-lg">
+          <h2 className="text-lg font-semibold mb-4">
+            {mode === "create"
+              ? activeTab?.actionLabel || "Add Data"
+              : "Edit Data"}
+          </h2>
 
-        {activeTab?.renderForm?.({
-          close: closeModal,
-          mode,
-          formData,
-        })}
-      </Modal>
+          {activeTab?.Form && (
+            <activeTab.Form
+              mode={mode}
+              initialValues={formData}
+              onSubmit={(data: any) => {
+                const pk = activeTab.module.table.config.primary_key;
+
+                return mode === "create"
+                  ? activeTab.module.handleCreate(data)
+                  : activeTab.module.handleUpdate({
+                      ...data,
+                      [pk]: formData?.[pk],
+                    });
+              }}
+              onSuccess={closeModal}
+            />
+          )}
+        </Modal>
+      )}
     </>
   );
 }

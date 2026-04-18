@@ -7,13 +7,15 @@ import RoleTab from "./components/RoleTab";
 import UserForm from "./components/UserForm";
 import RoleForm from "./components/RoleForm";
 import { UserOutlined, SafetyOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { fetchUserManagementCounts } from "@/services/user-management.service";
 
 import { useUserManagementTable } from "./hook/useUserManagementTable";
 import { useUserManagementAction } from "./hook/useUserManagementAction";
 import { useRoleManagementTable } from "./hook/useRoleManagementTable";
 import { useRoleManagementAction } from "./hook/useRoleManagementAction";
+
+import { TabItemConfig } from "@/components/ui/tabs/types";
 
 export default function HomeUserManagement() {
   const userTable = useUserManagementTable();
@@ -24,7 +26,8 @@ export default function HomeUserManagement() {
     role: 0,
   });
 
-  const loadCounts = async () => {
+  // 🔥 memo biar gak berubah2
+  const loadCounts = useCallback(async () => {
     try {
       const res = await fetchUserManagementCounts();
       setCounts({
@@ -34,11 +37,11 @@ export default function HomeUserManagement() {
     } catch (err) {
       console.error(err);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCounts();
-  }, []);
+  }, [loadCounts]);
 
   /**
    * USER
@@ -46,28 +49,24 @@ export default function HomeUserManagement() {
   const { handleCreate, handleUpdate, handleDelete } = useUserManagementAction(
     async (newUser) => {
       userTable.prependData(newUser);
-
-      await loadCounts(); // 🔥 real-time sync
+      await loadCounts();
     },
     (updatedUser) => {
       userTable.updateData?.(updatedUser);
     },
   );
 
-  const handleDeleteWrapperUser = async (id: number) => {
-    const success = await handleDelete(id);
+  const handleDeleteWrapperUser = useCallback(
+    async (id: number) => {
+      const success = await handleDelete(id);
+      if (success) await loadCounts();
+    },
+    [handleDelete, loadCounts],
+  );
 
-    if (success) {
-      await loadCounts(); // 🔥 real-time sync
-    }
-  };
-
-  const handleReloadUser = async () => {
-    await Promise.all([
-      userTable.fetchData(), // reload table
-      loadCounts(), // 🔥 reload badge
-    ]);
-  };
+  const handleReloadUser = useCallback(async () => {
+    await Promise.all([userTable.fetchData(), loadCounts()]);
+  }, [userTable, loadCounts]);
 
   /**
    * ROLE
@@ -76,95 +75,92 @@ export default function HomeUserManagement() {
     useRoleManagementAction(
       async (newRole) => {
         roleTable.prependData(newRole);
-
-        await loadCounts(); // 🔥 real-time sync
+        await loadCounts();
       },
-      (updateRole) => {
-        roleTable.updateData?.(updateRole);
+      (updatedRole) => {
+        roleTable.updateData?.(updatedRole);
       },
     );
 
-  const handleDeleteWrapperRole = async (id: number) => {
-    const success = await handleDeleteRole(id);
+  const handleDeleteWrapperRole = useCallback(
+    async (id: number) => {
+      const success = await handleDeleteRole(id);
+      if (success) await loadCounts();
+    },
+    [handleDeleteRole, loadCounts],
+  );
 
-    if (success) {
-      await loadCounts(); // 🔥 real-time sync
-    }
-  };
+  const handleReloadRole = useCallback(async () => {
+    await Promise.all([roleTable.fetchData(), loadCounts()]);
+  }, [roleTable, loadCounts]);
 
-  const handleReloadRole = async () => {
-    await Promise.all([
-      roleTable.fetchData(), // reload table
-      loadCounts(), // 🔥 reload badge
-    ]);
-  };
+  // 🔥 config dimemo → BIAR GAK RE-RENDER TERUS
+  const userManagementConfig: TabItemConfig[] = useMemo(
+    () => [
+      {
+        key: "user",
+        label: "User",
+        icon: <UserOutlined />,
+        badge: counts.user,
+
+        module: {
+          table: userTable,
+          handleDeleteWrapper: handleDeleteWrapperUser,
+          handleReload: handleReloadUser,
+          handleCreate,
+          handleUpdate,
+        },
+
+        Table: UserTab,
+        Form: UserForm,
+
+        showAction: true,
+        actionLabel: "Add User",
+        actionType: "modal",
+      },
+      {
+        key: "role",
+        label: "Role",
+        icon: <SafetyOutlined />,
+        badge: counts.role,
+
+        module: {
+          table: roleTable,
+          handleDeleteWrapper: handleDeleteWrapperRole,
+          handleReload: handleReloadRole,
+          handleCreate: handleCreateRole,
+          handleUpdate: handleUpdateRole,
+        },
+
+        Table: RoleTab,
+        Form: RoleForm,
+
+        showAction: true,
+        actionLabel: "Add Role",
+        actionType: "modal",
+      },
+    ],
+    [
+      counts,
+      userTable,
+      roleTable,
+      handleDeleteWrapperUser,
+      handleReloadUser,
+      handleDeleteWrapperRole,
+      handleReloadRole,
+      handleCreate,
+      handleUpdate,
+      handleCreateRole,
+      handleUpdateRole,
+    ],
+  );
 
   return (
     <ComponentCard
       title="User & Role Management"
-      desc="Pengaturan hak akses fitur aplikasi yang disesuaikan dengan peran (role) pengguna, seperti Admin, Editor, atau Viewer"
+      desc="Pengaturan hak akses fitur aplikasi berdasarkan role"
     >
-      <AppTabs
-        defaultActiveKey="user"
-        items={[
-          {
-            key: "user",
-            label: (
-              <>
-                <UserOutlined /> User
-              </>
-            ),
-            badgeCount: counts.user,
-            children: ({ openEdit }) => (
-              <UserTab
-                table={userTable}
-                onEdit={openEdit}
-                onDelete={handleDeleteWrapperUser}
-                onReload={handleReloadUser}
-              />
-            ),
-            showAction: true,
-            actionLabel: "Add User",
-            renderForm: ({ close, mode, formData }) => (
-              <UserForm
-                mode={mode}
-                initialValues={formData}
-                onSubmit={mode === "create" ? handleCreate : handleUpdate}
-                onSuccess={close}
-              />
-            ),
-          },
-          {
-            key: "role",
-            label: (
-              <>
-                <SafetyOutlined /> Role
-              </>
-            ),
-            badgeCount: counts.role,
-            children: ({ openEdit }) => (
-              <RoleTab
-                table={roleTable}
-                onEdit={openEdit}
-                onDelete={handleDeleteWrapperRole}
-                onReload={handleReloadRole}
-              />
-            ),
-            showAction: true,
-            actionLabel: "Add Role",
-            renderForm: ({ close, mode, formData }) => (
-              <RoleForm
-                mode={mode}
-                initialValues={formData}
-                onSubmit={
-                  mode === "create" ? handleCreateRole : handleUpdateRole
-                }
-                onSuccess={close}
-              />
-            ),
-          },
-        ]}
-      />
+      <AppTabs defaultActiveKey="user" items={userManagementConfig} />
     </ComponentCard>
   );
 }

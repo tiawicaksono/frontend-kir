@@ -6,7 +6,6 @@ import { BookOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
 import { fetchWilayahManagementCounts } from "@/services/wilayah.service";
 
-// 🔥 SERVICES
 import {
   createProvinsi,
   updateProvinsi,
@@ -25,16 +24,16 @@ import {
   deleteKelurahan,
   fetchTableDataKelurahan,
 } from "@/services/wilayah.service";
+
 import AppsSupportTable from "../AppsSupportTable";
-// 🔥 COMPONENTS
+
 import ProvinsiForm from "./form/ProvinsiForm";
-
 import KotaForm from "./form/KotaForm";
-
 import KecamatanForm from "./form/KecamatanForm";
-
 import KelurahanForm from "./form/KelurahanForm";
+
 import { useAppsSupportModule } from "../hook/useAppsSupportModule";
+import { TabItemConfig } from "@/components/ui/tabs/types";
 
 export default function HomeWilayahManagement() {
   const [counts, setCounts] = useState({
@@ -107,8 +106,8 @@ export default function HomeWilayahManagement() {
     loadCounts,
   });
 
-  // 🔥 CONFIG ARRAY
-  const wilayahConfig = [
+  // 🔥 CONFIG FINAL (TANPA MAP)
+  const wilayahConfig: TabItemConfig[] = [
     {
       key: "provinsi",
       label: "Provinsi",
@@ -117,6 +116,11 @@ export default function HomeWilayahManagement() {
       Table: AppsSupportTable,
       Form: ProvinsiForm,
       badge: counts.provinsi,
+
+      showAction: true,
+      actionLabel: "Add Provinsi",
+
+      actionType: "modal", // 🔥 tetap modal
     },
     {
       key: "kota",
@@ -126,6 +130,10 @@ export default function HomeWilayahManagement() {
       Table: AppsSupportTable,
       Form: KotaForm,
       badge: counts.kota,
+
+      showAction: true,
+      actionLabel: "Add Kota",
+      actionType: "modal",
     },
     {
       key: "kecamatan",
@@ -135,6 +143,10 @@ export default function HomeWilayahManagement() {
       Table: AppsSupportTable,
       Form: KecamatanForm,
       badge: counts.kecamatan,
+
+      showAction: true,
+      actionLabel: "Add Kecamatan",
+      actionType: "modal",
     },
     {
       key: "kelurahan",
@@ -144,6 +156,10 @@ export default function HomeWilayahManagement() {
       Table: AppsSupportTable,
       Form: KelurahanForm,
       badge: counts.kelurahan,
+
+      showAction: true,
+      actionLabel: "Add Kelurahan",
+      actionType: "modal",
     },
   ];
 
@@ -152,59 +168,7 @@ export default function HomeWilayahManagement() {
       title="Wilayah Management"
       desc="Pengaturan data wilayah provinsi, kota/kabupaten, kecamatan, dan kelurahan/desa"
     >
-      <AppTabs
-        defaultActiveKey="provinsi"
-        items={wilayahConfig.map((item) => ({
-          key: item.key,
-          label: (
-            <>
-              {item.icon} {item.label}
-            </>
-          ),
-          badgeCount: item.badge,
-
-          children: ({ openEdit }: any) => {
-            const TableComponent = item.Table;
-
-            return (
-              <TableComponent
-                table={item.module.table}
-                onEdit={openEdit}
-                onDelete={item.module.handleDeleteWrapper}
-                onReload={item.module.handleReload}
-              />
-            );
-          },
-
-          showAction: true,
-          actionLabel: `Add ${item.label}`,
-
-          renderForm: ({ close, mode, formData }: any) => {
-            const FormComponent = item.Form;
-
-            return (
-              <FormComponent
-                mode={mode}
-                initialValues={formData}
-                onSubmit={(data: any) => {
-                  const primaryKey = item.module.table.config.primary_key;
-                  // 🔥 DEBUG DI SINI
-                  console.log("FORM DATA:", formData);
-                  console.log("PRIMARY KEY:", primaryKey);
-                  console.log("ID VALUE:", formData?.[primaryKey]);
-                  return mode === "create"
-                    ? item.module.handleCreate(data)
-                    : item.module.handleUpdate({
-                        ...data,
-                        [primaryKey]: formData?.[primaryKey],
-                      });
-                }}
-                onSuccess={close}
-              />
-            );
-          },
-        }))}
-      />
+      <AppTabs defaultActiveKey="provinsi" items={wilayahConfig} />
     </ComponentCard>
   );
 }

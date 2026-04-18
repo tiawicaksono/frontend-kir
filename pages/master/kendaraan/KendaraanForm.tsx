@@ -8,7 +8,18 @@ import { kendaraanSteps } from "./schema";
 import ComponentCard from "@/components/common/ComponentCard";
 import { useWilayah } from "@/pages/master/kendaraan/useWilayah";
 
-export default function HomeKendaraanForm() {
+interface Props {
+  mode?: "create" | "edit";
+  initialValues?: any;
+  onSuccess?: () => void;
+  onSubmit?: (data: any) => Promise<boolean>;
+}
+
+export default function KendaraanForm({
+  initialValues,
+  onSuccess,
+  onSubmit,
+}: Props) {
   const [form] = Form.useForm();
   const [current, setCurrent] = useState(0);
   const wilayah = useWilayah(form);

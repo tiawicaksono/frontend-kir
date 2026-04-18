@@ -4,11 +4,6 @@ import ComponentCard from "@/components/common/ComponentCard";
 import AppTabs from "@/components/ui/tabs/AppTabs";
 import { BookOutlined } from "@ant-design/icons";
 import { useEffect, useState } from "react";
-import {
-  fetchBahanUtamaCounts,
-  fetchStatusPenerbitanCounts,
-  fetchKonfigurasiSumbuCounts,
-} from "@/services/apps-support.service";
 
 // 🔥 SERVICES
 import {
@@ -16,22 +11,28 @@ import {
   updateStatusPenerbitan,
   deleteStatusPenerbitan,
   fetchTableDataStatusPenerbitan,
+  fetchStatusPenerbitanCounts,
   createBahanUtama,
   updateBahanUtama,
   deleteBahanUtama,
   fetchTableDataBahanUtama,
+  fetchBahanUtamaCounts,
   createKonfigurasiSumbu,
   updateKonfigurasiSumbu,
   deleteKonfigurasiSumbu,
   fetchTableDataKonfigurasiSumbu,
+  fetchKonfigurasiSumbuCounts,
 } from "@/services/apps-support.service";
+
 import AppsSupportTable from "../AppsSupportTable";
-// 🔥 COMPONENTS
+
+// 🔥 FORMS
 import BahanUtamaKendaraanForm from "./form/BahanUtamaKendaraanForm";
 import StatusPenerbitanForm from "./form/StatusPenerbitanForm";
 import KonfigurasiSumbuForm from "./form/KonfigurasiSumbuForm";
 
 import { useAppsSupportModule } from "../hook/useAppsSupportModule";
+import { TabItemConfig } from "@/components/ui/tabs/types";
 
 export default function HomeAppsSupport() {
   const [counts, setCounts] = useState({
@@ -45,6 +46,7 @@ export default function HomeAppsSupport() {
       const resSp = await fetchStatusPenerbitanCounts();
       const resBu = await fetchBahanUtamaCounts();
       const resKs = await fetchKonfigurasiSumbuCounts();
+
       setCounts({
         countStatusPenerbitan: resSp.countData ?? 0,
         countBahanUtama: resBu.countData ?? 0,
@@ -67,7 +69,7 @@ export default function HomeAppsSupport() {
       update: updateStatusPenerbitan,
       delete: deleteStatusPenerbitan,
     },
-    label: "Provinsi",
+    label: "Status Penerbitan",
     loadCounts,
   });
 
@@ -78,7 +80,7 @@ export default function HomeAppsSupport() {
       update: updateBahanUtama,
       delete: deleteBahanUtama,
     },
-    label: "Kota",
+    label: "Bahan Utama",
     loadCounts,
   });
 
@@ -93,8 +95,8 @@ export default function HomeAppsSupport() {
     loadCounts,
   });
 
-  // 🔥 CONFIG ARRAY
-  const appsSupportConfig = [
+  // 🔥 CONFIG FINAL (NO MAP)
+  const appsSupportConfig: TabItemConfig[] = [
     {
       key: "status-penerbitan",
       label: "Status Penerbitan",
@@ -103,6 +105,10 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: StatusPenerbitanForm,
       badge: counts.countStatusPenerbitan,
+
+      showAction: true,
+      actionLabel: "Add Status Penerbitan",
+      actionType: "modal",
     },
     {
       key: "bahan-utama",
@@ -112,6 +118,10 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: BahanUtamaKendaraanForm,
       badge: counts.countBahanUtama,
+
+      showAction: true,
+      actionLabel: "Add Bahan Utama",
+      actionType: "modal",
     },
     {
       key: "konfigurasi-sumbu",
@@ -121,64 +131,16 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: KonfigurasiSumbuForm,
       badge: counts.countKonfigurasiSumbu,
+
+      showAction: true,
+      actionLabel: "Add Konfigurasi Sumbu",
+      actionType: "modal",
     },
   ];
 
   return (
     <ComponentCard title="Apps Support Management">
-      <AppTabs
-        defaultActiveKey="status-penerbitan"
-        items={appsSupportConfig.map((item) => ({
-          key: item.key,
-          label: (
-            <>
-              {item.icon} {item.label}
-            </>
-          ),
-          badgeCount: item.badge,
-
-          children: ({ openEdit }: any) => {
-            const TableComponent = item.Table;
-
-            return (
-              <TableComponent
-                table={item.module.table}
-                onEdit={openEdit}
-                onDelete={item.module.handleDeleteWrapper}
-                onReload={item.module.handleReload}
-              />
-            );
-          },
-
-          showAction: true,
-          actionLabel: `Add ${item.label}`,
-
-          renderForm: ({ close, mode, formData }: any) => {
-            const FormComponent = item.Form;
-
-            return (
-              <FormComponent
-                mode={mode}
-                initialValues={formData}
-                onSubmit={(data: any) => {
-                  const primaryKey = item.module.table.config.primary_key;
-                  // 🔥 DEBUG DI SINI
-                  console.log("FORM DATA:", formData);
-                  console.log("PRIMARY KEY:", primaryKey);
-                  console.log("ID VALUE:", formData?.[primaryKey]);
-                  return mode === "create"
-                    ? item.module.handleCreate(data)
-                    : item.module.handleUpdate({
-                        ...data,
-                        [primaryKey]: formData?.[primaryKey],
-                      });
-                }}
-                onSuccess={close}
-              />
-            );
-          },
-        }))}
-      />
+      <AppTabs defaultActiveKey="status-penerbitan" items={appsSupportConfig} />
     </ComponentCard>
   );
 }
