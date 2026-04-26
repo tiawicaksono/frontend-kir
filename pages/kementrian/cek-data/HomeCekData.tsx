@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Form, Input, Select, Button, Card, Typography, Tag } from "antd";
-import { cekDataApi } from "@/services/api-cek-data.service";
+import { cekDataApi } from "@/services/data-kendaraan.service";
 
 const { Title } = Typography;
 const { TextArea } = Input;

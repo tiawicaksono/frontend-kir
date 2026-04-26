@@ -4,8 +4,15 @@ import {
   getKota,
   getKecamatan,
   getKelurahan,
-} from "@/services/api-cek-data.service";
+} from "@/services/options.service";
 
+/**
+ * Hook untuk menghandle data wilayah.
+ * Mengembalikan state dan function untuk menghandle data provinsi, kota, kecamatan, dan kelurahan.
+ * Data diambil dari API dengan menggunakan fungsi getProvinsi, getKota, getKecamatan, dan getKelurahan.
+ * @param {any} form - Form yang akan digunakan untuk menghandle data wilayah.
+ * @returns {Object} - Object yang berisi state dan function untuk menghandle data wilayah.
+ */
 export function useWilayah(form: any) {
   const [provinsi, setProvinsi] = useState<any[]>([]);
   const [kota, setKota] = useState<any[]>([]);

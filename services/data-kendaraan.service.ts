@@ -28,6 +28,11 @@ export async function createKendaraan(data: any) {
   return res.data.data;
 }
 
+export async function detailKendaraan(id: number) {
+  const res = await api.get(`${API_URL}/master/kendaraan/${id}`);
+  return res.data.data;
+}
+
 export async function updateKendaraan(id: number, data: any) {
   const res = await api.put(`${API_URL}/master/kendaraan/${id}`, data);
   return res.data;

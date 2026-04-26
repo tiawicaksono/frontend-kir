@@ -1,4 +1,4 @@
-export type FieldType = "text" | "number" | "date" | "select";
+export type FieldType = "text" | "integer" | "decimal" | "date" | "select";
 
 export type OptionType = {
   label: string;
@@ -13,11 +13,23 @@ export type FieldSchema = {
   default?: any;
   options?: OptionType[];
   uppercase?: boolean;
+  suffix?: string;
+};
+
+export type ColSchema = {
+  span: number;
+  field?: FieldSchema;
+  children?: ColSchema[];
+};
+
+export type RowSchema = {
+  cols: ColSchema[];
 };
 
 export type SectionSchema = {
   title: string;
-  fields: FieldSchema[];
+  fields?: FieldSchema[]; // fallback lama
+  rows?: RowSchema[]; // versi baru
 };
 
 export type StepSchema = {

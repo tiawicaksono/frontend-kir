@@ -1,150 +1,112 @@
 "use client";
 
-import { Form, Steps, Button, Card, Row, Col, Divider } from "antd";
-import { useEffect, useState } from "react";
+import { Form, Steps, Button, Spin } from "antd";
+import { LeftOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons";
+import { useState } from "react";
 
-import FieldRenderer from "./FieldRenderer";
-import { kendaraanSteps } from "./schema";
 import ComponentCard from "@/components/common/ComponentCard";
-import { useWilayah } from "@/pages/master/kendaraan/useWilayah";
+import { kendaraanSteps } from "./schema";
 
-interface Props {
-  mode?: "create" | "edit";
-  initialValues?: any;
-  onSuccess?: () => void;
-  onSubmit?: (data: any) => Promise<boolean>;
-}
+import { useWilayah } from "./hook/options/useWilayah";
+import { useMerk } from "./hook/options/useMerk";
+import { useJenisKendaraan } from "./hook/options/useJenisKendaraan";
+import { useKelasJalan } from "./hook/options/useKelasJalan";
+import { useBahanUtama } from "./hook/options/useBahanUtama";
+import { useKonfigurasiSumbu } from "./hook/options/useKonfigurasiSumbu";
+import { useBahanBakar } from "./hook/options/useBahanBakar";
 
-export default function KendaraanForm({
-  initialValues,
-  onSuccess,
-  onSubmit,
-}: Props) {
+import { useKendaraanForm } from "./hook/useKendaraanForm";
+import { useSelectMap } from "./hook/useSelectMap";
+import StepRenderer from "./component/StepRenderer";
+import AppDivider from "@/components/common/AppDivider";
+
+export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
   const [form] = Form.useForm();
   const [current, setCurrent] = useState(0);
+
   const wilayah = useWilayah(form);
+  const merk = useMerk(form);
+  const jenisKendaraan = useJenisKendaraan(form);
+  const bahanUtama = useBahanUtama();
 
-  // ✅ SET DEFAULT VALUE
-  useEffect(() => {
-    const defaults: any = {};
+  const kelasJalan = useKelasJalan(current === 1);
+  const konsumbu = useKonfigurasiSumbu(current === 1);
+  const bahanBakar = useBahanBakar(current === 1);
 
-    kendaraanSteps.forEach((step) => {
-      step.sections.forEach((section) => {
-        section.fields.forEach((field) => {
-          if (field.default !== undefined) {
-            defaults[field.name] = field.default;
-          }
-        });
-      });
-    });
+  const selectMap = useSelectMap({
+    current,
+    merk,
+    wilayah,
+    jenisKendaraan,
+    bahanUtama,
+    kelasJalan,
+    konsumbu,
+    bahanBakar,
+  });
 
-    form.setFieldsValue(defaults);
-  }, []);
-
-  const getFieldExtra = (fieldName: string) => {
-    switch (fieldName) {
-      case "provinsi_id":
-        return {
-          options: wilayah.provinsi,
-          loading: wilayah.loadingProvinsi,
-          onChange: wilayah.onChangeProvinsi,
-          placeholder: "Pilih Provinsi",
-        };
-
-      case "kota_id":
-        return {
-          options: wilayah.kota,
-          loading: wilayah.loadingKota,
-          onChange: wilayah.onChangeKota,
-          disabled: !form.getFieldValue("provinsi_id"),
-          placeholder: "Pilih Kota",
-        };
-
-      case "kecamatan_id":
-        return {
-          options: wilayah.kecamatan,
-          loading: wilayah.loadingKecamatan,
-          onChange: wilayah.onChangeKecamatan,
-          disabled: !form.getFieldValue("kota_id"),
-          placeholder: "Pilih Kecamatan",
-        };
-
-      case "kelurahan_id":
-        return {
-          options: wilayah.kelurahan,
-          loading: wilayah.loadingKelurahan,
-          disabled: !form.getFieldValue("kecamatan_id"),
-          placeholder: "Pilih Kelurahan",
-        };
-
-      default:
-        return {};
-    }
-  };
+  const { loading, submitting, next, prev, submit } = useKendaraanForm({
+    form,
+    mode,
+    id,
+    wilayah,
+    merk,
+    jenisKendaraan,
+  });
 
   const step = kendaraanSteps[current];
 
-  const next = async () => {
-    const fields = step.sections.flatMap((s) => s.fields.map((f) => f.name));
-
-    await form.validateFields(fields);
-    setCurrent(current + 1);
-  };
-
-  const prev = () => setCurrent(current - 1);
-
-  const submit = (values: any) => {
-    console.log(values);
-  };
-
   return (
-    <ComponentCard>
-      <Steps
-        current={current}
-        style={{ marginBottom: 32 }}
-        items={kendaraanSteps.map((s) => ({
-          title: s.title,
-        }))}
-      />
+    <Spin spinning={loading}>
+      <Form form={form} layout="vertical" onFinish={() => submit(onSuccess)}>
+        <ComponentCard>
+          <Steps
+            current={current}
+            items={kendaraanSteps.map((s) => ({ title: s.title }))}
+          />
 
-      <Form form={form} layout="vertical" onFinish={submit}>
-        {step.sections.map((section, i) => (
-          <div key={i}>
-            <Divider>{section.title}</Divider>
+          {step.sections.map((section: any, i: number) => (
+            <div key={i}>
+              <AppDivider title={section.title} />
+              <StepRenderer section={section} selectMap={selectMap} />
+            </div>
+          ))}
 
-            <Row gutter={16}>
-              {section.fields.map((field: any) => (
-                <Col span={12} key={field.name}>
-                  <FieldRenderer
-                    field={field}
-                    extra={getFieldExtra(field.name)}
-                  />
-                </Col>
-              ))}
-            </Row>
+          <div className="mt-5">
+            {current > 0 && (
+              <Button
+                className="mr-2"
+                onClick={() => prev(setCurrent)}
+                icon={<LeftOutlined />}
+              >
+                Kembali
+              </Button>
+            )}
+
+            {current < kendaraanSteps.length - 1 && (
+              <Button
+                type="primary"
+                loading={submitting}
+                icon={<RightOutlined />}
+                iconPosition="end"
+                onClick={() => next(step, current, setCurrent)}
+              >
+                Lanjut & Simpan
+              </Button>
+            )}
+
+            {current === kendaraanSteps.length - 1 && (
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={submitting}
+                icon={<SaveOutlined />}
+              >
+                Simpan
+              </Button>
+            )}
           </div>
-        ))}
-
-        <div style={{ marginTop: 24 }}>
-          {current > 0 && (
-            <Button onClick={prev} style={{ marginRight: 8 }}>
-              Kembali
-            </Button>
-          )}
-
-          {current < kendaraanSteps.length - 1 && (
-            <Button type="primary" onClick={next}>
-              Lanjut
-            </Button>
-          )}
-
-          {current === kendaraanSteps.length - 1 && (
-            <Button type="primary" htmlType="submit">
-              Submit
-            </Button>
-          )}
-        </div>
+        </ComponentCard>
       </Form>
-    </ComponentCard>
+    </Spin>
   );
 }

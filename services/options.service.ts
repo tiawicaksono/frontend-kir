@@ -22,14 +22,16 @@ export const getKelurahan = (kecamatanId: string) =>
  */
 export const getMerk = () => API.get("/merk/options");
 export const getVarianMerk = (merkId: number) =>
-  API.get(`/varian-merk/options?merk_id=${merkId}`);
+  API.get(`/varianmerk/options?vehicle_brand_id=${merkId}`);
+export const getTipeVarianMerk = (varianMerkId: number) =>
+  API.get(`/tipevarianmerk/options?vehicle_varian_type_id=${varianMerkId}`);
 
 /**
  * JENIS KENDARAAN
  */
 export const getJenisKendaraan = () => API.get("/vehicletype/options");
-export const getSubJenisKendaraan = (merkId: number) =>
-  API.get(`/subvehicletype/options?merk_id=${merkId}`);
+export const getSubJenisKendaraan = (jenisKendaraanId: number) =>
+  API.get(`/subvehicletype/options?vehicle_type_id=${jenisKendaraanId}`);
 
 /**
  * BAHAN UTAMA
@@ -37,9 +39,14 @@ export const getSubJenisKendaraan = (merkId: number) =>
 export const getBahanUtama = () => API.get("/bahanutama/options");
 
 /**
+ * BAHAN BAKAR
+ */
+export const getBahanBakar = () => API.get("/bahanbakar/options");
+
+/**
  * KONFIGURASI SUMBU
  */
-export const getKonfigurasiSumbu = () => API.get("/konfigurasismbu/options");
+export const getKonfigurasiSumbu = () => API.get("/konfigurasisumbu/options");
 
 /**
  * KELAS JALAN
