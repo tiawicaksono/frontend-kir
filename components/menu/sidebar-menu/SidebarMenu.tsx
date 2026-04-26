@@ -44,14 +44,28 @@ export default function SidebarMenu() {
     >
       {/* ===== LOGO ===== */}
       <div className="p-6">
+        {/* Light mode */}
         <Image
           src={
             expanded ? "/images/logo/logo.svg" : "/images/logo/logo-icon.svg"
           }
           alt="logo"
-          width={expanded ? 140 : 32}
+          width={expanded ? 190 : 32}
           height={32}
-          className="dark:invert"
+          className="block dark:hidden"
+        />
+
+        {/* Dark mode */}
+        <Image
+          src={
+            expanded
+              ? "/images/logo/logo-dark.svg"
+              : "/images/logo/logo-icon.svg"
+          }
+          alt="logo"
+          width={expanded ? 190 : 32}
+          height={32}
+          className="hidden dark:block"
         />
       </div>
 

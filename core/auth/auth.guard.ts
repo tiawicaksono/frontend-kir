@@ -9,8 +9,15 @@ export const useAuthGuard = () => {
   useEffect(() => {
     if (loading) return;
 
+    const path = window.location.pathname;
+    const AUTH_PAGES = ["/signin", "/signup", "/reset-password"];
+
+    if (AUTH_PAGES.includes(path)) return;
+
     if (user === null) {
-      router.replace("/signin");
+      const current = window.location.pathname + window.location.search;
+
+      router.replace(`/signin?redirect=${encodeURIComponent(current)}`);
     }
   }, [user, loading]);
 };

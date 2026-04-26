@@ -1,21 +1,22 @@
 "use client";
+
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
 import Link from "next/link";
 import React, { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuth } from "@/core/auth/auth.context";
 import PasswordInput from "@/components/form/form-elements/PasswordField";
 import LoadingButton from "@/components/common/LoadingButton";
 
 export default function SignInForm() {
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [showPassword, setShowPassword] = useState(false);
+  const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login, loading, user } = useAuth();
+  const { login } = useAuth();
   const router = useRouter();
 
   const [error, setError] = useState<string | null>(null);
@@ -42,8 +43,18 @@ export default function SignInForm() {
     setError(null);
 
     try {
+      // login (AuthContext sudah handle initAuth + set cookie RBAC)
       await login(email, password);
-      router.replace("/dashboard");
+
+      // ambil intended redirect dari query param
+      const redirect = searchParams?.get("redirect");
+
+      // redirect final
+      if (redirect && redirect.startsWith("/")) {
+        router.replace(redirect);
+      } else {
+        router.replace("/dashboard");
+      }
     } catch {
       setError("Email atau password salah. Silakan coba lagi.");
       setShowError(true);
@@ -103,17 +114,16 @@ export default function SignInForm() {
 
           <div className="mt-5">
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <span className="text-sm font-normal text-center text-gray-700 dark:text-gray-400 sm:text-start">
-                  Don&apos;t have an account?{" "}
-                  <Link
-                    href="/signup"
-                    className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                  >
-                    Sign Up
-                  </Link>
-                </span>
-              </div>
+              <span className="text-sm text-gray-700 dark:text-gray-400">
+                Don&apos;t have an account?{" "}
+                <Link
+                  href="/signup"
+                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
+                >
+                  Sign Up
+                </Link>
+              </span>
+
               <Link
                 href="/reset-password"
                 className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
@@ -123,22 +133,13 @@ export default function SignInForm() {
             </div>
           </div>
 
-          {/* ALERT (no layout shift) */}
+          {/* ALERT */}
           {(error || showError) && (
             <div
               className={`
-                absolute
-                left-0
-                right-0
-                mt-4
-                rounded-lg
-                border border-red-200
-                bg-red-50
-                p-3
-                text-sm text-red-700
-                transition-all
-                duration-400
-                ease-[cubic-bezier(0.22, 1, 0.36, 1)]
+                absolute left-0 right-0 mt-4 rounded-lg border border-red-200
+                bg-red-50 p-3 text-sm text-red-700
+                transition-all duration-400
                 ${
                   showError
                     ? "opacity-100 scale-100 translate-y-0"

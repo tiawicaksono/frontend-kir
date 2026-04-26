@@ -1,17 +1,17 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const normalize = (url: string) => url.split("?")[0].replace(/\/+$/, "");
+const normalize = (url: string) => url.split("?")[0].replace(/\/+$/, "") || "/";
 
 export function proxy(request: NextRequest) {
-  const { pathname } = request.nextUrl;
+  const { pathname, search } = request.nextUrl;
   const clean = normalize(pathname);
 
-  // skip assets
   if (
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
-    pathname.startsWith("/images")
+    pathname.startsWith("/images") ||
+    pathname === "/favicon.ico"
   ) {
     return NextResponse.next();
   }
@@ -22,24 +22,24 @@ export function proxy(request: NextRequest) {
   const isAuthPage = AUTH_PAGES.includes(clean);
   const isForbidden = clean === "/forbidden";
 
-  // 🔴 Belum login
+  // 🔴 belum login
   if (!routesCookie) {
     if (!isAuthPage) {
-      return NextResponse.redirect(new URL("/signin", request.url));
+      const url = new URL("/signin", request.url);
+      url.searchParams.set("redirect", pathname + search);
+      return NextResponse.redirect(url);
     }
     return NextResponse.next();
   }
 
-  // 🟢 Sudah login
+  // 🟢 sudah login → cegah balik ke login
   if (routesCookie && isAuthPage) {
     return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
-  if (isForbidden) {
-    return NextResponse.next();
-  }
+  if (isForbidden) return NextResponse.next();
 
-  // RBAC check
+  // 🔐 RBAC
   let allowed: string[] = [];
 
   try {

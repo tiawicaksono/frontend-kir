@@ -25,13 +25,13 @@ export default function AuthLayout({
                   <Image
                     width={231}
                     height={48}
-                    src="./images/logo/auth-logo.svg"
+                    src="./images/logo/logo-dark.svg"
                     alt="Logo"
                   />
                 </Link>
                 <p className="text-center text-gray-400 dark:text-white/60">
-                  Sistem inspeksi digital untuk memastikan armada kendaraan
-                  layak jalan dan aman beroperasi.
+                  Sistem inspeksi digital untuk memastikan armada kendaraan laik
+                  jalan dan aman beroperasi.
                 </p>
               </div>
             </div>

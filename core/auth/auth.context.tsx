@@ -69,12 +69,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setUser(null);
         setMenus([]);
         clearRoutesCookie();
-        router.replace("/signin");
       }
 
       if (event.data === "LOGIN") {
         await initAuth();
-        router.replace("/dashboard");
       }
     };
 
@@ -85,12 +83,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const login = async (email: string, password: string) => {
     await loginRequest(email, password);
-
     await initAuth();
-
     broadcastLogin();
-
-    router.replace("/dashboard");
   };
 
   const logout = async () => {
@@ -98,14 +92,18 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await logoutRequest();
     } catch {}
 
+    const current =
+      typeof window !== "undefined"
+        ? window.location.pathname + window.location.search
+        : "/";
+
     setUser(null);
     setMenus([]);
-
     clearRoutesCookie();
 
     broadcastLogout();
 
-    router.replace("/signin");
+    router.replace(`/signin?redirect=${encodeURIComponent(current)}`);
   };
   useAutoLogout(logout);
 
