@@ -1,16 +1,14 @@
 import { formatDate } from "@/utils/formatDate";
 
 interface DateTextProps {
-  value: string | Date | undefined;
+  value?: string | Date;
   withTime?: boolean;
+  format?: "short" | "long";
 }
 
-export default function DateText({ value, withTime = false }: DateTextProps) {
-  if (!value) return <>-</>;
-
-  const date = new Date(value);
-
-  if (isNaN(date.getTime())) return <>-</>;
-
-  return <>{withTime ? date.toLocaleString() : date.toLocaleDateString()}</>;
+export default function DateText(props: DateTextProps) {
+  return formatDate(props.value, {
+    withTime: props.withTime,
+    format: props.format,
+  });
 }
