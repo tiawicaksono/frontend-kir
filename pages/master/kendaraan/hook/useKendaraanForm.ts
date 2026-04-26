@@ -63,31 +63,50 @@ export function useKendaraanForm({
   }, [mode, id]);
 
   // =========================
-  // NEXT STEP
+  // NEXT STEP & SAVE
   // =========================
-  const next = async (
-    step: any,
-    current: number,
-    setCurrent: (v: any) => void,
-  ) => {
-    const fields = step.sections.flatMap((s: any) =>
-      extractFieldsFromSection(s),
-    );
+  // const next = async (step: any) => {
+  //   try {
+  //     setSubmitting(true);
 
-    const values = await form.validateFields(fields);
-    const payload = transformValues(values);
+  //     const fields = step.sections.flatMap((s: any) =>
+  //       extractFieldsFromSection(s),
+  //     );
 
-    setSubmitting(true);
+  //     const values = await form.validateFields(fields);
+  //     const payload = transformValues(values);
 
-    if (!kendaraanId) {
-      const res = await createKendaraan(payload);
-      setKendaraanId(res.id);
-    } else {
-      await updateKendaraan(kendaraanId, payload);
+  //     if (!kendaraanId) {
+  //       const res = await createKendaraan(payload);
+  //       setKendaraanId(res.id);
+  //     } else {
+  //       await updateKendaraan(kendaraanId, payload);
+  //     }
+  //   } catch (err) {
+  //     console.error("NEXT STEP ERROR:", err);
+  //     throw err;
+  //   } finally {
+  //     setSubmitting(false);
+  //   }
+  // };
+
+  // =========================
+  // NEXT ONLY (NO SAVE)
+  // =========================
+  const next = async (step: any) => {
+    try {
+      const fields = step.sections.flatMap((s: any) =>
+        extractFieldsFromSection(s),
+      );
+
+      await form.validateFields(fields);
+
+      // ❗ NO API CALL HERE
+      // hanya validasi
+    } catch (err) {
+      console.error("VALIDATION ERROR:", err);
+      throw err;
     }
-
-    setCurrent((p: number) => p + 1);
-    setSubmitting(false);
   };
 
   // =========================
@@ -98,19 +117,26 @@ export function useKendaraanForm({
   };
 
   // =========================
-  // FINAL SUBMIT
+  // SAVE ONLY (NO NEXT)
   // =========================
   const submit = async (onSuccess?: any) => {
-    setSubmitting(true);
+    try {
+      setSubmitting(true);
 
-    const payload = transformValues(form.getFieldsValue(true));
+      const payload = transformValues(form.getFieldsValue(true));
 
-    if (kendaraanId) {
-      await updateKendaraan(kendaraanId, payload);
+      if (!kendaraanId) {
+        const res = await createKendaraan(payload);
+        setKendaraanId(res.id);
+      } else {
+        await updateKendaraan(kendaraanId, payload);
+      }
+    } catch (err) {
+      console.error("SAVE ERROR:", err);
+    } finally {
+      setSubmitting(false);
+      onSuccess?.();
     }
-
-    setSubmitting(false);
-    onSuccess?.();
   };
 
   return {

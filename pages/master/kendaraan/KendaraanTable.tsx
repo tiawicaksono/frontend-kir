@@ -39,7 +39,7 @@ export default function KendaraanTable({
         <TableActions
           record={record}
           rowKeyField={key}
-          onEdit={() => onEdit(record)}
+          onEdit={() => onEdit(record[key])}
           onDelete={() => onDelete(record[key])}
           actions={["edit", "delete"]}
         />

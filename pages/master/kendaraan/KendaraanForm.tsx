@@ -71,13 +71,9 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
             </div>
           ))}
 
-          <div className="mt-5">
-            {current > 0 && (
-              <Button
-                className="mr-2"
-                onClick={() => prev(setCurrent)}
-                icon={<LeftOutlined />}
-              >
+          <div className="mt-5 flex justify-between">
+            {/* {current > 0 && (
+              <Button onClick={() => prev(setCurrent)} icon={<LeftOutlined />}>
                 Kembali
               </Button>
             )}
@@ -103,7 +99,40 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
               >
                 Simpan
               </Button>
+            )} */}
+            {/* STEP 1+ */}
+            {current > 0 && (
+              <Button
+                onClick={() => prev(setCurrent)}
+                icon={<LeftOutlined />}
+                size="large"
+              >
+                Kembali
+              </Button>
             )}
+
+            {/* NEXT */}
+            {current < kendaraanSteps.length - 1 && (
+              <Button
+                icon={<RightOutlined />}
+                iconPlacement="end"
+                onClick={() => setCurrent((p) => p + 1)}
+                size="large"
+              >
+                Lanjut
+              </Button>
+            )}
+
+            {/* SAVE (ALL STEP) */}
+            <Button
+              type="primary"
+              loading={submitting}
+              onClick={() => submit(onSuccess)}
+              icon={<SaveOutlined />}
+              size="large"
+            >
+              Save
+            </Button>
           </div>
         </ComponentCard>
       </Form>
