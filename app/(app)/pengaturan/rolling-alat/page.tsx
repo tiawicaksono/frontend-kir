@@ -1,11 +1,17 @@
+"use client";
+
+import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
+import HomeRollingAlat from "@/pages/pengaturan/rolling-alat/HomeRollingAlat";
+
 export default function RollingAlatPage() {
   return (
-    <section className="space-y-4">
-      <h1 className="text-2xl font-semibold">Rolling Alat</h1>
-      <p className="text-muted-foreground">Rolling alat.</p>
-      <div className="rounded-xl border p-4">
-        <p>List produk</p>
+    <div>
+      <AutoBreadcrumb />
+      <div className="grid grid-cols-12 gap-4 md:gap-6">
+        <div className="col-span-12">
+          <HomeRollingAlat />
+        </div>
       </div>
-    </section>
+    </div>
   );
 }

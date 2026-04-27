@@ -1,6 +1,6 @@
 "use client";
 
-import { Form, Steps, Button, Spin } from "antd";
+import { Form, Steps, Button, Spin, Divider } from "antd";
 import { LeftOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
@@ -70,7 +70,7 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
               <StepRenderer section={section} selectMap={selectMap} />
             </div>
           ))}
-
+          <Divider />
           <div className="mt-5 flex justify-between">
             {/* {current > 0 && (
               <Button onClick={() => prev(setCurrent)} icon={<LeftOutlined />}>
@@ -102,11 +102,7 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
             )} */}
             {/* STEP 1+ */}
             {current > 0 && (
-              <Button
-                onClick={() => prev(setCurrent)}
-                icon={<LeftOutlined />}
-                size="large"
-              >
+              <Button onClick={() => prev(setCurrent)} icon={<LeftOutlined />}>
                 Kembali
               </Button>
             )}
@@ -117,7 +113,6 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
                 icon={<RightOutlined />}
                 iconPlacement="end"
                 onClick={() => setCurrent((p) => p + 1)}
-                size="large"
               >
                 Lanjut
               </Button>
@@ -129,9 +124,8 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
               loading={submitting}
               onClick={() => submit(onSuccess)}
               icon={<SaveOutlined />}
-              size="large"
             >
-              Save
+              Simpan
             </Button>
           </div>
         </ComponentCard>
