@@ -1,11 +1,11 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getMerk,
   getTipeVarianMerk,
   getVarianMerk,
 } from "@/services/options.service";
 
-export function useMerk(form: any) {
+export function useMerk(form: any, isInit: boolean) {
   const [merk, setMerk] = useState<any[]>([]);
   const [varianMerk, setVarianMerk] = useState<any[]>([]);
   const [tipeVarianMerk, setTipeVarianMerk] = useState<any[]>([]);
@@ -14,7 +14,12 @@ export function useMerk(form: any) {
   const [loadingVarianMerk, setLoadingVarianMerk] = useState(false);
   const [loadingTipeVarianMerk, setLoadingTipeVarianMerk] = useState(false);
 
+  const fetchedMerk = useRef(false);
+
   useEffect(() => {
+    if (fetchedMerk.current) return;
+    fetchedMerk.current = true;
+
     const fetch = async () => {
       setLoadingMerk(true);
       try {
@@ -28,6 +33,8 @@ export function useMerk(form: any) {
   }, []);
 
   const onChangeMerk = async (id: number) => {
+    if (!id || isInit) return;
+
     form.setFieldsValue({
       varian_merk_id: null,
       tipe_varian_merk_id: null,
@@ -46,6 +53,8 @@ export function useMerk(form: any) {
   };
 
   const onChangeVarianMerk = async (id: number) => {
+    if (!id || isInit) return;
+
     form.setFieldsValue({
       tipe_varian_merk_id: null,
     });
@@ -68,7 +77,12 @@ export function useMerk(form: any) {
     loadingMerk,
     loadingVarianMerk,
     loadingTipeVarianMerk,
+
     onChangeMerk,
     onChangeVarianMerk,
+
+    // 🔥 setter
+    setVarianMerk,
+    setTipeVarianMerk,
   };
 }

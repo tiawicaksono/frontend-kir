@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getKonfigurasiSumbu } from "@/services/options.service";
 
 export function useKonfigurasiSumbu(enabled: boolean) {
   const [konfigurasiSumbu, setKonfigurasiSumbu] = useState<any[]>([]);
   const [loadingKonfigurasiSumbu, setLoadingKonfigurasiSumbu] = useState(false);
 
+  const fetchedRef = useRef(false);
+
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || fetchedRef.current) return;
+
+    fetchedRef.current = true;
 
     const fetch = async () => {
       setLoadingKonfigurasiSumbu(true);

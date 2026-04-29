@@ -1,12 +1,16 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { getBahanBakar } from "@/services/options.service";
 
 export function useBahanBakar(enabled: boolean) {
   const [bahanBakar, setBahanBakar] = useState<any[]>([]);
   const [loadingBahanBakar, setLoadingBahanBakar] = useState(false);
 
+  const fetchedRef = useRef(false);
+
   useEffect(() => {
-    if (!enabled) return;
+    if (!enabled || fetchedRef.current) return;
+
+    fetchedRef.current = true;
 
     const fetch = async () => {
       setLoadingBahanBakar(true);
@@ -17,6 +21,7 @@ export function useBahanBakar(enabled: boolean) {
         setLoadingBahanBakar(false);
       }
     };
+
     fetch();
   }, [enabled]);
 

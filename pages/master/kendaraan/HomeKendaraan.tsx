@@ -66,9 +66,11 @@ export default function HomeKendaraan() {
       showAction: true,
       actionLabel: "Add Kendaraan",
 
-      actionType: "page", // ✅ sekarang aman
+      actionType: "page",
       onActionClick: () => router.push("/master/data-kendaraan/create"),
 
+      onViewPage: (row: any) =>
+        router.push(`/master/data-kendaraan/view/${row.id}`),
       onEditPage: (row: any) =>
         router.push(`/master/data-kendaraan/edit/${row.id}`),
     },

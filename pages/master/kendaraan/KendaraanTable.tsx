@@ -6,6 +6,7 @@ import TableActions from "@/components/ui/dynamic-table/TableActions";
 
 interface Props {
   table: any;
+  onView?: (record: any) => void;
   onEdit: (record: any) => void;
   onDelete: (id: string) => void;
   onReload?: () => void;
@@ -13,6 +14,7 @@ interface Props {
 
 export default function KendaraanTable({
   table,
+  onView,
   onEdit,
   onDelete,
   onReload,
@@ -39,9 +41,10 @@ export default function KendaraanTable({
         <TableActions
           record={record}
           rowKeyField={key}
-          onEdit={() => onEdit(record[key])}
+          onView={() => onView?.(record)}
+          onEdit={() => onEdit(record)}
           onDelete={() => onDelete(record[key])}
-          actions={["edit", "delete"]}
+          actions={["edit", "view", "delete"]}
         />
       )}
     />

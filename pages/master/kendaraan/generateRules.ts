@@ -81,5 +81,22 @@ export const generateRules = (field: any) => {
     });
   }
 
+  // 🔥 SPECIAL CASE: No Identitas
+  if (field.name === "no_identitas") {
+    rules.push(({ getFieldValue }: any) => ({
+      validator(_: any, value: string) {
+        const jenis = getFieldValue("identitas");
+
+        if (!value) return Promise.resolve();
+
+        if (jenis === "KTP" && value.length !== 16) {
+          return Promise.reject(new Error("No KTP harus 16 karakter"));
+        }
+
+        return Promise.resolve();
+      },
+    }));
+  }
+
   return rules;
 };

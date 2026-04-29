@@ -1,6 +1,6 @@
 "use client";
 
-import { Form, Steps, Button, Spin, Divider } from "antd";
+import { Form, Steps, Button, Spin, Divider, message } from "antd";
 import { LeftOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
@@ -24,14 +24,29 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
   const [form] = Form.useForm();
   const [current, setCurrent] = useState(0);
 
-  const wilayah = useWilayah(form);
-  const merk = useMerk(form);
-  const jenisKendaraan = useJenisKendaraan(form);
+  // 🔥 INIT CONTROL (source of truth)
+  const [isInit, setIsInit] = useState(true);
+
+  // 🔥 OPTION HOOKS (safe, pakai isInit)
+  const wilayah = useWilayah(form, isInit);
+  const merk = useMerk(form, isInit);
+  const jenisKendaraan = useJenisKendaraan(form, isInit);
   const bahanUtama = useBahanUtama();
 
   const kelasJalan = useKelasJalan(current === 1);
   const konsumbu = useKonfigurasiSumbu(current === 1);
   const bahanBakar = useBahanBakar(current === 1);
+
+  // 🔥 FORM LOGIC
+  const { loading, submitting, submit } = useKendaraanForm({
+    form,
+    mode,
+    id,
+    wilayah,
+    merk,
+    jenisKendaraan,
+    onInitDone: () => setIsInit(false), // 🔥 penting
+  });
 
   const selectMap = useSelectMap({
     current,
@@ -44,70 +59,67 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
     bahanBakar,
   });
 
-  const { loading, submitting, next, prev, submit } = useKendaraanForm({
-    form,
-    mode,
-    id,
-    wilayah,
-    merk,
-    jenisKendaraan,
-  });
+  // =========================
+  // SUBMIT
+  // =========================
+  const handleSubmit = async () => {
+    try {
+      await form.validateFields();
+      await submit(onSuccess);
+    } catch (err) {
+      message.error("Lengkapi semua field wajib sebelum simpan");
+    }
+  };
 
-  const step = kendaraanSteps[current];
+  // 🔥 LOADING AWAL (EDIT MODE)
+  if (loading) {
+    return (
+      <ComponentCard>
+        <div className="flex justify-center py-10">
+          <Spin size="large" />
+        </div>
+      </ComponentCard>
+    );
+  }
 
   return (
-    <Spin spinning={loading}>
-      <Form form={form} layout="vertical" onFinish={() => submit(onSuccess)}>
+    <Spin spinning={submitting}>
+      <Form form={form} layout="vertical">
         <ComponentCard>
+          {/* STEP */}
           <Steps
             current={current}
             items={kendaraanSteps.map((s) => ({ title: s.title }))}
           />
 
-          {step.sections.map((section: any, i: number) => (
-            <div key={i}>
-              <AppDivider title={section.title} />
-              <StepRenderer section={section} selectMap={selectMap} />
+          {/* CONTENT */}
+          {kendaraanSteps.map((stepItem, stepIndex) => (
+            <div
+              key={stepIndex}
+              style={{ display: stepIndex === current ? "block" : "none" }}
+            >
+              {stepItem.sections.map((section: any, i: number) => (
+                <div key={i}>
+                  <AppDivider title={section.title} />
+                  <StepRenderer section={section} selectMap={selectMap} />
+                </div>
+              ))}
             </div>
           ))}
+
           <Divider />
+
           <div className="mt-5 flex justify-between">
-            {/* {current > 0 && (
-              <Button onClick={() => prev(setCurrent)} icon={<LeftOutlined />}>
-                Kembali
-              </Button>
-            )}
-
-            {current < kendaraanSteps.length - 1 && (
-              <Button
-                type="primary"
-                loading={submitting}
-                icon={<RightOutlined />}
-                iconPosition="end"
-                onClick={() => next(step, current, setCurrent)}
-              >
-                Lanjut & Simpan
-              </Button>
-            )}
-
-            {current === kendaraanSteps.length - 1 && (
-              <Button
-                type="primary"
-                htmlType="submit"
-                loading={submitting}
-                icon={<SaveOutlined />}
-              >
-                Simpan
-              </Button>
-            )} */}
-            {/* STEP 1+ */}
+            {/* ACTION */}
             {current > 0 && (
-              <Button onClick={() => prev(setCurrent)} icon={<LeftOutlined />}>
+              <Button
+                onClick={() => setCurrent((p) => p - 1)}
+                icon={<LeftOutlined />}
+              >
                 Kembali
               </Button>
             )}
 
-            {/* NEXT */}
             {current < kendaraanSteps.length - 1 && (
               <Button
                 icon={<RightOutlined />}
@@ -118,12 +130,11 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
               </Button>
             )}
 
-            {/* SAVE (ALL STEP) */}
             <Button
               type="primary"
               loading={submitting}
-              onClick={() => submit(onSuccess)}
               icon={<SaveOutlined />}
+              onClick={handleSubmit}
             >
               Simpan
             </Button>

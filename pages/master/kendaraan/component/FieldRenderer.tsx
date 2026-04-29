@@ -69,6 +69,7 @@ export default function FieldRenderer({
             showSearch
             optionFilterProp="label"
             options={extra?.options || field.options || []}
+            fieldNames={{ label: "label", value: "value" }}
             onChange={extra?.onChange}
             loading={extra?.loading}
             disabled={extra?.disabled}

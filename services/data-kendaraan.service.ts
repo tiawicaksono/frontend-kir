@@ -42,3 +42,8 @@ export async function deleteKendaraan(id: number) {
   const res = await api.delete(`${API_URL}/master/kendaraan/${id}`);
   return res.data;
 }
+
+export async function fetchRiwayatUji(id: string) {
+  const res = await api.get(`${API_URL}/master/kendaraan/${id}/riwayat-uji`);
+  return res.data;
+}

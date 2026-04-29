@@ -65,6 +65,9 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
             children: (
               <TableComponent
                 table={item.module.table}
+                onView={(row: any) => {
+                  item.onViewPage?.(row); // 🔥 TAMBAH INI
+                }}
                 onEdit={(row: any) => {
                   if (item.actionType === "page") {
                     item.onEditPage?.(row);

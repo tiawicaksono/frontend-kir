@@ -699,7 +699,7 @@ export const kendaraanSteps: StepSchema[] = [
                 span: 6,
                 field: {
                   name: "pemakaian_sumbu_1",
-                  label: "Sumbu I",
+                  label: "Pemakaian Sumbu I",
                   type: "text",
                 },
               },
@@ -707,7 +707,7 @@ export const kendaraanSteps: StepSchema[] = [
                 span: 6,
                 field: {
                   name: "pemakaian_sumbu_2",
-                  label: "Sumbu II",
+                  label: "Pemakaian Sumbu II",
                   type: "text",
                 },
               },
@@ -715,7 +715,7 @@ export const kendaraanSteps: StepSchema[] = [
                 span: 6,
                 field: {
                   name: "pemakaian_sumbu_3",
-                  label: "Sumbu III",
+                  label: "Pemakaian Sumbu III",
                   type: "text",
                 },
               },
@@ -723,7 +723,7 @@ export const kendaraanSteps: StepSchema[] = [
                 span: 6,
                 field: {
                   name: "pemakaian_sumbu_4",
-                  label: "Sumbu IV",
+                  label: "Pemakaian Sumbu IV",
                   type: "text",
                 },
               },

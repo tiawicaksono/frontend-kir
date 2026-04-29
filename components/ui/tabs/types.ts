@@ -21,6 +21,7 @@ export type TabItemConfig = {
   actionType?: "modal" | "page" | "custom";
   onActionClick?: () => void;
 
+  onViewPage?: (row: any) => void;
   onEditPage?: (row: any) => void;
 };
 

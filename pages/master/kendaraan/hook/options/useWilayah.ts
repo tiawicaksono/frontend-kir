@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import {
   getProvinsi,
   getKota,
@@ -6,87 +6,71 @@ import {
   getKelurahan,
 } from "@/services/options.service";
 
-/**
- * Hook untuk menghandle data wilayah.
- * Mengembalikan state dan function untuk menghandle data provinsi, kota, kecamatan, dan kelurahan.
- * Data diambil dari API dengan menggunakan fungsi getProvinsi, getKota, getKecamatan, dan getKelurahan.
- * @param {any} form - Form yang akan digunakan untuk menghandle data wilayah.
- * @returns {Object} - Object yang berisi state dan function untuk menghandle data wilayah.
- */
-export function useWilayah(form: any) {
+// const mapOptions = (data: any[]) =>
+//   data.map((item) => ({
+//     label:
+//       item.label ||
+//       item.nama ||
+//       item.name ||
+//       item.text ||
+//       item.kota_nama_kota ||
+//       item.kecamatan_nama_kecamatan ||
+//       item.kelurahan_nama_kelurahan,
+//     value: Number(item.value ?? item.id),
+//   }));
+
+export function useWilayah(form: any, isInit: boolean) {
   const [provinsi, setProvinsi] = useState<any[]>([]);
   const [kota, setKota] = useState<any[]>([]);
   const [kecamatan, setKecamatan] = useState<any[]>([]);
   const [kelurahan, setKelurahan] = useState<any[]>([]);
 
-  const [loadingProvinsi, setLoadingProvinsi] = useState(false);
-  const [loadingKota, setLoadingKota] = useState(false);
-  const [loadingKecamatan, setLoadingKecamatan] = useState(false);
-  const [loadingKelurahan, setLoadingKelurahan] = useState(false);
+  const fetched = useRef(false);
 
   useEffect(() => {
+    if (fetched.current) return;
+    fetched.current = true;
+
     const fetch = async () => {
-      setLoadingProvinsi(true);
-      try {
-        const res = await getProvinsi();
-        setProvinsi(res.data);
-      } finally {
-        setLoadingProvinsi(false);
-      }
+      const res = await getProvinsi();
+      setProvinsi(res.data);
     };
+
     fetch();
   }, []);
 
-  const onChangeProvinsi = async (id: string) => {
+  const onChangeProvinsi = async (id: number) => {
+    if (!id || isInit) return;
+
     form.setFieldsValue({
       kota_id: null,
       kecamatan_id: null,
       kelurahan_id: null,
     });
 
-    setKota([]);
-    setKecamatan([]);
-    setKelurahan([]);
-
-    setLoadingKota(true);
-    try {
-      const res = await getKota(id);
-      setKota(res.data);
-    } finally {
-      setLoadingKota(false);
-    }
+    const res = await getKota(id);
+    setKota(res.data);
   };
 
-  const onChangeKota = async (id: string) => {
+  const onChangeKota = async (id: number) => {
+    if (!id || isInit) return;
+
     form.setFieldsValue({
       kecamatan_id: null,
       kelurahan_id: null,
     });
 
-    setKecamatan([]);
-    setKelurahan([]);
-
-    setLoadingKecamatan(true);
-    try {
-      const res = await getKecamatan(id);
-      setKecamatan(res.data);
-    } finally {
-      setLoadingKecamatan(false);
-    }
+    const res = await getKecamatan(id);
+    setKecamatan(res.data);
   };
 
-  const onChangeKecamatan = async (id: string) => {
+  const onChangeKecamatan = async (id: number) => {
+    if (!id || isInit) return;
+
     form.setFieldsValue({ kelurahan_id: null });
 
-    setKelurahan([]);
-
-    setLoadingKelurahan(true);
-    try {
-      const res = await getKelurahan(id);
-      setKelurahan(res.data);
-    } finally {
-      setLoadingKelurahan(false);
-    }
+    const res = await getKelurahan(id);
+    setKelurahan(res.data);
   };
 
   return {
@@ -94,12 +78,13 @@ export function useWilayah(form: any) {
     kota,
     kecamatan,
     kelurahan,
-    loadingProvinsi,
-    loadingKota,
-    loadingKecamatan,
-    loadingKelurahan,
     onChangeProvinsi,
     onChangeKota,
     onChangeKecamatan,
+
+    // 🔥 penting untuk preload edit
+    setKota,
+    setKecamatan,
+    setKelurahan,
   };
 }

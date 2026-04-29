@@ -6,11 +6,11 @@ const API_URL = process.env.NEXT_PUBLIC_API_URL;
  * WILAYAH
  */
 export const getProvinsi = () => api.get(`${API_URL}/master/provinsi/options`);
-export const getKota = (provinsiId: string) =>
+export const getKota = (provinsiId: string | number) =>
   api.get(`${API_URL}/master/kota/options?provinsi_id=${provinsiId}`);
-export const getKecamatan = (kotaId: string) =>
+export const getKecamatan = (kotaId: string | number) =>
   api.get(`${API_URL}/master/kecamatan/options?kota_id=${kotaId}`);
-export const getKelurahan = (kecamatanId: string) =>
+export const getKelurahan = (kecamatanId: string | number) =>
   api.get(`${API_URL}/master/kelurahan/options?kecamatan_id=${kecamatanId}`);
 
 /**
