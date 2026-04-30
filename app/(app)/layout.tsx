@@ -13,7 +13,9 @@ export default function AppLayout({ children }: { children: React.ReactNode }) {
         <AppMenu>
           <BackToTopButton />
           <SettingsButton />
-          <div className="p-4 mx-auto max-w-(--breakpoint-2xl)">{children}</div>
+          <div className="p-4 w-full transition-all duration-300">
+            {children}
+          </div>
         </AppMenu>
       </ConfirmProvider>
     </>
