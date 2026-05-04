@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Label from "@/components/form/Label";
-import Input from "@/components/form/input/InputField";
-import LoadingButton from "@/components/common/LoadingButton";
+import { Form, Input, Button } from "antd";
 
 interface Props {
   mode?: "create" | "edit";
@@ -17,77 +15,61 @@ export default function BahanUtamaKendaraanForm({
   onSuccess,
   onSubmit,
 }: Props) {
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [errors, setErrors] = useState<{
-    name?: string;
-  }>({});
 
   useEffect(() => {
     if (initialValues) {
-      setName((initialValues.bahan_utama || "").toUpperCase());
+      form.setFieldsValue({
+        name: (initialValues.bahan_utama || "").toUpperCase(),
+      });
     }
-  }, [initialValues]);
+  }, [initialValues, form]);
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-    }
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) return;
-
+  const handleFinish = async (values: any) => {
     setLoading(true);
 
     const payload = {
-      name,
+      name: values.name,
     };
 
-    // 🔥 PENTING BANGET
     const success = await onSubmit?.(payload);
-    // console.log("SUBMIT PAYLOAD:", payload);
+
     setLoading(false);
 
     if (success) {
       onSuccess?.();
+      form.resetFields();
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
-      <div>
-        <Label className="flex items-center justify-between">
-          <span>
-            <span className="text-red-500">*</span>
-            Bahan Utama
-          </span>
-          {errors.name && (
-            <span className="text-xs text-red-500 mt-1">{errors.name}</span>
-          )}
-        </Label>
-        <Input
-          value={name}
-          onChange={(val) => setName(val.toUpperCase().trimStart())}
-          className={`uppercase ${errors.name ? "border-red-500 focus:border-none" : ""}`}
-        />
-      </div>
-
-      <LoadingButton
-        type="submit"
-        size="sm"
-        loading={loading}
-        loadingText="Saving..."
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleFinish}
+      className="space-y-2"
+    >
+      <Form.Item
+        label="Bahan Utama Kendaraan"
+        name="name"
+        normalize={(value) => (value || "").toUpperCase().trimStart()}
+        rules={[{ required: true, message: "Bahan Utama is required" }]}
       >
-        Save
-      </LoadingButton>
-    </form>
+        <Input size="large" />
+      </Form.Item>
+
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          block
+          size="large"
+        >
+          Save
+        </Button>
+      </Form.Item>
+    </Form>
   );
 }

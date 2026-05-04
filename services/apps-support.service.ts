@@ -109,3 +109,34 @@ export async function deleteBahanUtama(id: number) {
   const res = await api.delete(`${API_URL}/pengaturan/bahanutama/${id}`);
   return res.data;
 }
+/**
+ * ===============================================================================
+ * BIRO JASA
+ * ===============================================================================
+ */
+export const fetchBiroJasaCounts = async () => {
+  const res = await api.get(`${API_URL}/pengaturan/birojasa/counts`);
+  return res.data;
+};
+
+export async function fetchTableDataBiroJasa(params: Record<string, any> = {}) {
+  const res = await api.get(`${API_URL}/pengaturan/birojasa`, {
+    params,
+  });
+  return res.data;
+}
+
+export async function createBiroJasa(data: any) {
+  const res = await api.post(`${API_URL}/pengaturan/birojasa`, data);
+  return res.data.data;
+}
+
+export async function updateBiroJasa(id: number, data: any) {
+  const res = await api.put(`${API_URL}/pengaturan/birojasa/${id}`, data);
+  return res.data;
+}
+
+export async function deleteBiroJasa(id: number) {
+  const res = await api.delete(`${API_URL}/pengaturan/birojasa/${id}`);
+  return res.data;
+}

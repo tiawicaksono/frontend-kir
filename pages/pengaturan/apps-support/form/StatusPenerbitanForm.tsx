@@ -1,9 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import Label from "@/components/form/Label";
-import Input from "@/components/form/input/InputField";
-import LoadingButton from "@/components/common/LoadingButton";
+import { Form, Input, Button } from "antd";
 
 interface Props {
   mode?: "create" | "edit";
@@ -17,77 +15,61 @@ export default function StatusPenerbitanForm({
   onSuccess,
   onSubmit,
 }: Props) {
+  const [form] = Form.useForm();
   const [loading, setLoading] = useState(false);
-  const [name, setName] = useState("");
-  const [errors, setErrors] = useState<{
-    name?: string;
-  }>({});
 
   useEffect(() => {
     if (initialValues) {
-      setName(initialValues.issuance_name || "");
+      form.setFieldsValue({
+        name: initialValues.issuance_name || "",
+      });
     }
-  }, [initialValues]);
+  }, [initialValues, form]);
 
-  const validate = () => {
-    const newErrors: typeof errors = {};
-
-    if (!name.trim()) {
-      newErrors.name = "Name is required";
-    }
-    setErrors(newErrors);
-
-    return Object.keys(newErrors).length === 0;
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!validate()) return;
-
+  const handleFinish = async (values: any) => {
     setLoading(true);
 
     const payload = {
-      name,
+      name: values.name,
     };
 
-    // 🔥 PENTING BANGET
     const success = await onSubmit?.(payload);
-    // console.log("SUBMIT PAYLOAD:", payload);
+
     setLoading(false);
 
     if (success) {
       onSuccess?.();
+      form.resetFields();
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-2">
-      <div>
-        <Label className="flex items-center justify-between">
-          <span>
-            <span className="text-red-500">*</span>
-            Name
-          </span>
-          {errors.name && (
-            <span className="text-xs text-red-500 mt-1">{errors.name}</span>
-          )}
-        </Label>
-        <Input
-          value={name}
-          onChange={setName}
-          className={errors.name ? "border-red-500 focus:border-none" : ""}
-        />
-      </div>
-
-      <LoadingButton
-        type="submit"
-        size="sm"
-        loading={loading}
-        loadingText="Saving..."
+    <Form
+      form={form}
+      layout="vertical"
+      onFinish={handleFinish}
+      className="space-y-2"
+    >
+      <Form.Item
+        label="Status Penerbitan"
+        name="name"
+        normalize={(value) => (value || "").trimStart()}
+        rules={[{ required: true, message: "Status Penerbitan is required" }]}
       >
-        Save
-      </LoadingButton>
-    </form>
+        <Input size="large" />
+      </Form.Item>
+
+      <Form.Item>
+        <Button
+          type="primary"
+          htmlType="submit"
+          loading={loading}
+          block
+          size="large"
+        >
+          Save
+        </Button>
+      </Form.Item>
+    </Form>
   );
 }

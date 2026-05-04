@@ -22,6 +22,11 @@ import {
   deleteKonfigurasiSumbu,
   fetchTableDataKonfigurasiSumbu,
   fetchKonfigurasiSumbuCounts,
+  fetchBiroJasaCounts,
+  fetchTableDataBiroJasa,
+  createBiroJasa,
+  updateBiroJasa,
+  deleteBiroJasa,
 } from "@/services/apps-support.service";
 
 import AppsSupportTable from "../AppsSupportTable";
@@ -30,6 +35,7 @@ import AppsSupportTable from "../AppsSupportTable";
 import BahanUtamaKendaraanForm from "./form/BahanUtamaKendaraanForm";
 import StatusPenerbitanForm from "./form/StatusPenerbitanForm";
 import KonfigurasiSumbuForm from "./form/KonfigurasiSumbuForm";
+import BiroJasaForm from "./form/BiroJasaForm";
 
 import { useAppsSupportModule } from "../hook/useAppsSupportModule";
 import { TabItemConfig } from "@/components/ui/tabs/types";
@@ -39,6 +45,7 @@ export default function HomeAppsSupport() {
     countStatusPenerbitan: 0,
     countBahanUtama: 0,
     countKonfigurasiSumbu: 0,
+    countBiroJasa: 0,
   });
 
   const loadCounts = async () => {
@@ -46,11 +53,13 @@ export default function HomeAppsSupport() {
       const resSp = await fetchStatusPenerbitanCounts();
       const resBu = await fetchBahanUtamaCounts();
       const resKs = await fetchKonfigurasiSumbuCounts();
+      const resBj = await fetchBiroJasaCounts();
 
       setCounts({
         countStatusPenerbitan: resSp.countData ?? 0,
         countBahanUtama: resBu.countData ?? 0,
         countKonfigurasiSumbu: resKs.countData ?? 0,
+        countBiroJasa: resBj.countData ?? 0,
       });
     } catch (err) {
       console.error(err);
@@ -95,6 +104,17 @@ export default function HomeAppsSupport() {
     loadCounts,
   });
 
+  const BiroJasa = useAppsSupportModule({
+    fetcher: fetchTableDataBiroJasa,
+    service: {
+      create: createBiroJasa,
+      update: updateBiroJasa,
+      delete: deleteBiroJasa,
+    },
+    label: "Biro Jasa",
+    loadCounts,
+  });
+
   // 🔥 CONFIG FINAL (NO MAP)
   const appsSupportConfig: TabItemConfig[] = [
     {
@@ -134,6 +154,19 @@ export default function HomeAppsSupport() {
 
       showAction: true,
       actionLabel: "Add Konfigurasi Sumbu",
+      actionType: "modal",
+    },
+    {
+      key: "biro-jasa",
+      label: "Biro Jasa",
+      icon: <BookOutlined />,
+      module: BiroJasa,
+      Table: AppsSupportTable,
+      Form: BiroJasaForm,
+      badge: counts.countBiroJasa,
+
+      showAction: true,
+      actionLabel: "Add Biro Jasa",
       actionType: "modal",
     },
   ];
