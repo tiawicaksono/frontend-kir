@@ -60,3 +60,8 @@ export const getKelasJalan = () => api.get(`${API_URL}/options/kelasjalan`);
  */
 export const getStatusPenerbitan = () =>
   api.get(`${API_URL}/options/statuspenerbitan`);
+
+/**
+ * BIRO JASA
+ */
+export const getBiroJasa = () => api.get(`${API_URL}/options/birojasa`);
