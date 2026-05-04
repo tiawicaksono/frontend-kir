@@ -6,71 +6,159 @@ import {
   getKelurahan,
 } from "@/services/options.service";
 
-// const mapOptions = (data: any[]) =>
-//   data.map((item) => ({
-//     label:
-//       item.label ||
-//       item.nama ||
-//       item.name ||
-//       item.text ||
-//       item.kota_nama_kota ||
-//       item.kecamatan_nama_kecamatan ||
-//       item.kelurahan_nama_kelurahan,
-//     value: Number(item.value ?? item.id),
-//   }));
-
 export function useWilayah(form: any, isInit: boolean) {
   const [provinsi, setProvinsi] = useState<any[]>([]);
   const [kota, setKota] = useState<any[]>([]);
   const [kecamatan, setKecamatan] = useState<any[]>([]);
   const [kelurahan, setKelurahan] = useState<any[]>([]);
 
+  const [loadingProvinsi, setLoadingProvinsi] = useState(false);
+  const [loadingKota, setLoadingKota] = useState(false);
+  const [loadingKecamatan, setLoadingKecamatan] = useState(false);
+  const [loadingKelurahan, setLoadingKelurahan] = useState(false);
+
   const fetched = useRef(false);
 
+  // 🔥 race guards
+  const lastFetchKota = useRef(0);
+  const lastFetchKecamatan = useRef(0);
+  const lastFetchKelurahan = useRef(0);
+
+  // =========================
+  // LOAD PROVINSI
+  // =========================
   useEffect(() => {
     if (fetched.current) return;
     fetched.current = true;
 
     const fetch = async () => {
-      const res = await getProvinsi();
-      setProvinsi(res.data);
+      setLoadingProvinsi(true);
+      try {
+        const res = await getProvinsi();
+        setProvinsi(res.data);
+      } finally {
+        setLoadingProvinsi(false);
+      }
     };
 
     fetch();
   }, []);
 
-  const onChangeProvinsi = async (id: number) => {
-    if (!id || isInit) return;
+  // =========================
+  // LOAD KOTA (PURE)
+  // =========================
+  const loadKota = async (id: number | string) => {
+    if (!id) return;
 
-    form.setFieldsValue({
-      kota_id: null,
-      kecamatan_id: null,
-      kelurahan_id: null,
-    });
+    const fetchId = ++lastFetchKota.current;
 
-    const res = await getKota(id);
-    setKota(res.data);
+    setLoadingKota(true);
+    try {
+      const res = await getKota(Number(id));
+
+      if (fetchId !== lastFetchKota.current) return;
+
+      setKota(res.data);
+    } finally {
+      setLoadingKota(false);
+    }
   };
 
-  const onChangeKota = async (id: number) => {
-    if (!id || isInit) return;
+  // =========================
+  // LOAD KECAMATAN (PURE)
+  // =========================
+  const loadKecamatan = async (id: number | string) => {
+    if (!id) return;
 
-    form.setFieldsValue({
-      kecamatan_id: null,
-      kelurahan_id: null,
-    });
+    const fetchId = ++lastFetchKecamatan.current;
 
-    const res = await getKecamatan(id);
-    setKecamatan(res.data);
+    setLoadingKecamatan(true);
+    try {
+      const res = await getKecamatan(Number(id));
+
+      if (fetchId !== lastFetchKecamatan.current) return;
+
+      setKecamatan(res.data);
+    } finally {
+      setLoadingKecamatan(false);
+    }
   };
 
-  const onChangeKecamatan = async (id: number) => {
-    if (!id || isInit) return;
+  // =========================
+  // LOAD KELURAHAN (PURE)
+  // =========================
+  const loadKelurahan = async (id: number | string) => {
+    if (!id) return;
 
-    form.setFieldsValue({ kelurahan_id: null });
+    const fetchId = ++lastFetchKelurahan.current;
 
-    const res = await getKelurahan(id);
-    setKelurahan(res.data);
+    setLoadingKelurahan(true);
+    try {
+      const res = await getKelurahan(Number(id));
+
+      if (fetchId !== lastFetchKelurahan.current) return;
+
+      setKelurahan(res.data);
+    } finally {
+      setLoadingKelurahan(false);
+    }
+  };
+
+  // =========================
+  // ON CHANGE PROVINSI
+  // =========================
+  const onChangeProvinsi = async (id: number | string) => {
+    if (!id) return;
+
+    if (!isInit) {
+      form.setFieldsValue({
+        kota_id: null,
+        kecamatan_id: null,
+        kelurahan_id: null,
+      });
+
+      setKota([]);
+      setKecamatan([]);
+      setKelurahan([]);
+    }
+
+    await loadKota(id);
+  };
+
+  // =========================
+  // ON CHANGE KOTA
+  // =========================
+  const onChangeKota = async (id: number | string) => {
+    if (!id) return;
+
+    if (!isInit) {
+      form.setFieldsValue({
+        kecamatan_id: null,
+        kelurahan_id: null,
+      });
+
+      setKecamatan([]);
+      setKelurahan([]);
+    }
+
+    await loadKecamatan(id);
+  };
+
+  // =========================
+  // ON CHANGE KECAMATAN
+  // =========================
+  const onChangeKecamatan = async (id: number | string) => {
+    if (!id) return;
+
+    if (!isInit) {
+      form.setFieldsValue({
+        kelurahan_id: null,
+      });
+
+      setKelurahan([]);
+    }
+
+    await loadKelurahan(id);
   };
 
   return {
@@ -78,11 +166,22 @@ export function useWilayah(form: any, isInit: boolean) {
     kota,
     kecamatan,
     kelurahan,
+
+    loadingProvinsi,
+    loadingKota,
+    loadingKecamatan,
+    loadingKelurahan,
+
     onChangeProvinsi,
     onChangeKota,
     onChangeKecamatan,
 
-    // 🔥 penting untuk preload edit
+    // 🔥 helper edit mode
+    loadKota,
+    loadKecamatan,
+    loadKelurahan,
+
+    // 🔥 optional setter
     setKota,
     setKecamatan,
     setKelurahan,

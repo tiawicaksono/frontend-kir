@@ -16,6 +16,13 @@ export function useMerk(form: any, isInit: boolean) {
 
   const fetchedMerk = useRef(false);
 
+  // 🔥 race condition guard
+  const lastFetchVarianId = useRef(0);
+  const lastFetchTipeId = useRef(0);
+
+  // =========================
+  // LOAD MASTER MERK
+  // =========================
   useEffect(() => {
     if (fetchedMerk.current) return;
     fetchedMerk.current = true;
@@ -29,51 +36,99 @@ export function useMerk(form: any, isInit: boolean) {
         setLoadingMerk(false);
       }
     };
+
     fetch();
   }, []);
 
-  const onChangeMerk = async (id: number) => {
-    if (!id || isInit) return;
+  // =========================
+  // LOAD VARIAN (PURE FUNCTION)
+  // =========================
+  const loadVarianMerk = async (id: number | string) => {
+    if (!id) return;
 
-    form.setFieldsValue({
-      varian_merk_id: null,
-      tipe_varian_merk_id: null,
-    });
-
-    setVarianMerk([]);
-    setTipeVarianMerk([]);
+    const fetchId = ++lastFetchVarianId.current;
 
     setLoadingVarianMerk(true);
     try {
-      const res = await getVarianMerk(id);
+      const res = await getVarianMerk(Number(id));
+
+      if (fetchId !== lastFetchVarianId.current) return;
+
       setVarianMerk(res.data);
     } finally {
       setLoadingVarianMerk(false);
     }
   };
 
-  const onChangeVarianMerk = async (id: number) => {
-    if (!id || isInit) return;
+  // =========================
+  // LOAD TIPE VARIAN (PURE FUNCTION)
+  // =========================
+  const loadTipeVarianMerk = async (id: number | string) => {
+    if (!id) return;
 
-    form.setFieldsValue({
-      tipe_varian_merk_id: null,
-    });
-
-    setTipeVarianMerk([]);
+    const fetchId = ++lastFetchTipeId.current;
 
     setLoadingTipeVarianMerk(true);
     try {
-      const res = await getTipeVarianMerk(id);
-      setTipeVarianMerk(res.data);
+      const res = await getTipeVarianMerk(Number(id));
+
+      if (fetchId !== lastFetchTipeId.current) return;
+
+      const data = res.data || [];
+      setTipeVarianMerk(data);
+
+      // 🔥 AUTO SELECT jika hanya 1
+      if (data.length === 1) {
+        form.setFieldsValue({
+          tipe_varian_merk_id: Number(data[0].id ?? data[0].value),
+        });
+      }
     } finally {
       setLoadingTipeVarianMerk(false);
     }
+  };
+
+  // =========================
+  // ON CHANGE MERK
+  // =========================
+  const onChangeMerk = async (id: number | string) => {
+    if (!id) return;
+
+    if (!isInit) {
+      form.setFieldsValue({
+        varian_merk_id: null,
+        tipe_varian_merk_id: null,
+      });
+
+      setVarianMerk([]);
+      setTipeVarianMerk([]);
+    }
+
+    await loadVarianMerk(id);
+  };
+
+  // =========================
+  // ON CHANGE VARIAN
+  // =========================
+  const onChangeVarianMerk = async (id: number | string) => {
+    if (!id) return;
+
+    if (!isInit) {
+      form.setFieldsValue({
+        tipe_varian_merk_id: null,
+      });
+
+      setTipeVarianMerk([]);
+    }
+
+    await loadTipeVarianMerk(id);
   };
 
   return {
     merk,
     varianMerk,
     tipeVarianMerk,
+
     loadingMerk,
     loadingVarianMerk,
     loadingTipeVarianMerk,
@@ -81,7 +136,11 @@ export function useMerk(form: any, isInit: boolean) {
     onChangeMerk,
     onChangeVarianMerk,
 
-    // 🔥 setter
+    // 🔥 helper untuk edit mode
+    loadVarianMerk,
+    loadTipeVarianMerk,
+
+    // 🔥 optional setter
     setVarianMerk,
     setTipeVarianMerk,
   };

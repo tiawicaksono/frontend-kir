@@ -14,6 +14,9 @@ export function useJenisKendaraan(form: any, isInit: boolean) {
 
   const fetchedJenis = useRef(false);
 
+  // 🔥 race condition guard
+  const lastFetchId = useRef(0);
+
   // =========================
   // LOAD MASTER JENIS
   // =========================
@@ -37,16 +40,19 @@ export function useJenisKendaraan(form: any, isInit: boolean) {
   }, []);
 
   // =========================
-  // LOAD SUB JENIS (FORCE - UNTUK EDIT)
+  // LOAD SUB JENIS (PURE)
   // =========================
   const loadSubJenis = async (id: number | string) => {
     if (!id) return;
 
-    const numId = Number(id);
+    const fetchId = ++lastFetchId.current;
 
     setLoadingSubJenisKendaraan(true);
     try {
-      const res = await getSubJenisKendaraan(numId);
+      const res = await getSubJenisKendaraan(Number(id));
+
+      if (fetchId !== lastFetchId.current) return;
+
       setSubJenisKendaraan(res.data);
     } catch (err) {
       console.error("getSubJenisKendaraan error:", err);
@@ -56,19 +62,18 @@ export function useJenisKendaraan(form: any, isInit: boolean) {
   };
 
   // =========================
-  // ON CHANGE (USER ACTION)
+  // ON CHANGE
   // =========================
   const onChangeJenisKendaraan = async (id: number | string) => {
     if (!id) return;
 
-    // ❗ saat init (edit), jangan reset field
     if (!isInit) {
       form.setFieldsValue({
         sub_jenis_kendaraan_id: null,
       });
-    }
 
-    setSubJenisKendaraan([]);
+      setSubJenisKendaraan([]);
+    }
 
     await loadSubJenis(id);
   };
@@ -82,10 +87,10 @@ export function useJenisKendaraan(form: any, isInit: boolean) {
 
     onChangeJenisKendaraan,
 
-    // 🔥 dipakai di edit mode
+    // 🔥 helper edit mode
     loadSubJenis,
 
-    // 🔥 dipakai di useKendaraanForm
+    // 🔥 optional setter
     setSubJenisKendaraan,
   };
 }
