@@ -1,9 +1,9 @@
 "use client";
 
 import ComponentCard from "@/components/common/ComponentCard";
-import { useApiKeys } from "./hook/useApiKeys";
-import { useApiKeyActions } from "./hook/useApiKeyAction";
-import { useApiKeyDropdown } from "./hook/useApiKeyDropdown";
+import { useApiKeys } from "@/hooks/api-key/useApiKeys";
+import { useApiKeyActions } from "@/hooks/api-key/useApiKeyAction";
+import { useApiKeyDropdown } from "@/hooks/api-key/useApiKeyDropdown";
 import ApiKeyHeaderMenu from "./components/ApiKeyHeaderMenu";
 import ApiKeyTable from "./components/ApiKeyTable";
 import { useState } from "react";

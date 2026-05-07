@@ -15,7 +15,7 @@ import {
 import KendaraanTable from "./KendaraanTable";
 // 🔥 COMPONENTS
 import KendaraanForm from "./KendaraanForm";
-import { useKendaraanModule } from "./hook/useKendaraanModule";
+import { useKendaraanModule } from "../../../hooks/data-kendaraan/useKendaraanModule";
 import { useRouter } from "next/navigation";
 import { TabItemConfig } from "@/components/ui/tabs/types";
 

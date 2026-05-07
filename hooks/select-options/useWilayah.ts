@@ -1,3 +1,5 @@
+"use client";
+
 import { useEffect, useState, useRef } from "react";
 import {
   getProvinsi,
@@ -5,6 +7,13 @@ import {
   getKecamatan,
   getKelurahan,
 } from "@/services/options.service";
+
+// 🔥 MAPPER WAJIB
+const mapOptions = (data: any[]) =>
+  (data || []).map((item: any) => ({
+    label: item.label || item.nama || item.name || item.text || String(item.id),
+    value: Number(item.id ?? item.value),
+  }));
 
 export function useWilayah(form: any, isInit: boolean) {
   const [provinsi, setProvinsi] = useState<any[]>([]);
@@ -35,7 +44,7 @@ export function useWilayah(form: any, isInit: boolean) {
       setLoadingProvinsi(true);
       try {
         const res = await getProvinsi();
-        setProvinsi(res.data);
+        setProvinsi(mapOptions(res.data));
       } finally {
         setLoadingProvinsi(false);
       }
@@ -45,9 +54,9 @@ export function useWilayah(form: any, isInit: boolean) {
   }, []);
 
   // =========================
-  // LOAD KOTA (PURE)
+  // LOADERS (PURE)
   // =========================
-  const loadKota = async (id: number | string) => {
+  const loadKota = async (id: number) => {
     if (!id) return;
 
     const fetchId = ++lastFetchKota.current;
@@ -58,7 +67,7 @@ export function useWilayah(form: any, isInit: boolean) {
 
       if (fetchId !== lastFetchKota.current) return;
 
-      setKota(res.data);
+      setKota(mapOptions(res.data));
     } finally {
       setLoadingKota(false);
     }
@@ -67,7 +76,7 @@ export function useWilayah(form: any, isInit: boolean) {
   // =========================
   // LOAD KECAMATAN (PURE)
   // =========================
-  const loadKecamatan = async (id: number | string) => {
+  const loadKecamatan = async (id: number) => {
     if (!id) return;
 
     const fetchId = ++lastFetchKecamatan.current;
@@ -78,7 +87,7 @@ export function useWilayah(form: any, isInit: boolean) {
 
       if (fetchId !== lastFetchKecamatan.current) return;
 
-      setKecamatan(res.data);
+      setKecamatan(mapOptions(res.data));
     } finally {
       setLoadingKecamatan(false);
     }
@@ -98,7 +107,7 @@ export function useWilayah(form: any, isInit: boolean) {
 
       if (fetchId !== lastFetchKelurahan.current) return;
 
-      setKelurahan(res.data);
+      setKelurahan(mapOptions(res.data));
     } finally {
       setLoadingKelurahan(false);
     }
@@ -107,7 +116,7 @@ export function useWilayah(form: any, isInit: boolean) {
   // =========================
   // ON CHANGE PROVINSI
   // =========================
-  const onChangeProvinsi = async (id: number | string) => {
+  const onChangeProvinsi = async (id: number) => {
     if (!id) return;
 
     if (!isInit) {
@@ -128,7 +137,7 @@ export function useWilayah(form: any, isInit: boolean) {
   // =========================
   // ON CHANGE KOTA
   // =========================
-  const onChangeKota = async (id: number | string) => {
+  const onChangeKota = async (id: number) => {
     if (!id) return;
 
     if (!isInit) {
@@ -147,7 +156,7 @@ export function useWilayah(form: any, isInit: boolean) {
   // =========================
   // ON CHANGE KECAMATAN
   // =========================
-  const onChangeKecamatan = async (id: number | string) => {
+  const onChangeKecamatan = async (id: number) => {
     if (!id) return;
 
     if (!isInit) {
@@ -176,7 +185,7 @@ export function useWilayah(form: any, isInit: boolean) {
     onChangeKota,
     onChangeKecamatan,
 
-    // 🔥 helper edit mode
+    // 🔥 dipakai prefill
     loadKota,
     loadKecamatan,
     loadKelurahan,

@@ -7,8 +7,8 @@ import {
 } from "@/components/ui/table";
 import { ApiKeys } from "@/types/api-keys.type";
 import ApiKeyRow from "./ApiKeyRow";
-import { useApiKeyDropdown } from "../hook/useApiKeyDropdown";
-import { useApiKeyActions } from "../hook/useApiKeyAction";
+import { useApiKeyDropdown } from "@/hooks/api-key/useApiKeyDropdown";
+import { useApiKeyActions } from "@/hooks/api-key/useApiKeyAction";
 
 const headerCellClass =
   "py-3 font-medium text-left text-gray-500 dark:text-gray-400";

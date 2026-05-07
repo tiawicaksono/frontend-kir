@@ -37,7 +37,7 @@ import StatusPenerbitanForm from "./form/StatusPenerbitanForm";
 import KonfigurasiSumbuForm from "./form/KonfigurasiSumbuForm";
 import BiroJasaForm from "./form/BiroJasaForm";
 
-import { useAppsSupportModule } from "../hook/useAppsSupportModule";
+import { useAppsSupportModule } from "@/hooks/pengaturan/useAppsSupportModule";
 import { TabItemConfig } from "@/components/ui/tabs/types";
 
 export default function HomeAppsSupport() {

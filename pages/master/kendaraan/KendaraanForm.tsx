@@ -7,16 +7,16 @@ import { useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
 import { kendaraanSteps } from "./schema";
 
-import { useWilayah } from "./hook/options/useWilayah";
-import { useMerk } from "./hook/options/useMerk";
-import { useJenisKendaraan } from "./hook/options/useJenisKendaraan";
-import { useKelasJalan } from "./hook/options/useKelasJalan";
-import { useBahanUtama } from "./hook/options/useBahanUtama";
-import { useKonfigurasiSumbu } from "./hook/options/useKonfigurasiSumbu";
-import { useBahanBakar } from "./hook/options/useBahanBakar";
+import { useWilayah } from "@/hooks/select-options/useWilayah";
+import { useMerk } from "@/hooks/select-options/useMerk";
+import { useJenisKendaraan } from "@/hooks/select-options/useJenisKendaraan";
+import { useKelasJalan } from "@/hooks/select-options/useKelasJalan";
+import { useBahanUtama } from "@/hooks/select-options/useBahanUtama";
+import { useKonfigurasiSumbu } from "@/hooks/select-options/useKonfigurasiSumbu";
+import { useBahanBakar } from "@/hooks/select-options/useBahanBakar";
 
-import { useKendaraanForm } from "./hook/useKendaraanForm";
-import { useSelectMap } from "./hook/useSelectMap";
+import { useKendaraanForm } from "@/hooks/data-kendaraan/useKendaraanForm";
+import { useSelectMap } from "@/hooks/data-kendaraan/useSelectMap";
 import StepRenderer from "./component/StepRenderer";
 import AppDivider from "@/components/common/AppDivider";
 

@@ -10,8 +10,8 @@ import DateText from "@/components/common/DateText";
 import ToggleSwitch from "@/components/form/switch/ToggleSwitch";
 import { Dropdown, DropdownItem } from "@/components/ui/dropdown";
 import { ApiKeys } from "@/types/api-keys.type";
-import { useApiKeyDropdown } from "../hook/useApiKeyDropdown";
-import { useApiKeyActions } from "../hook/useApiKeyAction";
+import { useApiKeyDropdown } from "@/hooks/api-key/useApiKeyDropdown";
+import { useApiKeyActions } from "@/hooks/api-key/useApiKeyAction";
 
 const bodyCellClass =
   "text-start py-3 text-gray-500 text-theme-sm dark:text-gray-400";

@@ -32,7 +32,7 @@ import KotaForm from "./form/KotaForm";
 import KecamatanForm from "./form/KecamatanForm";
 import KelurahanForm from "./form/KelurahanForm";
 
-import { useAppsSupportModule } from "../hook/useAppsSupportModule";
+import { useAppsSupportModule } from "@/hooks/pengaturan/useAppsSupportModule";
 import { TabItemConfig } from "@/components/ui/tabs/types";
 
 export default function HomeWilayahManagement() {

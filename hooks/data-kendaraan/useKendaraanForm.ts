@@ -14,9 +14,12 @@ import {
   getSubJenisKendaraan,
 } from "@/services/options.service";
 
-import { mapApiToForm, transformValues } from "../utils/formMapper";
-import { extractFieldsFromSection } from "../utils/schemaHelper";
-import { kendaraanSteps } from "../schema";
+import {
+  mapApiToForm,
+  transformValues,
+} from "../../pages/master/kendaraan/utils/formMapper";
+import { extractFieldsFromSection } from "../../pages/master/kendaraan/utils/schemaHelper";
+import { kendaraanSteps } from "../../pages/master/kendaraan/schema";
 import { useShowAlert } from "@/core/alert/alert.hook";
 
 // 🔥 helper WAJIB (biar label muncul)

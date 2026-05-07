@@ -1,7 +1,7 @@
 "use client";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import HomePendaftaran from "@/pages/pendaftaran/hook/HomePendaftaran";
+import HomePendaftaran from "@/pages/pendaftaran/HomePendaftaran";
 
 export default function DaftarUjiPage() {
   return (
