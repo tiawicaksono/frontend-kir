@@ -2,27 +2,36 @@
 
 import Input from "@/components/form/input/InputField";
 import Label from "@/components/form/Label";
-import Link from "next/link";
 import React, { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useAuth } from "@/core/auth/auth.context";
 import PasswordInput from "@/components/form/form-elements/PasswordField";
 import LoadingButton from "@/components/common/LoadingButton";
 
+// 🔥 SAFE IMPORT HOOK
+import { useAuth } from "@/core/auth/auth.context";
+
 export default function SignInForm() {
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  const router = useRouter();
   const searchParams = useSearchParams();
 
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
 
-  const { login } = useAuth();
-  const router = useRouter();
-
   const [error, setError] = useState<string | null>(null);
   const [showError, setShowError] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  // auto hide alert
+  // 🔥 SAFE GUARD (INI PENTING)
+  let login: any = null;
+
+  try {
+    const auth = useAuth();
+    login = auth?.login;
+  } catch (e) {
+    // ❗ Jangan crash SSR
+    login = null;
+  }
+
   useEffect(() => {
     if (!error) return;
 
@@ -39,17 +48,21 @@ export default function SignInForm() {
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!login) {
+      setError("Auth system belum siap. Silakan reload halaman.");
+      setShowError(true);
+      return;
+    }
+
     setIsSubmitting(true);
     setError(null);
 
     try {
-      // login (AuthContext sudah handle initAuth + set cookie RBAC)
       await login(email, password);
 
-      // ambil intended redirect dari query param
       const redirect = searchParams?.get("redirect");
 
-      // redirect final
       if (redirect && redirect.startsWith("/")) {
         router.replace(redirect);
       } else {
@@ -79,12 +92,9 @@ export default function SignInForm() {
           <form onSubmit={handleLogin}>
             <div className="space-y-6">
               <div>
-                <Label>
-                  Email <span className="text-error-500">*</span>
-                </Label>
+                <Label>Email *</Label>
                 <Input
                   disabled={isSubmitting}
-                  placeholder="info@gmail.com"
                   type="email"
                   value={email}
                   onChange={setEmail}
@@ -99,54 +109,18 @@ export default function SignInForm() {
                 />
               </div>
 
-              <div>
-                <LoadingButton
-                  type="submit"
-                  size="sm"
-                  loading={isSubmitting}
-                  loadingText="Signing in..."
-                >
-                  Sign in
-                </LoadingButton>
-              </div>
+              <LoadingButton
+                type="submit"
+                loading={isSubmitting}
+                loadingText="Signing in..."
+              >
+                Sign in
+              </LoadingButton>
             </div>
           </form>
 
-          <div className="mt-5">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-gray-700 dark:text-gray-400">
-                Don&apos;t have an account?{" "}
-                <Link
-                  href="/signup"
-                  className="text-brand-500 hover:text-brand-600 dark:text-brand-400"
-                >
-                  Sign Up
-                </Link>
-              </span>
-
-              <Link
-                href="/reset-password"
-                className="text-sm text-brand-500 hover:text-brand-600 dark:text-brand-400"
-              >
-                Forgot password?
-              </Link>
-            </div>
-          </div>
-
-          {/* ALERT */}
           {(error || showError) && (
-            <div
-              className={`
-                absolute left-0 right-0 mt-4 rounded-lg border border-red-200
-                bg-red-50 p-3 text-sm text-red-700
-                transition-all duration-400
-                ${
-                  showError
-                    ? "opacity-100 scale-100 translate-y-0"
-                    : "opacity-0 scale-95 translate-y-2"
-                }
-              `}
-            >
+            <div className="absolute left-0 right-0 mt-4 rounded-lg bg-red-50 p-3 text-sm text-red-700 border border-red-200">
               {error}
             </div>
           )}

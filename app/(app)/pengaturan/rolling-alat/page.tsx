@@ -3,6 +3,8 @@
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import HomeRollingAlat from "@/pages/pengaturan/rolling-alat/HomeRollingAlat";
 
+export const dynamic = "force-dynamic";
+
 export default function RollingAlatPage() {
   return (
     <div>

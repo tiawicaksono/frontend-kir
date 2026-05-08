@@ -6,7 +6,9 @@ import ConfirmDialog from "./confirm.dialog";
 
 export function ConfirmProvider({ children }: { children: React.ReactNode }) {
   const [options, setOptions] = useState<ConfirmOptions | null>(null);
-  const [resolver, setResolver] = useState<(value: boolean) => void>();
+  const [resolver, setResolver] = useState<((value: boolean) => void) | null>(
+    null,
+  );
 
   const confirm = (opts: ConfirmOptions) => {
     setOptions(opts);

@@ -17,6 +17,13 @@ export const AlertContext = createContext<AlertContextType | null>(null);
 
 export const useAlert = () => {
   const ctx = useContext(AlertContext);
-  if (!ctx) throw new Error("useAlert must be used inside AlertProvider");
+
+  // 🔥 FIX: jangan throw di SSR
+  if (!ctx) {
+    return {
+      showAlert: () => {},
+    } as AlertContextType;
+  }
+
   return ctx;
 };

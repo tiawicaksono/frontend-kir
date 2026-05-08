@@ -2,7 +2,7 @@ import { RollingAlatItem } from "@/services/rolling-alat.service";
 import { Checkbox } from "antd";
 
 type Props = {
-  item: RollingAlatItem;
+  item?: RollingAlatItem; // 🔥 dibuat optional biar aman saat prerender
   onCheckboxChange: (
     key: number,
     field: keyof Omit<
@@ -14,13 +14,16 @@ type Props = {
 };
 
 export default function UserItemCard({ item, onCheckboxChange }: Props) {
+  // 🔥 guard utama biar tidak crash saat undefined
+  if (!item) return null;
+
   return (
     <div className="flex flex-col w-full">
-      <span className="font-semibold mb-1">{item.title}</span>
+      <span className="font-semibold mb-1">{item.title ?? "-"}</span>
 
       <div className="flex items-center gap-3 flex-nowrap">
         <Checkbox
-          checked={item.prauji}
+          checked={!!item.prauji}
           onChange={(e) =>
             onCheckboxChange(item.key, "prauji", e.target.checked)
           }
@@ -29,7 +32,7 @@ export default function UserItemCard({ item, onCheckboxChange }: Props) {
         </Checkbox>
 
         <Checkbox
-          checked={item.emisi}
+          checked={!!item.emisi}
           onChange={(e) =>
             onCheckboxChange(item.key, "emisi", e.target.checked)
           }
@@ -38,7 +41,7 @@ export default function UserItemCard({ item, onCheckboxChange }: Props) {
         </Checkbox>
 
         <Checkbox
-          checked={item.lampu}
+          checked={!!item.lampu}
           onChange={(e) =>
             onCheckboxChange(item.key, "lampu", e.target.checked)
           }
@@ -47,7 +50,7 @@ export default function UserItemCard({ item, onCheckboxChange }: Props) {
         </Checkbox>
 
         <Checkbox
-          checked={item.pitlift}
+          checked={!!item.pitlift}
           onChange={(e) =>
             onCheckboxChange(item.key, "pitlift", e.target.checked)
           }
@@ -56,7 +59,7 @@ export default function UserItemCard({ item, onCheckboxChange }: Props) {
         </Checkbox>
 
         <Checkbox
-          checked={item.rem}
+          checked={!!item.rem}
           onChange={(e) => onCheckboxChange(item.key, "rem", e.target.checked)}
         >
           Rem

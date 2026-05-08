@@ -3,6 +3,8 @@
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import HomeAppsSupport from "@/pages/pengaturan/apps-support/HomeAppsSupport";
 
+export const dynamic = "force-dynamic";
+
 export default function WilayahPage() {
   return (
     <div>

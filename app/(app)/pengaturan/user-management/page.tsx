@@ -3,6 +3,8 @@
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import HomeUserManagement from "@/pages/pengaturan/user-management/HomeUserManagement";
 
+export const dynamic = "force-dynamic";
+
 export default function UserManagementPage() {
   return (
     <div>

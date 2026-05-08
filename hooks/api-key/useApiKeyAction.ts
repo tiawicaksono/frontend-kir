@@ -15,37 +15,27 @@ export function useApiKeyActions(
 ) {
   const [loadingId, setLoadingId] = useState<number | null>(null);
   const [loadingDeleteId, setLoadingDeleteId] = useState<number | null>(null);
-  const { confirm } = useConfirm();
-  const { showErrorAlert, showSuccessAlert } = useShowAlert();
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const { confirm } = useConfirm(); // ✔ now safe karena provider sudah global
+  const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
   const handleToggle = async (id: number, value: boolean) => {
     setLoadingId(id);
 
     const previous = apiKeys;
 
-    // 🔥 CASE: Aktifkan → semua jadi false kecuali yang dipilih
-    if (value) {
-      setApiKeys(
-        apiKeys.map((i) => ({
-          ...i,
-          isActive: i.id === id,
-        })),
-      );
-    }
-
-    // 🔥 CASE: Nonaktifkan → normal (biar backend validasi)
-    else {
-      setApiKeys(
-        apiKeys.map((i) => (i.id === id ? { ...i, isActive: false } : i)),
-      );
-    }
+    setApiKeys(
+      apiKeys.map((i) => ({
+        ...i,
+        isActive: value ? i.id === id : i.id === id ? false : i.isActive,
+      })),
+    );
 
     try {
       await updateApiKeyStatus(id, value);
       showSuccessAlert("Status berhasil diubah");
     } catch (err) {
-      // rollback kalau gagal
       setApiKeys(previous);
       showErrorAlert(err, "Status gagal diubah");
     } finally {
@@ -64,8 +54,8 @@ export function useApiKeyActions(
     if (!confirmed) return;
 
     setLoadingDeleteId(id);
-    const previous = apiKeys;
 
+    const previous = apiKeys;
     setApiKeys(apiKeys.filter((i) => i.id !== id));
 
     try {
@@ -79,11 +69,7 @@ export function useApiKeyActions(
     }
   };
 
-  const handleCreate = async (data: {
-    name: string;
-    urlApi: string;
-    token: string;
-  }) => {
+  const handleCreate = async (data: any) => {
     try {
       setIsSubmitting(true);
       const newItem = await createApiKey(data);
@@ -98,28 +84,10 @@ export function useApiKeyActions(
     }
   };
 
-  const handleUpdate = async (
-    id: number,
-    data: {
-      name: string;
-      urlApi: string;
-      token: string;
-    },
-  ): Promise<boolean> => {
+  const handleUpdate = async (id: number, data: any) => {
     const previous = apiKeys;
 
-    setApiKeys(
-      apiKeys.map((i) =>
-        i.id === id
-          ? {
-              ...i,
-              name: data.name,
-              urlApi: data.urlApi,
-              token: data.token,
-            }
-          : i,
-      ),
-    );
+    setApiKeys(apiKeys.map((i) => (i.id === id ? { ...i, ...data } : i)));
 
     try {
       setIsSubmitting(true);

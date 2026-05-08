@@ -1,30 +1,34 @@
-import { Form, Input, InputNumber, DatePicker, Select } from "antd";
-import { FieldSchema } from "../type";
-import { generateRules } from "../generateRules";
+"use client";
 
-export default function FieldRenderer({
-  field,
-  extra,
-}: {
-  field: FieldSchema;
+import { Form, Input, InputNumber, DatePicker, Select } from "antd";
+import { FieldSchema } from "@/utils/kendaraan/type";
+import { generateRules } from "@/utils/kendaraan/generateRules";
+
+type Props = {
+  field?: FieldSchema;
   extra?: any;
-}) {
+};
+
+export default function FieldRenderer({ field, extra }: Props) {
+  // 🛡️ SAFETY GUARD (WAJIB biar SSR gak crash)
+  if (!field) return null;
+
   const commonProps = {
-    name: field.name,
-    label: field.label,
+    name: field?.name,
+    label: field?.label,
     rules: generateRules(field),
   };
 
-  switch (field.type) {
+  switch (field?.type) {
     case "text":
       return (
         <Form.Item
           {...commonProps}
           normalize={(value) =>
-            field.uppercase && value ? value.toUpperCase() : value
+            field?.uppercase && value ? String(value).toUpperCase() : value
           }
         >
-          <Input placeholder={`Masukkan ${field.label}`} />
+          <Input placeholder={`Masukkan ${field?.label || ""}`} />
         </Form.Item>
       );
 
@@ -38,7 +42,7 @@ export default function FieldRenderer({
               value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
             }
             parser={(value) => (value ? Number(value.replace(/,/g, "")) : 0)}
-            suffix={field.suffix || ""}
+            suffix={field?.suffix || ""}
           />
         </Form.Item>
       );
@@ -49,8 +53,8 @@ export default function FieldRenderer({
           <InputNumber
             style={{ width: "100%" }}
             step={0.01}
-            precision={2} // bisa kamu adjust
-            suffix={field.suffix || ""}
+            precision={2}
+            suffix={field?.suffix || ""}
           />
         </Form.Item>
       );
@@ -68,7 +72,7 @@ export default function FieldRenderer({
           <Select
             showSearch
             optionFilterProp="label"
-            options={extra?.options || field.options || []}
+            options={extra?.options ?? field?.options ?? []}
             fieldNames={{ label: "label", value: "value" }}
             onChange={extra?.onChange}
             loading={extra?.loading}

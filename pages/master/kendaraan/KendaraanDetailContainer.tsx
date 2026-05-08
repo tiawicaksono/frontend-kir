@@ -14,7 +14,7 @@ import DetailHeaderAction from "./component/DetailHeaderAction";
 import { Card, Tabs, Tag, Spin, Button } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import type { TabBarExtraMap } from "@rc-component/tabs/es/interface";
-import { safe } from "./utils/formatDetailKendaraan";
+import { safe } from "@/utils/kendaraan/formatDetailKendaraan";
 
 type PositionType = "left" | "right";
 

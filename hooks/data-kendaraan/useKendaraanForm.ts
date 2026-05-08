@@ -17,9 +17,9 @@ import {
 import {
   mapApiToForm,
   transformValues,
-} from "../../pages/master/kendaraan/utils/formMapper";
-import { extractFieldsFromSection } from "../../pages/master/kendaraan/utils/schemaHelper";
-import { kendaraanSteps } from "../../pages/master/kendaraan/schema";
+} from "../../utils/kendaraan/formMapper";
+import { extractFieldsFromSection } from "../../utils/kendaraan/schemaHelper";
+import { kendaraanSteps } from "../../utils/kendaraan/schema";
 import { useShowAlert } from "@/core/alert/alert.hook";
 
 // 🔥 helper WAJIB (biar label muncul)

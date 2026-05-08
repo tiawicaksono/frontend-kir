@@ -5,28 +5,35 @@ import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 import TableActions from "@/components/ui/dynamic-table/TableActions";
 
 export default function UserTab({ table, onEdit, onDelete, onReload }: any) {
-  useEffect(() => {
-    table.fetchData();
-  }, [table.params]);
+  // 👇 SAFE GUARD
+  if (!table) return null;
+
+  const params = table.params ?? { page: 1, limit: 10 };
+
   const key = table.config?.primary_key || "id";
+
+  useEffect(() => {
+    table?.fetchData?.();
+  }, [table?.params]);
+
   return (
     <DynamicTable
-      columns={table.columns}
-      dataSource={table.dataSource}
-      loading={table.loading}
-      total={table.total}
-      page={table.params.page}
-      pageSize={table.params.limit}
-      onChange={table.setParams}
-      onReload={onReload || table.fetchData}
-      rowKeyField={table.config?.primary_key}
+      columns={table?.columns ?? []}
+      dataSource={table?.dataSource ?? []}
+      loading={table?.loading ?? false}
+      total={table?.total ?? 0}
+      page={params.page}
+      pageSize={params.limit}
+      onChange={table?.setParams ?? (() => {})}
+      onReload={onReload || table?.fetchData}
+      rowKeyField={table?.config?.primary_key || "id"}
       showActions
       renderActions={(record) => (
         <TableActions
           record={record}
           rowKeyField={key}
           onEdit={() => onEdit(record)}
-          onDelete={() => onDelete(record[key])}
+          onDelete={() => onDelete(record?.[key])}
           actions={["edit", "delete"]}
         />
       )}

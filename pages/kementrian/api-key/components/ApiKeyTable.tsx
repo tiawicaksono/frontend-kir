@@ -14,7 +14,7 @@ const headerCellClass =
   "py-3 font-medium text-left text-gray-500 dark:text-gray-400";
 
 interface Props {
-  apiKeys: ApiKeys[];
+  apiKeys?: ApiKeys[]; // 👈 IMPORTANT: optional
   loading: boolean;
   dropdown: ReturnType<typeof useApiKeyDropdown>;
   actions: ReturnType<typeof useApiKeyActions>;
@@ -28,6 +28,9 @@ export default function ApiKeyTable({
   actions,
   onEdit,
 }: Props) {
+  // 👇 SAFE FALLBACK
+  const safeApiKeys = apiKeys ?? [];
+
   return (
     <div className="max-w-full overflow-x-auto">
       {loading && (
@@ -57,13 +60,13 @@ export default function ApiKeyTable({
           </TableHeader>
 
           <TableBody className="divide-y">
-            {apiKeys.length === 0 && (
+            {safeApiKeys.length === 0 && (
               <TableRow>
                 <TableCell colSpan={6}>No Data Found</TableCell>
               </TableRow>
             )}
 
-            {apiKeys.map((item) => (
+            {safeApiKeys.map((item) => (
               <ApiKeyRow
                 key={item.id}
                 item={item}

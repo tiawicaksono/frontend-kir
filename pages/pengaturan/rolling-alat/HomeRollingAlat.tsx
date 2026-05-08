@@ -3,7 +3,7 @@
 import { Spin, Button } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 import RollingAlatTransfer from "./components/RollingAlatTransfer";
-import { useRollingAlat } from "./hook/useRollingAlat";
+import { useRollingAlat } from "@/hooks/rolling-alat/useRollingAlat";
 import ComponentCard from "@/components/common/ComponentCard";
 
 export default function HomeRollingAlat() {

@@ -4,10 +4,10 @@ import { useAlert } from "@/core/alert/alert.context";
 import { getErrorMessage } from "@/utils/errorHandler";
 
 export function useShowAlert() {
-  const { showAlert } = useAlert();
+  const alert = useAlert();
 
   const showErrorAlert = (error: unknown, fallback?: string) => {
-    showAlert({
+    alert.showAlert({
       variant: "error",
       title: "Error",
       message: getErrorMessage(error, fallback),
@@ -15,7 +15,7 @@ export function useShowAlert() {
   };
 
   const showSuccessAlert = (message = "Success") => {
-    showAlert({
+    alert.showAlert({
       variant: "success",
       title: "Success",
       message,

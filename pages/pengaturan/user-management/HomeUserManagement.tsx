@@ -10,10 +10,10 @@ import { UserOutlined, SafetyOutlined } from "@ant-design/icons";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { fetchUserManagementCounts } from "@/services/user-management.service";
 
-import { useUserManagementTable } from "./hook/useUserManagementTable";
-import { useUserManagementAction } from "./hook/useUserManagementAction";
-import { useRoleManagementTable } from "./hook/useRoleManagementTable";
-import { useRoleManagementAction } from "./hook/useRoleManagementAction";
+import { useUserManagementTable } from "@/hooks/user-management/useUserManagementTable";
+import { useUserManagementAction } from "@/hooks/user-management/useUserManagementAction";
+import { useRoleManagementTable } from "@/hooks/user-management/useRoleManagementTable";
+import { useRoleManagementAction } from "@/hooks/user-management/useRoleManagementAction";
 
 import { TabItemConfig } from "@/components/ui/tabs/types";
 

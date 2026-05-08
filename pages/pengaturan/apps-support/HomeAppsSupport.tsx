@@ -1,44 +1,41 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
 import AppTabs from "@/components/ui/tabs/AppTabs";
 import { BookOutlined } from "@ant-design/icons";
-import { useEffect, useState } from "react";
-
-// 🔥 SERVICES
-import {
-  createStatusPenerbitan,
-  updateStatusPenerbitan,
-  deleteStatusPenerbitan,
-  fetchTableDataStatusPenerbitan,
-  fetchStatusPenerbitanCounts,
-  createBahanUtama,
-  updateBahanUtama,
-  deleteBahanUtama,
-  fetchTableDataBahanUtama,
-  fetchBahanUtamaCounts,
-  createKonfigurasiSumbu,
-  updateKonfigurasiSumbu,
-  deleteKonfigurasiSumbu,
-  fetchTableDataKonfigurasiSumbu,
-  fetchKonfigurasiSumbuCounts,
-  fetchBiroJasaCounts,
-  fetchTableDataBiroJasa,
-  createBiroJasa,
-  updateBiroJasa,
-  deleteBiroJasa,
-} from "@/services/apps-support.service";
 
 import AppsSupportTable from "../AppsSupportTable";
 
-// 🔥 FORMS
-import BahanUtamaKendaraanForm from "./form/BahanUtamaKendaraanForm";
 import StatusPenerbitanForm from "./form/StatusPenerbitanForm";
+import BahanUtamaKendaraanForm from "./form/BahanUtamaKendaraanForm";
 import KonfigurasiSumbuForm from "./form/KonfigurasiSumbuForm";
 import BiroJasaForm from "./form/BiroJasaForm";
 
 import { useAppsSupportModule } from "@/hooks/pengaturan/useAppsSupportModule";
-import { TabItemConfig } from "@/components/ui/tabs/types";
+
+import {
+  fetchStatusPenerbitanCounts,
+  fetchBahanUtamaCounts,
+  fetchKonfigurasiSumbuCounts,
+  fetchBiroJasaCounts,
+  fetchTableDataStatusPenerbitan,
+  fetchTableDataBahanUtama,
+  fetchTableDataKonfigurasiSumbu,
+  fetchTableDataBiroJasa,
+  createStatusPenerbitan,
+  updateStatusPenerbitan,
+  deleteStatusPenerbitan,
+  createBahanUtama,
+  updateBahanUtama,
+  deleteBahanUtama,
+  createKonfigurasiSumbu,
+  updateKonfigurasiSumbu,
+  deleteKonfigurasiSumbu,
+  createBiroJasa,
+  updateBiroJasa,
+  deleteBiroJasa,
+} from "@/services/apps-support.service";
 
 export default function HomeAppsSupport() {
   const [counts, setCounts] = useState({
@@ -49,28 +46,25 @@ export default function HomeAppsSupport() {
   });
 
   const loadCounts = async () => {
-    try {
-      const resSp = await fetchStatusPenerbitanCounts();
-      const resBu = await fetchBahanUtamaCounts();
-      const resKs = await fetchKonfigurasiSumbuCounts();
-      const resBj = await fetchBiroJasaCounts();
+    const res = await Promise.all([
+      fetchStatusPenerbitanCounts(),
+      fetchBahanUtamaCounts(),
+      fetchKonfigurasiSumbuCounts(),
+      fetchBiroJasaCounts(),
+    ]);
 
-      setCounts({
-        countStatusPenerbitan: resSp.countData ?? 0,
-        countBahanUtama: resBu.countData ?? 0,
-        countKonfigurasiSumbu: resKs.countData ?? 0,
-        countBiroJasa: resBj.countData ?? 0,
-      });
-    } catch (err) {
-      console.error(err);
-    }
+    setCounts({
+      countStatusPenerbitan: res[0]?.countData ?? 0,
+      countBahanUtama: res[1]?.countData ?? 0,
+      countKonfigurasiSumbu: res[2]?.countData ?? 0,
+      countBiroJasa: res[3]?.countData ?? 0,
+    });
   };
 
   useEffect(() => {
     loadCounts();
   }, []);
 
-  // 🔥 MODULES
   const StatusPenerbitan = useAppsSupportModule({
     fetcher: fetchTableDataStatusPenerbitan,
     service: {
@@ -115,65 +109,48 @@ export default function HomeAppsSupport() {
     loadCounts,
   });
 
-  // 🔥 CONFIG FINAL (NO MAP)
-  const appsSupportConfig: TabItemConfig[] = [
+  const tabs = [
     {
-      key: "status-penerbitan",
+      key: "status",
       label: "Status Penerbitan",
       icon: <BookOutlined />,
       module: StatusPenerbitan,
       Table: AppsSupportTable,
       Form: StatusPenerbitanForm,
       badge: counts.countStatusPenerbitan,
-
-      showAction: true,
-      actionLabel: "Add Status Penerbitan",
-      actionType: "modal",
     },
     {
-      key: "bahan-utama",
+      key: "bahan",
       label: "Bahan Utama",
       icon: <BookOutlined />,
       module: BahanUtama,
       Table: AppsSupportTable,
       Form: BahanUtamaKendaraanForm,
       badge: counts.countBahanUtama,
-
-      showAction: true,
-      actionLabel: "Add Bahan Utama",
-      actionType: "modal",
     },
     {
-      key: "konfigurasi-sumbu",
+      key: "sumbu",
       label: "Konfigurasi Sumbu",
       icon: <BookOutlined />,
       module: KonfigurasiSumbu,
       Table: AppsSupportTable,
       Form: KonfigurasiSumbuForm,
       badge: counts.countKonfigurasiSumbu,
-
-      showAction: true,
-      actionLabel: "Add Konfigurasi Sumbu",
-      actionType: "modal",
     },
     {
-      key: "biro-jasa",
+      key: "biro",
       label: "Biro Jasa",
       icon: <BookOutlined />,
       module: BiroJasa,
       Table: AppsSupportTable,
       Form: BiroJasaForm,
       badge: counts.countBiroJasa,
-
-      showAction: true,
-      actionLabel: "Add Biro Jasa",
-      actionType: "modal",
     },
   ];
 
   return (
     <ComponentCard title="Apps Support Management">
-      <AppTabs defaultActiveKey="status-penerbitan" items={appsSupportConfig} />
+      <AppTabs defaultActiveKey="status" items={tabs} />
     </ComponentCard>
   );
 }

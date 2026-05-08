@@ -5,7 +5,7 @@ import { LeftOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
 import ComponentCard from "@/components/common/ComponentCard";
-import { kendaraanSteps } from "./schema";
+import { kendaraanSteps } from "@/utils/kendaraan/schema";
 
 import { useWilayah } from "@/hooks/select-options/useWilayah";
 import { useMerk } from "@/hooks/select-options/useMerk";

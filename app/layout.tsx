@@ -1,10 +1,5 @@
-import { Outfit } from "next/font/google";
 import "./globals.css";
 import { AppProviders } from "./providers";
-
-const outfit = Outfit({
-  subsets: ["latin"],
-});
 
 export default function RootLayout({
   children,
@@ -13,7 +8,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={`${outfit.className} dark:bg-gray-900`}>
+      <body>
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

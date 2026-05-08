@@ -4,21 +4,28 @@ import { useState } from "react";
 import { Copy, Check } from "lucide-react";
 
 interface ApiKeyFieldProps {
-  value: string;
+  value?: string; // 👈 IMPORTANT: optional biar aman SSR
 }
 
 export default function ApiKeyField({ value }: ApiKeyFieldProps) {
   const [copied, setCopied] = useState(false);
 
-  const maskedValue = `${value.slice(0, 7)}********${value.slice(-4)}`;
+  // 👇 SAFE GUARD
+  const safeValue = value ?? "";
+
+  // kalau kosong, jangan slice
+  const maskedValue =
+    safeValue.length > 0
+      ? `${safeValue.slice(0, 7)}********${safeValue.slice(-4)}`
+      : "************";
 
   const handleCopy = async () => {
-    await navigator.clipboard.writeText(value);
+    if (!safeValue) return;
+
+    await navigator.clipboard.writeText(safeValue);
     setCopied(true);
 
-    setTimeout(() => {
-      setCopied(false);
-    }, 1500);
+    setTimeout(() => setCopied(false), 1500);
   };
 
   return (

@@ -2,7 +2,7 @@ import { ApiIntegrations } from "@/types/api-integrations.type";
 import ApiIntegrationCard from "@/pages/kementrian/api-integration/ApiIntegrationCard";
 
 interface Props {
-  data: ApiIntegrations[];
+  data?: ApiIntegrations[]; // 👈 IMPORTANT: optional
   loading: boolean;
   onSyncSingle?: (item: ApiIntegrations) => Promise<void>;
   loadingMap?: Record<number, boolean>;
@@ -14,6 +14,9 @@ export default function ApiIntegrationGrid({
   onSyncSingle,
   loadingMap = {},
 }: Props) {
+  // 👇 FIX: default fallback supaya tidak undefined
+  const safeData = data ?? [];
+
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -24,13 +27,13 @@ export default function ApiIntegrationGrid({
     );
   }
 
-  if (!data.length) {
+  if (safeData.length === 0) {
     return <p className="text-gray-500">Data tidak tersedia</p>;
   }
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-      {data.map((item) => (
+      {safeData.map((item) => (
         <ApiIntegrationCard
           key={item.id}
           data={item}
