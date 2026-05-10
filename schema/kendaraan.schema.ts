@@ -407,7 +407,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "isi_silinder",
                   label: "Isi Silinder",
@@ -417,7 +417,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "daya_motor",
                   label: "Daya Motor",
@@ -427,7 +427,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "bahan_bakar_id",
                   label: "Bahan Bakar",
@@ -445,7 +445,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "panjang_utama",
                   label: "Panjang Utama",
@@ -455,7 +455,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "lebar_utama",
                   label: "Lebar Utama",
@@ -465,7 +465,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "tinggi_utama",
                   label: "Tinggi Utama",
@@ -479,7 +479,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "panjang_bak",
                   label: "Panjang Bak",
@@ -488,7 +488,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "lebar_bak",
                   label: "Lebar Bak",
@@ -497,7 +497,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "tinggi_bak",
                   label: "Tinggi Bak",
@@ -510,7 +510,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "roh",
                   label: "Julur Belakang (ROH)",
@@ -520,7 +520,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "foh",
                   label: "Julur Depan (FOH)",
@@ -530,7 +530,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "jarak_terendah",
                   label: "Jarak Terendah",
@@ -775,7 +775,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "jbb",
                   label: "JBB",
@@ -785,7 +785,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "jbkb",
                   label: "JBKB",
@@ -795,7 +795,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "jbki",
                   label: "JBKI",
@@ -809,7 +809,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 12,
+                span: 6,
                 field: {
                   name: "mst",
                   label: "MST",
@@ -819,7 +819,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 12,
+                span: 6,
                 field: {
                   name: "volume_tera",
                   label: "Volume Tera",
@@ -832,7 +832,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "ukuran_qr",
                   label: "q/r",
@@ -840,7 +840,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "ukuran_p1",
                   label: "p1",
@@ -848,7 +848,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "ukuran_p2",
                   label: "p2",
@@ -865,7 +865,7 @@ export const kendaraanSteps: StepSchema[] = [
           {
             cols: [
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "jenis_muatan",
                   label: "Jenis Muatan",
@@ -873,7 +873,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "berat_jenis_muatan",
                   label: "Berat Jenis Muatan (N/m3)",
@@ -882,7 +882,7 @@ export const kendaraanSteps: StepSchema[] = [
                 },
               },
               {
-                span: 8,
+                span: 6,
                 field: {
                   name: "volume_muatan",
                   label: "Volume Muatan (m3)",

@@ -14,27 +14,10 @@ import {
   getSubJenisKendaraan,
 } from "@/services/options.service";
 
-import {
-  mapApiToForm,
-  transformValues,
-} from "../../utils/kendaraan/formMapper";
-import { extractFieldsFromSection } from "../../utils/kendaraan/schemaHelper";
-import { kendaraanSteps } from "../../utils/kendaraan/schema";
+import { mapApiToForm, transformValues } from "@/utils/formHelper";
+import { extractSectionFields } from "@/utils/for-schema/schemaHelper";
+import { kendaraanSteps } from "@/schema/kendaraan.schema";
 import { useShowAlert } from "@/core/alert/alert.hook";
-
-// 🔥 helper WAJIB (biar label muncul)
-// const mapOptions = (data: any[]) =>
-//   data.map((item) => ({
-//     label:
-//       item.label ||
-//       item.nama ||
-//       item.name ||
-//       item.text ||
-//       item.kota_nama_kota ||
-//       item.kecamatan_nama_kecamatan ||
-//       item.kelurahan_nama_kelurahan,
-//     value: Number(item.value ?? item.id),
-//   }));
 
 export function useKendaraanForm({
   form,
@@ -150,9 +133,7 @@ export function useKendaraanForm({
   // =========================
   const next = async (step: any) => {
     try {
-      const fields = step.sections.flatMap((s: any) =>
-        extractFieldsFromSection(s),
-      );
+      const fields = step.sections.flatMap((s: any) => extractSectionFields(s));
 
       await form.validateFields(fields);
     } catch (err) {

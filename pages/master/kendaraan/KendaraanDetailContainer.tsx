@@ -7,16 +7,14 @@ import { useEffect, useMemo, useState } from "react";
 import { detailKendaraan } from "@/services/data-kendaraan.service";
 import { fetchRiwayatUji } from "@/services/data-kendaraan.service";
 
-import DetailTabDataKendaraan from "./component/DetailTabDataKendaraan";
-import DetailTabRiwayat from "./component/DetailTabRiwayat";
-import DetailHeaderAction from "./component/DetailHeaderAction";
+import DetailTabDataKendaraan from "@/components/data-kendaraan/DetailTabDataKendaraan";
+import DetailTabRiwayat from "@/components/data-kendaraan/DetailTabRiwayat";
+import DetailHeaderAction from "@/components/data-kendaraan/DetailHeaderAction";
 
 import { Card, Tabs, Tag, Spin, Button } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import type { TabBarExtraMap } from "@rc-component/tabs/es/interface";
-import { safe } from "@/utils/kendaraan/formatDetailKendaraan";
-
-type PositionType = "left" | "right";
+import { safe } from "@/utils/formatDetailKendaraan";
 
 export default function KendaraanDetailContainer({ id }: { id: string }) {
   const router = useRouter();

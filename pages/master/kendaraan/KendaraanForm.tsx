@@ -5,7 +5,7 @@ import { LeftOutlined, RightOutlined, SaveOutlined } from "@ant-design/icons";
 import { useState } from "react";
 
 import ComponentCard from "@/components/common/ComponentCard";
-import { kendaraanSteps } from "@/utils/kendaraan/schema";
+import { kendaraanSteps } from "@/schema/kendaraan.schema";
 
 import { useWilayah } from "@/hooks/select-options/useWilayah";
 import { useMerk } from "@/hooks/select-options/useMerk";
@@ -17,12 +17,13 @@ import { useBahanBakar } from "@/hooks/select-options/useBahanBakar";
 
 import { useKendaraanForm } from "@/hooks/data-kendaraan/useKendaraanForm";
 import { useSelectMap } from "@/hooks/data-kendaraan/useSelectMap";
-import StepRenderer from "./component/StepRenderer";
+import StepRenderer from "@/components/data-kendaraan/StepRenderer";
 import AppDivider from "@/components/common/AppDivider";
 
 export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
   const [form] = Form.useForm();
   const [current, setCurrent] = useState(0);
+  const values = Form.useWatch([], form) || {};
 
   // 🔥 INIT CONTROL (source of truth)
   const [isInit, setIsInit] = useState(true);
@@ -101,7 +102,12 @@ export default function KendaraanForm({ mode = "create", id, onSuccess }: any) {
               {stepItem.sections.map((section: any, i: number) => (
                 <div key={i}>
                   <AppDivider title={section.title} />
-                  <StepRenderer section={section} selectMap={selectMap} />
+                  <StepRenderer
+                    section={section}
+                    selectMap={selectMap}
+                    wilayah={wilayah}
+                    values={values}
+                  />
                 </div>
               ))}
             </div>

@@ -1,8 +1,18 @@
-export type FieldType = "text" | "integer" | "decimal" | "date" | "select";
+export type FieldType =
+  | "text"
+  | "integer"
+  | "decimal"
+  | "date"
+  | "select"
+  | "textarea"
+  | "checkbox"
+  | "radio"
+  | "custom"
+  | "search";
 
 export type OptionType = {
   label: string;
-  value: string | number;
+  value: string | number | boolean;
 };
 
 export type FieldSchema = {
@@ -14,6 +24,16 @@ export type FieldSchema = {
   options?: OptionType[];
   uppercase?: boolean;
   suffix?: string;
+  span?: number;
+  readonly?: boolean;
+  disabled?: boolean;
+  placeholder?: string;
+  min?: number;
+  max?: number;
+  step?: number;
+  hidden?: boolean;
+  rows?: number;
+  visible?: (values: any) => boolean;
 };
 
 export type ColSchema = {

@@ -65,3 +65,8 @@ export const getStatusPenerbitan = () =>
  * BIRO JASA
  */
 export const getBiroJasa = () => api.get(`${API_URL}/options/birojasa`);
+
+/**
+ * AREA
+ */
+export const getArea = () => api.get(`${API_URL}/options/area`);

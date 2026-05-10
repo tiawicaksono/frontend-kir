@@ -24,12 +24,16 @@ export function proxy(request: NextRequest) {
 
   // 🔴 belum login
   if (!routesCookie) {
-    if (!isAuthPage) {
-      const url = new URL("/signin", request.url);
-      url.searchParams.set("redirect", pathname + search);
-      return NextResponse.redirect(url);
+    if (isAuthPage) {
+      return NextResponse.next();
     }
-    return NextResponse.next();
+
+    const url = new URL("/signin", request.url);
+
+    // hanya pathname asli
+    url.searchParams.set("redirect", pathname);
+
+    return NextResponse.redirect(url);
   }
 
   // 🟢 sudah login → cegah balik ke login

@@ -1,31 +1,39 @@
+// /app/pendaftaran/page.tsx
 "use client";
 
-import { useEffect, useState } from "react";
-import {
-  Row,
-  Col,
-  Card,
-  Form,
-  Select,
-  Input,
-  Button,
-  message,
-  DatePicker,
-} from "antd";
+import { useEffect, useMemo, useState } from "react";
+
+import { Form, Card, Button, message, Row, Col } from "antd";
+
 import { SaveOutlined } from "@ant-design/icons";
+
 import dayjs from "dayjs";
+
+import SearchKendaraan from "./SearchKendaraan";
+
+import { pendaftaranSections } from "@/schema/pendaftaran.schema";
+
+import { useWilayah } from "@/hooks/select-options/useWilayah";
 
 import {
   searchKendaraan,
   createPendaftaran,
 } from "@/services/pendaftaran.service";
-import { getStatusPenerbitan, getBiroJasa } from "@/services/options.service";
 
-import AppDivider from "@/components/common/AppDivider";
-import { useWilayah } from "@/hooks/select-options/useWilayah";
-import Search from "antd/es/input/Search";
+import {
+  getStatusPenerbitan,
+  getBiroJasa,
+  getArea,
+} from "@/services/options.service";
 
-// 🔥 mapper kecil (biar konsisten)
+import FormRenderer from "@/components/FormRenderer";
+
+import { mapApiToForm, mergePayload } from "@/utils/formHelper";
+
+// ====================================
+// OPTION MAPPER
+// ====================================
+
 const mapOptions = (data: any[]) =>
   (data || []).map((i: any) => ({
     label: i.label ?? i.nama ?? String(i.value),
@@ -34,247 +42,286 @@ const mapOptions = (data: any[]) =>
 
 export default function HomePendaftaran() {
   const [form] = Form.useForm();
-  const isBiroJasa = Form.useWatch("is_biro_jasa", form);
+
+  // ====================================
+  // STATE
+  // ====================================
 
   const [statusOptions, setStatusOptions] = useState<any[]>([]);
+
   const [biroOptions, setBiroOptions] = useState<any[]>([]);
 
-  const [state, setState] = useState<"idle" | "found" | "not_found">("idle");
-  const [data, setData] = useState<any>(null);
-  const [loading, setLoading] = useState(false);
+  const [areaOptions, setAreaOptions] = useState<any[]>([]);
+
+  const [kendaraan, setKendaraan] = useState<any>(null);
+
+  const [searchLoading, setSearchLoading] = useState(false);
+
+  const current = form.getFieldsValue();
+
+  // ====================================
+  // WATCH
+  // SSR SAFE
+  // ====================================
+
+  const values = Form.useWatch([], form) || {};
+
+  // ====================================
+  // WILAYAH
+  // ====================================
 
   const wilayah = useWilayah(form, false);
 
-  // =========================
+  // ====================================
   // LOAD MASTER
-  // =========================
+  // ====================================
+
   useEffect(() => {
     const load = async () => {
-      const [s, b] = await Promise.all([getStatusPenerbitan(), getBiroJasa()]);
+      try {
+        const [statusRes, biroRes, areaRes] = await Promise.all([
+          getStatusPenerbitan(),
+          getBiroJasa(),
+          getArea(),
+        ]);
 
-      setStatusOptions(mapOptions(s.data));
-      setBiroOptions(mapOptions(b.data));
+        setStatusOptions(mapOptions(statusRes.data));
+
+        setBiroOptions(mapOptions(biroRes.data));
+
+        setAreaOptions(mapOptions(areaRes.data));
+      } catch (err) {
+        console.error(err);
+
+        message.error("Gagal load master");
+      }
     };
 
     load();
   }, []);
 
-  // =========================
+  // ====================================
+  // ALL SECTIONS
+  // ====================================
+
+  const allSections = useMemo(
+    () =>
+      pendaftaranSections({
+        statusOptions,
+        biroOptions,
+        areaOptions,
+      }),
+
+    [statusOptions, biroOptions, areaOptions],
+  );
+
+  // ====================================
+  // SPLIT 3 COLS
+  // kiri:
+  // - pendaftaran
+  // - kendaraan
+  //
+  // tengah:
+  // - pemilik
+  // - wilayah
+  //
+  // kanan:
+  // - biro jasa
+  // ====================================
+
+  const leftSections = allSections.filter((s) =>
+    ["JENIS UJI", "DATA KENDARAAN"].includes(s.title),
+  );
+
+  const middleSections = allSections.filter((s) =>
+    ["PEMILIK", "WILAYAH"].includes(s.title),
+  );
+
+  const rightSections = allSections.filter((s) =>
+    ["BIRO JASA"].includes(s.title),
+  );
+
+  // ====================================
   // SEARCH
-  // =========================
-  const handleSearch = async () => {
-    const values = form.getFieldsValue();
+  // ====================================
 
-    if (!values.status_penerbitan_id) {
-      message.warning("Pilih status dulu");
-      return;
-    }
-
-    setLoading(true);
+  const handleSearch = async (q: string) => {
     try {
-      const res = await searchKendaraan(values.q, values.status_penerbitan_id);
+      setSearchLoading(true);
 
-      if (res.found) {
-        setState("found");
-        setData(res.data);
-      } else {
-        setState("not_found");
-        setData(null);
+      const values = form.getFieldsValue();
+
+      if (!values.status_penerbitan_id) {
+        message.warning("Pilih jenis uji");
+
+        return;
       }
+
+      const res = await searchKendaraan(q, values.status_penerbitan_id);
+
+      if (!res?.found) {
+        message.warning("Data tidak ditemukan");
+
+        return;
+      }
+
+      setKendaraan(res.data);
+    } catch (err) {
+      console.error(err);
+
+      message.error("Gagal search");
     } finally {
-      setLoading(false);
+      setSearchLoading(false);
     }
   };
 
-  // =========================
-  // PREFILL (FIX TOTAL)
-  // =========================
+  // ====================================
+  // PREFILL
+  // ====================================
+
   useEffect(() => {
-    if (!data) return;
+    if (!kendaraan) return;
 
     const run = async () => {
-      const prov = Number(data.provinsi_id);
-      const kota = Number(data.kota_id);
-      const kec = Number(data.kecamatan_id);
-      const kel = Number(data.kelurahan_id);
+      try {
+        const prov = Number(kendaraan?.provinsi_id);
 
-      form.setFieldsValue({
-        no_uji: data.no_uji,
-        no_rangka: data.no_rangka,
-        no_mesin: data.no_mesin,
-        no_kendaraan: data.no_kendaraan,
-        nama_pemilik: data.nama_pemilik,
-        no_hp: data.no_hp,
-        alamat: data.alamat,
+        const kota = Number(kendaraan?.kota_id);
 
-        tanggal_uji: dayjs(),
-        tanggal_mati_uji: data.tanggal_mati_uji
-          ? dayjs(data.tanggal_mati_uji)
-          : null,
+        const kec = Number(kendaraan?.kecamatan_id);
 
-        is_biro_jasa: !!data.is_biro_jasa,
-        biro_jasa_id: data.biro_jasa_id ? Number(data.biro_jasa_id) : null,
+        const kel = Number(kendaraan?.kelurahan_id);
 
-        provinsi_id: prov,
-      });
+        // ====================================
+        // BASE VALUE
+        // ====================================
 
-      // 🔥 load berurutan (NO RACE)
-      await wilayah.loadKota(prov);
-      await wilayah.loadKecamatan(kota);
-      await wilayah.loadKelurahan(kec);
+        form.setFieldsValue({
+          ...mapApiToForm(kendaraan, allSections),
 
-      form.setFieldsValue({
-        kota_id: kota,
-        kecamatan_id: kec,
-        kelurahan_id: kel,
-      });
+          status_penerbitan_id: current.status_penerbitan_id,
+
+          q: current.q,
+
+          tanggal_uji: dayjs(),
+
+          provinsi_id: prov || undefined,
+
+          is_biro_jasa: !!kendaraan?.is_biro_jasa,
+
+          biro_jasa_id: kendaraan?.biro_jasa_id
+            ? Number(kendaraan.biro_jasa_id)
+            : undefined,
+        });
+
+        // ====================================
+        // LOAD WILAYAH
+        // ====================================
+
+        if (prov) {
+          await wilayah.loadKota(prov);
+        }
+
+        if (kota) {
+          await wilayah.loadKecamatan(kota);
+        }
+
+        if (kec) {
+          await wilayah.loadKelurahan(kec);
+        }
+
+        // ====================================
+        // SET CHILD VALUE
+        // ====================================
+
+        form.setFieldsValue({
+          kota_id: kota || undefined,
+          kecamatan_id: kec || undefined,
+          kelurahan_id: kel || undefined,
+        });
+      } catch (err) {
+        console.error(err);
+      }
     };
 
     run();
-  }, [data]);
+  }, [kendaraan]);
 
-  // =========================
+  // ====================================
   // SUBMIT
-  // =========================
+  // ====================================
+
   const handleSubmit = async () => {
-    const values = form.getFieldsValue();
+    try {
+      const validated = await form.validateFields();
 
-    await createPendaftaran({
-      ...data,
-      ...values,
-    });
+      const payload = mergePayload(kendaraan, validated);
 
-    message.success("Berhasil simpan");
+      await createPendaftaran(payload);
+
+      message.success("Berhasil simpan");
+
+      console.log(payload);
+    } catch (err) {
+      console.error(err);
+
+      message.error("Gagal simpan");
+    }
   };
 
   return (
-    <Row gutter={16}>
-      {/* LEFT */}
-      <Col span={8}>
-        <Card title="Search & Kendaraan">
-          <Form form={form} layout="vertical">
-            <Form.Item name="status_penerbitan_id" label="Jenis Uji">
-              <Select
-                options={statusOptions}
-                showSearch
-                optionFilterProp="label"
-              />
-            </Form.Item>
+    <Form form={form} layout="horizontal" labelCol={{ span: 8 }}>
+      <Row gutter={16}>
+        {/* ==================================== */}
+        {/* LEFT */}
+        {/* ==================================== */}
 
-            <Form.Item name="q" label="Query">
-              <Search
-                enterButton="Search"
-                loading={loading}
-                onSearch={handleSearch}
-              />
-            </Form.Item>
+        <Col xs={24} lg={8}>
+          {/* DATA */}
+          <FormRenderer
+            sections={leftSections}
+            values={{
+              ...values,
+              handleSearch,
+              searchLoading,
+            }}
+            wilayah={wilayah}
+          />
+        </Col>
 
-            <AppDivider title="Data Kendaraan" />
+        {/* ==================================== */}
+        {/* MIDDLE */}
+        {/* ==================================== */}
 
-            <Form.Item name="no_uji" label="No Uji">
-              <Input />
-            </Form.Item>
+        <Col xs={24} lg={8}>
+          <FormRenderer
+            sections={middleSections}
+            values={{
+              ...values,
+              handleSearch,
+              searchLoading,
+            }}
+            wilayah={wilayah}
+          />
+        </Col>
 
-            <Form.Item name="no_kendaraan" label="No Kendaraan">
-              <Input />
-            </Form.Item>
+        {/* ==================================== */}
+        {/* RIGHT */}
+        {/* ==================================== */}
 
-            <Form.Item name="no_mesin" label="Mesin">
-              <Input />
-            </Form.Item>
+        <Col xs={24} lg={8}>
+          <FormRenderer
+            sections={rightSections}
+            values={{
+              ...values,
+              handleSearch,
+              searchLoading,
+            }}
+            wilayah={wilayah}
+          />
 
-            <Form.Item name="no_rangka" label="Rangka">
-              <Input />
-            </Form.Item>
-
-            <Form.Item name="tanggal_uji" label="Tgl Uji">
-              <DatePicker style={{ width: "100%" }} />
-            </Form.Item>
-
-            <Form.Item name="tanggal_mati_uji" label="Mati Uji">
-              <DatePicker style={{ width: "100%" }} />
-            </Form.Item>
-          </Form>
-        </Card>
-      </Col>
-
-      {/* MID */}
-      <Col span={8}>
-        <Card title="Pemilik & Wilayah">
-          <Form form={form} layout="vertical">
-            <Form.Item name="nama_pemilik" label="Nama">
-              <Input />
-            </Form.Item>
-
-            <Form.Item name="no_hp" label="No HP">
-              <Input />
-            </Form.Item>
-
-            <Form.Item name="alamat" label="Alamat">
-              <Input />
-            </Form.Item>
-
-            <Form.Item name="provinsi_id" label="Provinsi">
-              <Select
-                showSearch
-                optionFilterProp="label"
-                options={wilayah.provinsi}
-                onChange={wilayah.onChangeProvinsi}
-              />
-            </Form.Item>
-
-            <Form.Item name="kota_id" label="Kota">
-              <Select
-                showSearch
-                optionFilterProp="label"
-                options={wilayah.kota}
-                onChange={wilayah.onChangeKota}
-              />
-            </Form.Item>
-
-            <Form.Item name="kecamatan_id" label="Kecamatan">
-              <Select
-                showSearch
-                optionFilterProp="label"
-                options={wilayah.kecamatan}
-                onChange={wilayah.onChangeKecamatan}
-              />
-            </Form.Item>
-
-            <Form.Item name="kelurahan_id" label="Kelurahan">
-              <Select
-                showSearch
-                optionFilterProp="label"
-                options={wilayah.kelurahan}
-              />
-            </Form.Item>
-          </Form>
-        </Card>
-      </Col>
-
-      {/* RIGHT */}
-      <Col span={8}>
-        <Card title="Biro Jasa & Action">
-          <Form form={form} layout="vertical">
-            <Form.Item name="is_biro_jasa" label="Diwakilkan">
-              <Select
-                options={[
-                  { label: "Tidak", value: false },
-                  { label: "Ya", value: true },
-                ]}
-              />
-            </Form.Item>
-
-            {isBiroJasa && (
-              <Form.Item name="biro_jasa_id" label="Biro">
-                <Select
-                  options={biroOptions}
-                  showSearch
-                  optionFilterProp="label"
-                />
-              </Form.Item>
-            )}
-
+          {/* ACTION */}
+          <Card>
             <Button
               type="primary"
               icon={<SaveOutlined />}
@@ -283,9 +330,9 @@ export default function HomePendaftaran() {
             >
               Simpan
             </Button>
-          </Form>
-        </Card>
-      </Col>
-    </Row>
+          </Card>
+        </Col>
+      </Row>
+    </Form>
   );
 }

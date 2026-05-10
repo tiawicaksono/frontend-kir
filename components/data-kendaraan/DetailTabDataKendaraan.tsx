@@ -1,7 +1,7 @@
 "use client";
 
 import { Card, Descriptions, Tag, Spin } from "antd";
-import { safe } from "@/utils/kendaraan/formatDetailKendaraan";
+import { safe } from "@/utils/formatDetailKendaraan";
 import { formatDate } from "@/utils/formatDate";
 
 export default function DetailTabDataKendaraan({
