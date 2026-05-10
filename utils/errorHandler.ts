@@ -4,6 +4,11 @@ export function getErrorMessage(
 ): string {
   if (!error) return fallback;
 
+  // STRING
+  if (typeof error === "string") {
+    return error;
+  }
+
   // Validation error Laravel
   if (error?.response?.data?.errors) {
     const firstError = Object.values(error.response.data.errors)[0] as string[];

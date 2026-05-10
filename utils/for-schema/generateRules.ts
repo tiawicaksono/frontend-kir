@@ -4,8 +4,13 @@ export const generateRules = (field: any) => {
   // REQUIRED
   if (field.required) {
     rules.push({
-      required: true,
-      message: `${field.label} wajib diisi`,
+      validator: (_: any, value: any) => {
+        if (value === undefined || value === null || value === "") {
+          return Promise.reject(new Error(`${field.label} wajib diisi`));
+        }
+
+        return Promise.resolve();
+      },
     });
   }
 

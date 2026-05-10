@@ -1,4 +1,3 @@
-// /app/pendaftaran/page.tsx
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
@@ -8,8 +7,6 @@ import { Form, Card, Button, message, Row, Col } from "antd";
 import { SaveOutlined } from "@ant-design/icons";
 
 import dayjs from "dayjs";
-
-import SearchKendaraan from "./SearchKendaraan";
 
 import { pendaftaranSections } from "@/schema/pendaftaran.schema";
 
@@ -28,7 +25,9 @@ import {
 
 import FormRenderer from "@/components/FormRenderer";
 
-import { mapApiToForm, mergePayload } from "@/utils/formHelper";
+import { mapApiToForm } from "@/utils/formHelper";
+
+import { useShowAlert } from "@/core/alert/alert.hook";
 
 // ====================================
 // OPTION MAPPER
@@ -58,6 +57,10 @@ export default function HomePendaftaran() {
   const [searchLoading, setSearchLoading] = useState(false);
 
   const current = form.getFieldsValue();
+
+  const { showErrorAlert, showSuccessAlert } = useShowAlert();
+
+  const [submitLoading, setSubmitLoading] = useState(false);
 
   // ====================================
   // WATCH
@@ -253,24 +256,65 @@ export default function HomePendaftaran() {
 
   const handleSubmit = async () => {
     try {
-      const validated = await form.validateFields();
+      setSubmitLoading(true);
 
-      const payload = mergePayload(kendaraan, validated);
+      const values = await form.validateFields();
 
-      await createPendaftaran(payload);
+      const payload = {
+        kendaraan_id: kendaraan?.id,
 
-      message.success("Berhasil simpan");
+        no_kendaraan: values.no_kendaraan,
+        no_mesin: values.no_mesin,
+        no_rangka: values.no_rangka,
 
-      console.log(payload);
-    } catch (err) {
+        status_penerbitan_id: values.status_penerbitan_id,
+
+        tanggal_uji: values.tanggal_uji?.format("YYYY-MM-DD"),
+
+        tanggal_mati_uji: values.tanggal_mati_uji?.format("YYYY-MM-DD"),
+
+        nama_pemilik: values.nama_pemilik,
+        identitas: values.identitas,
+        no_identitas: values.no_identitas,
+        alamat: values.alamat,
+        no_hp: values.no_hp,
+
+        provinsi_id: values.provinsi_id,
+        kota_id: values.kota_id,
+        kecamatan_id: values.kecamatan_id,
+        kelurahan_id: values.kelurahan_id,
+
+        is_dikuasakan: values.is_biro_jasa,
+
+        biro_jasa_id: values.biro_jasa_id || null,
+
+        no_kartu_hilang: values.no_kartu_hilang || null,
+
+        area_asal_id: values.area_asal_id || null,
+      };
+
+      const res = await createPendaftaran(payload);
+
+      showSuccessAlert(res?.message || "Berhasil simpan");
+      // RESET
+      form.resetFields();
+
+      setKendaraan(null);
+
+      // RESET WILAYAH
+      wilayah.setKota([]);
+      wilayah.setKecamatan([]);
+      wilayah.setKelurahan([]);
+    } catch (err: any) {
       console.error(err);
-
-      message.error("Gagal simpan");
+      showErrorAlert(err);
+    } finally {
+      setSubmitLoading(false);
     }
   };
 
   return (
-    <Form form={form} layout="horizontal" labelCol={{ span: 8 }}>
+    <Form form={form} layout="horizontal" labelCol={{ span: 8 }} colon={false}>
       <Row gutter={16}>
         {/* ==================================== */}
         {/* LEFT */}
@@ -326,6 +370,7 @@ export default function HomePendaftaran() {
               type="primary"
               icon={<SaveOutlined />}
               onClick={handleSubmit}
+              loading={submitLoading}
               block
             >
               Simpan

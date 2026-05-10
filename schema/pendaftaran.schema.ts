@@ -1,4 +1,4 @@
-// /schema/pendaftaran.schema.ts
+import dayjs from "dayjs";
 
 import { SectionSchema } from "./type";
 
@@ -90,24 +90,35 @@ export const pendaftaranSections = ({
           name: "no_kendaraan",
           label: "No Kendaraan",
           type: "text",
-          readonly: true,
           span: 24,
+          required: true,
+          uppercase: true,
         },
 
         {
           name: "no_mesin",
           label: "No Mesin",
           type: "text",
-          readonly: true,
           span: 24,
+          uppercase: true,
         },
 
         {
           name: "no_rangka",
           label: "No Rangka",
           type: "text",
-          readonly: true,
           span: 24,
+          required: true,
+          uppercase: true,
+        },
+
+        {
+          name: "tanggal_mati_uji",
+          label: "Tanggal Mati Uji",
+          type: "date",
+          span: 24,
+          required: true,
+          default: dayjs(),
         },
 
         {
@@ -116,13 +127,7 @@ export const pendaftaranSections = ({
           type: "date",
           required: true,
           span: 24,
-        },
-
-        {
-          name: "tanggal_mati_uji",
-          label: "Tanggal Mati Uji",
-          type: "date",
-          span: 24,
+          default: dayjs(),
         },
       ],
     },
@@ -140,6 +145,28 @@ export const pendaftaranSections = ({
           label: "Nama Pemilik",
           type: "text",
           span: 24,
+          required: true,
+          uppercase: true,
+        },
+
+        {
+          name: "identitas",
+          label: "Jenis Identitas",
+          type: "select",
+          default: "KTP",
+          required: true,
+          options: [
+            { label: "KTP", value: "KTP" },
+            { label: "NIB", value: "NIB" },
+            { label: "DOMISILI", value: "DOMISILI" },
+          ],
+        },
+        {
+          name: "no_identitas",
+          label: "No Identitas",
+          type: "text",
+          required: true,
+          uppercase: true,
         },
 
         {
@@ -155,6 +182,8 @@ export const pendaftaranSections = ({
           type: "textarea",
           rows: 3,
           span: 24,
+          required: true,
+          uppercase: true,
         },
       ],
     },
@@ -172,13 +201,15 @@ export const pendaftaranSections = ({
           label: "Provinsi",
           type: "select",
           span: 24,
+          required: true,
         },
 
         {
           name: "kota_id",
-          label: "Kota / Kabupaten",
+          label: "Kota / Kab",
           type: "select",
           span: 24,
+          required: true,
         },
 
         {
@@ -186,13 +217,15 @@ export const pendaftaranSections = ({
           label: "Kecamatan",
           type: "select",
           span: 24,
+          required: true,
         },
 
         {
           name: "kelurahan_id",
-          label: "Kelurahan / Desa",
+          label: "Kelurahan",
           type: "select",
           span: 24,
+          required: true,
         },
       ],
     },
@@ -211,17 +244,10 @@ export const pendaftaranSections = ({
           type: "select",
 
           options: [
-            {
-              label: "Tidak",
-              value: false,
-            },
-
-            {
-              label: "Ya",
-              value: true,
-            },
+            { label: "Tidak", value: false },
+            { label: "Ya", value: true },
           ],
-
+          default: false,
           span: 24,
         },
 
@@ -229,11 +255,8 @@ export const pendaftaranSections = ({
           name: "biro_jasa_id",
           label: "Biro Jasa",
           type: "select",
-
-          options: biroOptions,
-
           span: 24,
-
+          options: biroOptions,
           visible: (values: any) => values?.is_biro_jasa === true,
         },
       ],

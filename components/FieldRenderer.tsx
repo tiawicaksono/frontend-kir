@@ -11,9 +11,10 @@ type Props = {
   field?: FieldSchema;
   extra?: any;
   values?: any;
+  form?: any;
 };
 
-export default function FieldRenderer({ field, extra, values }: Props) {
+export default function FieldRenderer({ field, extra, values, form }: Props) {
   // ====================================
   // SSR SAFETY
   // IMPORTANT
@@ -77,7 +78,12 @@ export default function FieldRenderer({ field, extra, values }: Props) {
 
   if (field.type === "textarea") {
     return (
-      <Form.Item {...commonProps}>
+      <Form.Item
+        {...commonProps}
+        normalize={(value) =>
+          field.uppercase && value ? String(value).toUpperCase() : value
+        }
+      >
         <Input.TextArea {...inputProps} rows={field.rows || 3} />
       </Form.Item>
     );
@@ -104,7 +110,7 @@ export default function FieldRenderer({ field, extra, values }: Props) {
             formatter={(value) =>
               value ? `${value}`.replace(/\B(?=(\d{3})+(?!\d))/g, ",") : ""
             }
-            parser={(value) => (value ? Number(value.replace(/,/g, "")) : "")}
+            parser={(value) => (value ? Number(value.replace(/,/g, "")) : 0)}
           />
 
           {field.suffix && (
@@ -185,7 +191,7 @@ export default function FieldRenderer({ field, extra, values }: Props) {
       <Form.Item {...commonProps}>
         <DatePicker
           style={{ width: "100%" }}
-          format="DD-MM-YYYY"
+          format="DD/MM/YYYY"
           disabled={field.disabled || extra?.disabled}
         />
       </Form.Item>
