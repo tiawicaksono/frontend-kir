@@ -5,7 +5,7 @@ import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 import TableActions from "@/components/ui/dynamic-table/TableActions";
 
 interface Props {
-  table?: any; // 👈 IMPORTANT: optional biar SSR aman
+  table?: any;
   onEdit: (record: any) => void;
   onDelete: (id: string) => void;
   onReload?: () => void;
@@ -17,20 +17,25 @@ export default function AppsSupportTable({
   onDelete,
   onReload,
 }: Props) {
-  // 👇 SAFE GUARD
-  if (!table) {
-    return null;
-  }
+  // =========================
+  // SAFE GUARD
+  // =========================
+  if (!table) return null;
 
   const params = table.params ?? { page: 1, limit: 10 };
-
-  useEffect(() => {
-    // guard biar tidak crash saat undefined
-    table?.fetchData?.();
-  }, [table?.params]);
-
   const key = table?.config?.primary_key || "id";
 
+  // =========================
+  // STABLE FETCH (FIX ERROR useEffect)
+  // =========================
+  useEffect(() => {
+    if (!table?.fetchData) return;
+    table.fetchData();
+  }, [table?.fetchData]);
+
+  // =========================
+  // RENDER
+  // =========================
   return (
     <DynamicTable
       columns={table?.columns ?? []}
@@ -40,7 +45,7 @@ export default function AppsSupportTable({
       page={params.page}
       pageSize={params.limit}
       onChange={table?.setParams ?? (() => {})}
-      onReload={onReload || table?.fetchData}
+      onReload={onReload || table?.reload || table?.fetchData}
       rowKeyField={key}
       showActions
       renderActions={(record) => (

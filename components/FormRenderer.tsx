@@ -28,7 +28,7 @@ export default function FormRenderer({
         <Card
           key={section.title}
           style={{
-            marginBottom: 16,
+            marginBottom: 10,
           }}
         >
           <AppDivider title={section.title} />

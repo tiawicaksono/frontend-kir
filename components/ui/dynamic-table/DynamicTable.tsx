@@ -18,6 +18,7 @@ interface Props {
 
   page: number;
   pageSize: number;
+  config?: any;
 
   onChange: (params: {
     page?: number;
@@ -45,6 +46,7 @@ export default function DynamicTable({
   total,
   page,
   pageSize,
+  config,
   onChange,
   onReload,
   showActions = false,
@@ -99,11 +101,11 @@ export default function DynamicTable({
             allowClear
             style={{ width: 180 }}
             onChange={(val) => setSearchBy(val)}
-            options={columns
-              .filter((col: any) => col.searchable) // 🔥 dari BE
-              .map((col: any) => ({
-                label: col.title,
-                value: col.dataIndex,
+            options={(columns || [])
+              .filter((col) => col.searchable)
+              .map((col) => ({
+                label: col.searchLabel || col.title,
+                value: col.searchField, // 🔥 IMPORTANT: pakai field asli BE
               }))}
           />
 

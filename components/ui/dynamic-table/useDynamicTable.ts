@@ -9,15 +9,14 @@ type FetchFn = (params: any) => Promise<{
   config: any;
 }>;
 
-export function useDynamicTable(
-  fetchFn: FetchFn,
-  options?: {
-    columnTransform?: (cols: any[], config: any) => any[];
-  },
-) {
+type SearchItem = {
+  field: string;
+  label: string;
+};
+
+export function useDynamicTable(fetchFn: FetchFn) {
   const fetchRef = useRef(fetchFn);
 
-  // 🔥 selalu update ke function terbaru TANPA trigger re-render
   useEffect(() => {
     fetchRef.current = fetchFn;
   }, [fetchFn]);
@@ -37,27 +36,13 @@ export function useDynamicTable(
     sorter: undefined,
   });
 
-  // 🔥 inject data baru
-  const prependData = (newItem: any) => {
-    setDataSource((prev) => [newItem, ...prev]);
-    setTotal((prev) => prev + 1);
-  };
+  // =========================
+  // FLATTEN SEARCH FIELD
+  // =========================
+  const normalize = (str: string) => str.replace(/\./g, "_");
 
-  // 🔥 update / delete
-  const updateData = (updatedItem: any) => {
-    const key = config?.primary_key || "id";
-
-    setDataSource((prev) => {
-      // delete
-      if (updatedItem?._delete) {
-        return prev.filter((item) => item?.[key] !== updatedItem?.[key]);
-      }
-
-      // update
-      return prev.map((item) =>
-        item?.[key] === updatedItem?.[key] ? updatedItem : item,
-      );
-    });
+  const flattenSearchField = (field: string) => {
+    return normalize(field); // kota.nama -> kota_nama
   };
 
   const fetchData = useCallback(async () => {
@@ -79,34 +64,62 @@ export function useDynamicTable(
         ...params.filters,
       });
 
-      if (json.config) setConfig(json.config);
+      const cfg = json.config || {};
+      setConfig(cfg);
 
-      const hiddenKeys: string[] = json.config?.hidden || [];
+      const labels = cfg.labels || {};
+      const hidden = cfg.hidden || [];
+      const sortable = cfg.sortable || [];
 
-      const keys = json.data?.length
-        ? Object.keys(json.data[0]).filter((k) => !hiddenKeys.includes(k))
-        : [json.config?.primary_key, ...(json.config?.searchable || [])].filter(
-            (k) => k && !hiddenKeys.includes(k),
-          );
+      // =========================
+      // SEARCH LIST (RAW FROM BE)
+      // =========================
+      const searchList: SearchItem[] = (cfg.searchable || []).map(
+        (item: any) => ({
+          field: item.field,
+          label: item.label,
+        }),
+      );
 
-      let newColumns = keys.map((key) => ({
-        title: json.config?.labels?.[key] || key,
-        dataIndex: key,
-        key,
-        searchable: (json.config?.searchable || []).includes(key),
-        sorter: (json.config?.sortable || []).includes(key),
-      }));
+      // =========================
+      // BUILD SEARCH MAP (IMPORTANT FIX)
+      // =========================
+      const searchMap = new Map<string, SearchItem>();
 
-      // 🔥 inject custom column logic
-      if (options?.columnTransform) {
-        newColumns = options.columnTransform(newColumns, json.config);
-      }
+      searchList.forEach((s) => {
+        searchMap.set(flattenSearchField(s.field), s);
+      });
+
+      // =========================
+      // BASE KEYS FROM LABELS
+      // =========================
+      const baseKeys = Object.keys(labels);
+
+      const newColumns = baseKeys
+        .filter((k) => !hidden.includes(k))
+        .map((key) => {
+          const match = searchMap.get(key); // 🔥 DIRECT MATCH
+
+          return {
+            title: labels[key] || key,
+            dataIndex: key,
+            key,
+
+            // 🔥 FIX: ALL SEARCHABLE FIELDS NOW WORK
+            searchable: !!match,
+            searchField: match?.field,
+            searchLabel: match?.label,
+
+            sorter: sortable.includes(key),
+          };
+        });
 
       setColumns(newColumns);
       setDataSource(json.data || []);
       setTotal(json.meta?.total || 0);
     } catch (err) {
-      console.error("DynamicTable Error:", err);
+      console.error(err);
+      setColumns([]);
       setDataSource([]);
       setTotal(0);
     } finally {
@@ -118,14 +131,9 @@ export function useDynamicTable(
     fetchData();
   }, [fetchData]);
 
-  const updateParams = (newParams: Partial<TableParams>) => {
-    setParams((prev) => ({
-      ...prev,
-      ...newParams,
-    }));
+  const updateParams = (p: Partial<TableParams>) => {
+    setParams((prev) => ({ ...prev, ...p }));
   };
-
-  const reload = () => fetchData();
 
   return {
     columns,
@@ -137,10 +145,6 @@ export function useDynamicTable(
     params,
     setParams: updateParams,
     fetchData,
-    reload,
-
-    // 🔥 NEW
-    prependData,
-    updateData,
+    reload: fetchData,
   };
 }

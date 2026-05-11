@@ -29,7 +29,9 @@ export function generateColumnsFromData(data: any[], config: any) {
       const isSearchable = Array.isArray(searchableConfig)
         ? searchableConfig.length === 0
           ? true
-          : searchableConfig.includes(key)
+          : searchableConfig.some(
+              (item: any) => item.field?.replace(/\./g, "_") === key,
+            )
         : true;
 
       return {
