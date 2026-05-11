@@ -9,12 +9,19 @@ type FetchFn = (params: any) => Promise<{
   config: any;
 }>;
 
+type UseDynamicTableOptions = {
+  columnTransform?: (cols: any[]) => any[];
+};
+
 type SearchItem = {
   field: string;
   label: string;
 };
 
-export function useDynamicTable(fetchFn: FetchFn) {
+export function useDynamicTable(
+  fetchFn: FetchFn,
+  options?: UseDynamicTableOptions,
+) {
   const fetchRef = useRef(fetchFn);
 
   useEffect(() => {
@@ -114,7 +121,11 @@ export function useDynamicTable(fetchFn: FetchFn) {
           };
         });
 
-      setColumns(newColumns);
+      setColumns(
+        options?.columnTransform
+          ? options.columnTransform(newColumns)
+          : newColumns,
+      );
       setDataSource(json.data || []);
       setTotal(json.meta?.total || 0);
     } catch (err) {
@@ -135,6 +146,32 @@ export function useDynamicTable(fetchFn: FetchFn) {
     setParams((prev) => ({ ...prev, ...p }));
   };
 
+  const prependData = useCallback((newData: any) => {
+    setDataSource((prev) => [newData, ...prev]);
+    setTotal((prev) => prev + 1);
+  }, []);
+
+  const updateData = useCallback(
+    (updatedData: any) => {
+      const pk = config.primary_key || "id";
+      if (updatedData._delete) {
+        // Handle deletion
+        setDataSource((prev) =>
+          prev.filter((item) => item[pk] !== updatedData[pk]),
+        );
+        setTotal((prev) => Math.max(0, prev - 1));
+      } else {
+        // Handle update
+        setDataSource((prev) =>
+          prev.map((item) =>
+            item[pk] === updatedData[pk] ? { ...item, ...updatedData } : item,
+          ),
+        );
+      }
+    },
+    [config.primary_key],
+  );
+
   return {
     columns,
     dataSource,
@@ -146,5 +183,8 @@ export function useDynamicTable(fetchFn: FetchFn) {
     setParams: updateParams,
     fetchData,
     reload: fetchData,
+
+    prependData,
+    updateData,
   };
 }

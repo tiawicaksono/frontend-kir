@@ -56,6 +56,9 @@ export default function PendaftaranListCard({ onEdit, onDelete }: Props) {
     });
   }, [table.columns, FORMAT_MAP]);
 
+  const config = {
+    dateFields: ["tanggal_uji"],
+  };
   return (
     <Card title="List Pendaftaran" className="mt-4">
       <DynamicTable
@@ -68,6 +71,7 @@ export default function PendaftaranListCard({ onEdit, onDelete }: Props) {
         onChange={table.setParams ?? (() => {})}
         onReload={table.fetchData}
         rowKeyField={key}
+        config={config}
         showActions
         renderActions={(record) => (
           <TableActions

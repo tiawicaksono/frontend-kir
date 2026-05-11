@@ -1,9 +1,10 @@
 "use client";
 
-import { Table, Input, Button, Space, Select } from "antd";
+import { Table, Input, Button, Space, Select, DatePicker } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import TableActions from "./TableActions";
 import { useState } from "react";
+import dayjs from "dayjs";
 
 interface Sorter {
   field?: string;
@@ -57,6 +58,9 @@ export default function DynamicTable({
 }: Props) {
   const [searchBy, setSearchBy] = useState<string | undefined>();
 
+  // ✅ hanya field tertentu yang pakai datepicker (khusus page seperti Pendaftaran)
+  const isDateField = config?.dateFields?.includes(searchBy);
+
   const getRowKey = (record: any) => {
     return rowKeyField
       ? record?.[rowKeyField]
@@ -105,17 +109,32 @@ export default function DynamicTable({
               .filter((col) => col.searchable)
               .map((col) => ({
                 label: col.searchLabel || col.title,
-                value: col.searchField, // 🔥 IMPORTANT: pakai field asli BE
+                value: col.searchField,
               }))}
           />
 
-          <Input.Search
-            placeholder="Search..."
-            allowClear
-            onSearch={(val) =>
-              onChange({ search: val, search_by: searchBy, page: 1 })
-            }
-          />
+          {/* ✅ INPUT / DATE PICKER SWITCH */}
+          {isDateField ? (
+            <DatePicker
+              style={{ width: 200 }}
+              format="DD/MM/YYYY"
+              onChange={(date) =>
+                onChange({
+                  search: date ? date.format("YYYY-MM-DD") : undefined,
+                  search_by: searchBy,
+                  page: 1,
+                })
+              }
+            />
+          ) : (
+            <Input.Search
+              placeholder="Search..."
+              allowClear
+              onSearch={(val) =>
+                onChange({ search: val, search_by: searchBy, page: 1 })
+              }
+            />
+          )}
         </Space>
 
         <Button icon={<ReloadOutlined />} onClick={onReload}>
