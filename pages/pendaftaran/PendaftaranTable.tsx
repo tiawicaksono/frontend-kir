@@ -6,19 +6,19 @@ import { Card } from "antd";
 import TableActions from "@/components/ui/dynamic-table/TableActions";
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 
-import { fetchPendaftaran } from "@/services/pendaftaran.service";
-import { usePendaftaranTable } from "@/hooks/pendaftaran/usePendaftaranTable";
-
 import { ColumnFormatters } from "@/components/ui/dynamic-table/ColumnFormatters";
 
 interface Props {
+  table: any;
   onEdit?: (record: any) => void;
-  onDelete?: (id: string) => void;
+  onDelete?: (id: number) => void;
 }
 
-export default function PendaftaranListCard({ onEdit, onDelete }: Props) {
-  const table = usePendaftaranTable(fetchPendaftaran);
-
+export default function PendaftaranListCard({
+  table,
+  onEdit,
+  onDelete,
+}: Props) {
   if (!table) return null;
 
   const params = table.params ?? {

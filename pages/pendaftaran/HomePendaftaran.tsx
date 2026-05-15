@@ -39,7 +39,10 @@ const mapOptions = (data: any[]) =>
     value: Number(i.value ?? i.id),
   }));
 
-export default function HomePendaftaran() {
+interface Props {
+  onCreated?: (data: any) => void;
+}
+export default function HomePendaftaran({ onCreated }: Props) {
   const [form] = Form.useForm();
 
   // ====================================
@@ -295,7 +298,16 @@ export default function HomePendaftaran() {
 
       const res = await createPendaftaran(payload);
 
+      // ====================================
+      // ADD ROW TO TABLE
+      // ====================================
+
+      if (res?.data) {
+        onCreated?.(res.data);
+      }
+
       showSuccessAlert(res?.message || "Berhasil simpan");
+
       // RESET
       form.resetFields();
 
@@ -307,6 +319,7 @@ export default function HomePendaftaran() {
       wilayah.setKelurahan([]);
     } catch (err: any) {
       console.error(err);
+
       showErrorAlert(err);
     } finally {
       setSubmitLoading(false);
