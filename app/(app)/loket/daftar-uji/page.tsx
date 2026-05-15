@@ -10,9 +10,12 @@ import {
   deletePendaftaran,
   fetchPendaftaran,
 } from "@/services/pendaftaran.service";
-import { message } from "antd";
+import { useState } from "react";
+import PendaftaranEditModal from "@/pages/pendaftaran/PendaftaranEditModal";
 
 export default function DaftarUjiPage() {
+  const [editingData, setEditingData] = useState<any>(null);
+
   const { confirm } = useConfirm();
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
   const table = usePendaftaranTable(fetchPendaftaran);
@@ -40,6 +43,10 @@ export default function DaftarUjiPage() {
       showErrorAlert(err, "Gagal hapus");
     }
   };
+
+  const handleEdit = (record: any) => {
+    setEditingData(record);
+  };
   return (
     <div>
       <AutoBreadcrumb pageTitle="Form Pendaftaran" />
@@ -53,8 +60,20 @@ export default function DaftarUjiPage() {
 
           <PendaftaranListCard
             table={table}
-            onEdit={table.updateData}
+            onEdit={handleEdit}
             onDelete={handleDelete}
+          />
+
+          <PendaftaranEditModal
+            open={!!editingData}
+            data={editingData}
+            onClose={() => setEditingData(null)}
+            onSuccess={(updatedData) => {
+              table.updateData(updatedData);
+
+              // close modal biar clean
+              setEditingData(null);
+            }}
           />
         </div>
       </div>
