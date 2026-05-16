@@ -162,7 +162,7 @@ export default function SidebarItem({
             animate={{ opacity: 1, x: 0, scale: 1 }}
             exit={{ opacity: 0, x: -8, scale: 0.98 }}
             transition={{ duration: 0.18, ease: "easeOut" }}
-            className="absolute left-18 top-0 z-[1200]"
+            className="absolute left-full top-0 ml-3 z-[9999]"
             onMouseEnter={() => {
               if (closeTimer.current) clearTimeout(closeTimer.current);
             }}

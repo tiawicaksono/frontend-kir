@@ -132,10 +132,10 @@ export default function PembayaranTable({
       <div className="flex justify-end mb-2">
         <Button
           type="primary"
-          disabled={selectedRowKeys.length === 0}
+          disabled={(selectedRowKeys?.length ?? 0) === 0}
           onClick={onBulkToggle}
         >
-          Ubah Status ({selectedRowKeys.length})
+          Ubah Status ({selectedRowKeys?.length ?? 0})
         </Button>
       </div>
 

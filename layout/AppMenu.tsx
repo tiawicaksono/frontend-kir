@@ -10,7 +10,7 @@ export default function AppMenu({ children }: { children: React.ReactNode }) {
   const { menuLayout } = useLayout();
 
   return (
-    <div className="h-screen flex overflow-hidden">
+    <div className="h-screen flex overflow-visible">
       {menuLayout === "sidebar" && <SidebarMenu />}
 
       <div className="flex flex-1 flex-col">
@@ -18,7 +18,10 @@ export default function AppMenu({ children }: { children: React.ReactNode }) {
         {menuLayout === "top" && <TopMenu />}
 
         {/* CONTENT YANG SCROLL */}
-        <main id="main-scroll" className="flex-1 overflow-y-auto p-4">
+        <main
+          id="main-scroll"
+          className="relative z-0 flex-1 overflow-y-auto p-4"
+        >
           {children}
         </main>
       </div>
