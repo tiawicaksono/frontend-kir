@@ -26,7 +26,7 @@ export default function ThemeCustomizerDrawer() {
       exit={{ x: 380, opacity: 0 }}
       transition={{ type: "spring", stiffness: 260, damping: 30 }}
       className={clsx(
-        "fixed top-0 right-0 z-50 h-full w-90",
+        "fixed top-0 right-0 z-[4000] h-full w-90",
         "bg-white dark:bg-slate-900 shadow-2xl",
       )}
     >

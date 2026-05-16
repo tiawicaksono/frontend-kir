@@ -15,7 +15,7 @@ export default function ThemeCustomizerOverlay({
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
       transition={{ duration: 0.25, ease: "easeOut" }}
-      className="fixed inset-0 z-40 bg-black/30 dark:bg-black/60 backdrop-blur-sm"
+      className="fixed inset-0 z-[3000] bg-black/30 dark:bg-black/60 backdrop-blur-sm"
     />
   );
 }
