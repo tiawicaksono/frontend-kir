@@ -31,16 +31,6 @@ export async function updatePendaftaran(id: number, data: any) {
   }
 }
 
-// 🔍 DETAIL
-export async function detailPendaftaran(id: number) {
-  try {
-    const res = await api.get(`${API_URL}/loket/pendaftaran/${id}`);
-    return res.data;
-  } catch (err: any) {
-    throw new Error(err?.response?.data?.message || "Data tidak ditemukan");
-  }
-}
-
 // ❌ DELETE
 export async function deletePendaftaran(id: number) {
   try {
@@ -60,17 +50,5 @@ export async function fetchPendaftaran(params: Record<string, any> = {}) {
     return res.data;
   } catch (err: any) {
     throw err?.response?.data || err;
-  }
-}
-
-// 📊 COUNTS
-export async function fetchPendaftaranCounts() {
-  try {
-    const res = await api.get(`${API_URL}/loket/pendaftaran/counts`);
-    return res.data;
-  } catch (err: any) {
-    throw new Error(
-      err?.response?.data?.message || "Gagal mengambil statistik",
-    );
   }
 }
