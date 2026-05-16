@@ -12,10 +12,10 @@ import {
   togglePembayaran,
 } from "@/services/pembayaran.service";
 
-import PembayaranFilters from "@/pages/pembayaran/PembayaranFilter";
-import PembayaranTable from "@/pages/pembayaran/PembayaranTable";
+import PembayaranFilters from "@/pages/loket/pembayaran/PembayaranFilter";
+import PembayaranTable from "@/pages/loket/pembayaran/PembayaranTable";
 import { Card } from "antd";
-import PendaftaranEditModal from "@/pages/pendaftaran/PendaftaranEditModal";
+import PendaftaranEditModal from "@/pages/loket/pendaftaran/PendaftaranEditModal";
 
 export default function PembayaranPage() {
   const { confirm } = useConfirm();

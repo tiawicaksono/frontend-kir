@@ -4,14 +4,14 @@ import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import { useShowAlert } from "@/core/alert/alert.hook";
 import { useConfirm } from "@/core/confirm/confirm.hook";
 import { usePendaftaranTable } from "@/hooks/pendaftaran/usePendaftaranTable";
-import HomePendaftaran from "@/pages/pendaftaran/HomePendaftaran";
-import PendaftaranListCard from "@/pages/pendaftaran/PendaftaranTable";
+import HomePendaftaran from "@/pages/loket/pendaftaran/HomePendaftaran";
+import PendaftaranListCard from "@/pages/loket/pendaftaran/PendaftaranTable";
 import {
   deletePendaftaran,
   fetchPendaftaran,
 } from "@/services/pendaftaran.service";
 import { useState } from "react";
-import PendaftaranEditModal from "@/pages/pendaftaran/PendaftaranEditModal";
+import PendaftaranEditModal from "@/pages/loket/pendaftaran/PendaftaranEditModal";
 
 export default function DaftarUjiPage() {
   const [editingData, setEditingData] = useState<any>(null);
