@@ -6,16 +6,27 @@ import {
   CloseCircleOutlined,
   DeleteOutlined,
   EditOutlined,
-  LoadingOutlined,
   MoreOutlined,
 } from "@ant-design/icons";
+
 import dayjs from "dayjs";
+
 import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
+import type { ColumnsType } from "antd/es/table";
 
 interface Props {
   data: any[];
   loading: boolean;
   loadingId: number | null;
+
+  meta: any;
+
+  onChangePage: (
+    page: number,
+    pageSize: number,
+    sortBy?: string,
+    sortOrder?: string,
+  ) => void;
 
   onDelete: (id: number) => void;
   onToggle: (row: any) => void;
@@ -26,39 +37,73 @@ interface Props {
   onBulkToggle: () => void;
 
   onEdit: (row: any) => void;
+  filters: any;
 }
 
 export default function PembayaranTable({
   data,
   loading,
   loadingId,
+
+  meta,
+  onChangePage,
+
   onDelete,
   onToggle,
+
   selectedRowKeys,
   setSelectedRowKeys,
+
   onBulkToggle,
+
   onEdit,
+  filters,
 }: Props) {
   const rowSelection = {
     selectedRowKeys,
     onChange: (keys: any) => setSelectedRowKeys(keys),
   };
 
-  const columns = [
+  const columns: ColumnsType<any> = [
     {
       title: "No Antrian",
+      dataIndex: "no_pendaftaran_harian",
+      key: "no_pendaftaran_harian",
+      sorter: true,
+
+      sortOrder:
+        filters.sort_by === "no_pendaftaran_harian"
+          ? filters.sort_order === "asc"
+            ? ("ascend" as const)
+            : ("descend" as const)
+          : undefined,
+
       render: (_: any, row: any) => (
         <strong>{row.no_pendaftaran_harian || "-"}</strong>
       ),
     },
+
     {
       title: "Tanggal Uji",
       render: (_: any, row: any) =>
         row.tanggal_uji ? dayjs(row.tanggal_uji).format("DD/MM/YYYY") : "-",
     },
-    { title: "No Uji", dataIndex: "kendaraan_no_uji" },
-    { title: "No Kendaraan", dataIndex: "kendaraan_no_kendaraan" },
-    { title: "Nama", dataIndex: "kendaraan_nama_pemilik" },
+
+    {
+      title: "No Uji",
+      dataIndex: "kendaraan_no_uji",
+    },
+
+    {
+      title: "No Kendaraan",
+      dataIndex: "kendaraan_no_kendaraan",
+    },
+
+    {
+      title: "Nama",
+      dataIndex: "kendaraan_nama_pemilik",
+    },
+
     {
       title: "Status",
       render: (_: any, row: any) => (
@@ -68,6 +113,7 @@ export default function PembayaranTable({
         />
       ),
     },
+
     {
       title: "Pendaftaran",
       render: (_: any, row: any) => {
@@ -80,53 +126,71 @@ export default function PembayaranTable({
         );
       },
     },
-    { title: "Petugas", dataIndex: "petugas_name" },
+
+    {
+      title: "Petugas",
+      dataIndex: "petugas_name",
+    },
 
     {
       title: "Aksi",
+
       render: (_: any, row: any) => {
         const menuItems = [
           {
             key: "toggle",
+
             label: (
               <span className="flex items-center gap-2">
                 {row.retribusi_status_pembayaran ? (
                   <>
-                    <CloseCircleOutlined /> Tandai Belum Bayar
+                    <CloseCircleOutlined />
+                    Tandai Belum Bayar
                   </>
                 ) : (
                   <>
-                    <CheckCircleOutlined /> Tandai Lunas
+                    <CheckCircleOutlined />
+                    Tandai Lunas
                   </>
                 )}
               </span>
             ),
+
             disabled: loadingId === row.id,
+
             onClick: () => onToggle(row),
           },
+
           {
             key: "edit",
+
             label: (
               <span className="flex items-center gap-2">
-                <EditOutlined /> Edit
+                <EditOutlined />
+                Edit
               </span>
             ),
+
             onClick: () => onEdit(row),
           },
+
           {
             key: "delete",
+
             label: (
               <span className="flex items-center gap-2 text-red-500">
-                <DeleteOutlined /> Delete
+                <DeleteOutlined />
+                Delete
               </span>
             ),
+
             onClick: () => onDelete(row.id),
           },
         ];
 
         return (
           <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-            <MoreOutlined />
+            <MoreOutlined className="cursor-pointer" />
           </Dropdown>
         );
       },
@@ -152,7 +216,27 @@ export default function PembayaranTable({
         columns={columns}
         dataSource={data}
         loading={loading}
-        pagination={false}
+        onChange={(pagination: any, _: any, sorter: any) => {
+          onChangePage(
+            pagination.current,
+            pagination.pageSize,
+            sorter.order ? sorter.field : undefined,
+            sorter.order === "ascend"
+              ? "asc"
+              : sorter.order === "descend"
+                ? "desc"
+                : undefined,
+          );
+        }}
+        pagination={{
+          current: meta?.current_page,
+          pageSize: meta?.per_page,
+          total: meta?.total,
+
+          showSizeChanger: true,
+
+          showTotal: (total) => `Total ${total} data`,
+        }}
       />
     </div>
   );

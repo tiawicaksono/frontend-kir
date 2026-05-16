@@ -30,9 +30,19 @@ export default function PembayaranPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [editData, setEditData] = useState<any>(null);
 
+  const [meta, setMeta] = useState<any>({
+    current_page: 1,
+    per_page: 10,
+    total: 0,
+  });
+
   const [filters, setFilters] = useState<any>({
     page: 1,
     limit: 10,
+
+    sort_by: "no_pendaftaran_harian",
+    sort_order: "desc",
+
     search: undefined,
     tanggal_uji: undefined,
     status_pembayaran: undefined,
@@ -45,6 +55,21 @@ export default function PembayaranPage() {
     }));
   }, []);
 
+  const handleChangePage = (
+    page: number,
+    pageSize: number,
+    sortBy?: string,
+    sortOrder?: string,
+  ) => {
+    setFilters((prev: any) => ({
+      ...prev,
+      page,
+      limit: pageSize,
+      sort_by: sortBy,
+      sort_order: sortOrder,
+    }));
+  };
+
   // FETCH (SSR SAFE - only runs client)
   useEffect(() => {
     let active = true;
@@ -56,6 +81,13 @@ export default function PembayaranPage() {
         if (!active) return;
 
         setData(res?.data ?? []);
+        setMeta(
+          res?.meta ?? {
+            current_page: 1,
+            per_page: 10,
+            total: 0,
+          },
+        );
         setSelectedRowKeys([]); // reset selection setiap reload
       } catch (err) {
         showErrorAlert(err, "Gagal load data");
@@ -183,6 +215,8 @@ export default function PembayaranPage() {
         {/* TABLE */}
         <PembayaranTable
           data={data}
+          onChangePage={handleChangePage}
+          meta={meta}
           loading={loading}
           loadingId={loadingId}
           onDelete={handleDelete}
@@ -191,6 +225,7 @@ export default function PembayaranPage() {
           setSelectedRowKeys={setSelectedRowKeys}
           onBulkToggle={handleBulkToggle}
           onEdit={handleOpenEdit}
+          filters={filters}
         />
       </Card>
 
