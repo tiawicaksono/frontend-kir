@@ -7,6 +7,7 @@ import TableActions from "@/components/ui/dynamic-table/TableActions";
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 
 import { ColumnFormatters } from "@/components/ui/dynamic-table/ColumnFormatters";
+import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
 
 interface Props {
   table: any;
@@ -35,7 +36,13 @@ export default function PendaftaranListCard({
     return {
       no_pendaftaran_harian: ColumnFormatters.bold(),
       tanggal_uji: ColumnFormatters.date(),
-      status_penerbitan_issuance_name: ColumnFormatters.tag(),
+      status_penerbitan_issuance_name: {
+        render: (_: any, record: any) => {
+          return ColumnFormatters.tag(
+            getPendaftaranTagColor(record.status_penerbitan_issuance_id),
+          ).render(record.status_penerbitan_issuance_name);
+        },
+      },
     };
   }, []);
 

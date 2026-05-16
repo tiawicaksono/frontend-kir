@@ -10,6 +10,7 @@ import {
   MoreOutlined,
 } from "@ant-design/icons";
 import dayjs from "dayjs";
+import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
 
 interface Props {
   data: any[];
@@ -69,9 +70,15 @@ export default function PembayaranTable({
     },
     {
       title: "Pendaftaran",
-      render: (_: any, row: any) => (
-        <Tag color="blue">{row.status_penerbitan_issuance_name}</Tag>
-      ),
+      render: (_: any, row: any) => {
+        return (
+          <Tag
+            color={getPendaftaranTagColor(row.status_penerbitan_issuance_id)}
+          >
+            {row.status_penerbitan_issuance_name}
+          </Tag>
+        );
+      },
     },
     { title: "Petugas", dataIndex: "petugas_name" },
 

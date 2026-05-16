@@ -199,15 +199,24 @@ export default function HomePendaftaran({ onCreated }: Props) {
         const kel = Number(kendaraan?.kelurahan_id);
 
         // ====================================
+        // PRESERVE MANUAL INPUT
+        // ====================================
+
+        const currentValues = form.getFieldsValue();
+
+        // ====================================
         // BASE VALUE
         // ====================================
 
         form.setFieldsValue({
           ...mapApiToForm(kendaraan, allSections),
 
-          status_penerbitan_id: current.status_penerbitan_id,
+          // preserve current form values
+          status_penerbitan_id: currentValues.status_penerbitan_id,
 
-          q: current.q,
+          q: currentValues.q,
+
+          no_kartu_hilang: currentValues.no_kartu_hilang,
 
           tanggal_uji: dayjs(),
 

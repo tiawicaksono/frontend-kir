@@ -35,6 +35,7 @@ export const pendaftaranSections = ({
           label: "No Kartu Hilang",
           type: "text",
           span: 24,
+          uppercase: true,
 
           visible: (values: any) => {
             console.log("VISIBLE VALUES", values);
