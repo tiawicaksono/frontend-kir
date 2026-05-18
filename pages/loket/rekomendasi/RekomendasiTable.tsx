@@ -118,7 +118,6 @@ export default function RekomendasiTable({ table, onSelect }: Props) {
       config={config}
       onRow={(record: any) => ({
         onClick: () => onSelect?.(record),
-
         className: "cursor-pointer hover:bg-gray-50",
       })}
     />

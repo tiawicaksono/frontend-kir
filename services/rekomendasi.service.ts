@@ -10,6 +10,9 @@ export const fetchRekomendasi = async (params?: any) => {
   return res.data;
 };
 
+export const fetchRekomendasiDetail = (id: number) =>
+  api.get(`${API_URL}/loket/rekomendasi/${id}`);
+
 export const updateRekomendasi = async (id: number, payload: any) => {
   const res = await api.put(`${API_URL}/loket/rekomendasi/${id}`, payload);
 
