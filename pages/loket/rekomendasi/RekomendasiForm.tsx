@@ -3,6 +3,7 @@
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Empty, Form, Space, Tag } from "antd";
 import {
+  EditOutlined,
   InfoCircleOutlined,
   SaveOutlined,
   SyncOutlined,
@@ -36,10 +37,11 @@ export default function RekomendasiForm({
   loading,
 }: Props) {
   const [form] = Form.useForm();
+
   const wilayah = useWilayah(form, false);
   const { area } = useArea(true);
+
   const isLoading = loading?.detail || loading?.submit || loading?.sync;
-  const [hydrated, setHydrated] = useState(false);
 
   // =========================
   // NORMALIZE JENIS
@@ -52,20 +54,38 @@ export default function RekomendasiForm({
       .replace(/\s+/g, "_");
   }, [data?.jenis_rekomendasi]);
 
+  // =========================
+  // CHECK MUTASI
+  // =========================
+  const isMutasiKeluar = jenis === "mutasi_keluar";
+
+  // =========================
+  // SECTIONS
+  // =========================
   const sections = useMemo(() => {
     return Array.isArray(rekomendasiSchema[jenis])
       ? rekomendasiSchema[jenis]
       : [];
   }, [jenis]);
 
+  // =========================
+  // OPTIONS MAP
+  // =========================
   const optionsMap: any = {
     area_tujuan_id: area,
-    provinsi_id: wilayah.provinsi,
-    kota_id: wilayah.kota,
-    kecamatan_id: wilayah.kecamatan,
-    kelurahan_id: wilayah.kelurahan,
+
+    // 🔥 hanya mutasi keluar
+    ...(isMutasiKeluar && {
+      provinsi_id: wilayah.provinsi,
+      kota_id: wilayah.kota,
+      kecamatan_id: wilayah.kecamatan,
+      kelurahan_id: wilayah.kelurahan,
+    }),
   };
 
+  // =========================
+  // DISABLED
+  // =========================
   const isDisabled = (name: string) => {
     const prov = form.getFieldValue("provinsi_id");
     const kota = form.getFieldValue("kota_id");
@@ -74,16 +94,18 @@ export default function RekomendasiForm({
     if (name === "kota_id") return !prov;
     if (name === "kecamatan_id") return !kota;
     if (name === "kelurahan_id") return !kec;
+
     return false;
   };
 
   // =========================
-  // HYDRATION + CASCADE FIX
+  // HYDRATE FORM
   // =========================
   useEffect(() => {
     if (!data) return;
 
     const mapped = {
+      no_surat_rekomendasi: data?.no_surat_rekomendasi ?? "",
       no_pemilik_tujuan: data?.no_pemilik_tujuan ?? "",
       nama_pemilik_tujuan: data?.nama_pemilik_tujuan ?? "",
       alamat_pemilik_tujuan: data?.alamat_pemilik_tujuan ?? "",
@@ -99,37 +121,37 @@ export default function RekomendasiForm({
     const run = async () => {
       form.setFieldsValue(mapped);
 
-      // 🔥 cascade load wajib biar SELECT kebaca options-nya
-      if (mapped.provinsi_id) {
-        await wilayah.onChangeProvinsi(mapped.provinsi_id);
+      // 🔥 hanya mutasi keluar
+      if (isMutasiKeluar) {
+        if (mapped.provinsi_id) {
+          await wilayah.onChangeProvinsi(mapped.provinsi_id);
+        }
+
+        if (mapped.kota_id) {
+          await wilayah.onChangeKota(mapped.kota_id);
+        }
+
+        if (mapped.kecamatan_id) {
+          await wilayah.onChangeKecamatan(mapped.kecamatan_id);
+        }
+
+        // re-apply setelah options ready
+        form.setFieldsValue(mapped);
       }
-
-      if (mapped.kota_id) {
-        await wilayah.onChangeKota(mapped.kota_id);
-      }
-
-      if (mapped.kecamatan_id) {
-        await wilayah.onChangeKecamatan(mapped.kecamatan_id);
-      }
-
-      // 🔥 re-apply setelah options ready
-      form.setFieldsValue(mapped);
-
-      setHydrated(true);
     };
 
     run();
-  }, [data]);
+  }, [data, isMutasiKeluar]);
 
   // =========================
-  // EMPTY STATE
+  // EMPTY
   // =========================
   if (!data) {
     return <Empty description="Pilih data terlebih dahulu" />;
   }
 
   // =========================
-  // FIELD RENDER (PAKAI FIELDRENDERER)
+  // FIELD RENDER
   // =========================
   const renderField = (field: any) => {
     return (
@@ -140,22 +162,32 @@ export default function RekomendasiForm({
         form={form}
         extra={{
           options: optionsMap[field.name],
+
           disabled: !isEditing || isDisabled(field.name) || isLoading,
+
           onChange: (val: any) => {
             form.setFieldValue(field.name, val);
 
-            if (field.name === "provinsi_id") wilayah.onChangeProvinsi(val);
-            if (field.name === "kota_id") wilayah.onChangeKota(val);
-            if (field.name === "kecamatan_id") wilayah.onChangeKecamatan(val);
+            // 🔥 hanya mutasi keluar
+            if (isMutasiKeluar) {
+              if (field.name === "provinsi_id") {
+                wilayah.onChangeProvinsi(val);
+              }
+
+              if (field.name === "kota_id") {
+                wilayah.onChangeKota(val);
+              }
+
+              if (field.name === "kecamatan_id") {
+                wilayah.onChangeKecamatan(val);
+              }
+            }
           },
         }}
       />
     );
   };
 
-  // =========================
-  // UI
-  // =========================
   return (
     <div>
       {isLoading && (
@@ -168,13 +200,23 @@ export default function RekomendasiForm({
           }}
         />
       )}
+
       {/* HEADER */}
       <div className="mb-4 flex flex-wrap gap-2">
-        <Tag color="blue">{data.pendaftaran_kendaraan_no_uji}</Tag>
-        <Tag color="purple">{data.pendaftaran_kendaraan_no_kendaraan}</Tag>
-        <Tag color="green">{data.jenis_rekomendasi}</Tag>
+        <Tag color="green">{data.pendaftaran_kendaraan_no_uji}</Tag>
 
-        <Button size="small" onClick={onEdit} disabled={isLoading}>
+        <Tag color="purple">{data.pendaftaran_kendaraan_no_kendaraan}</Tag>
+
+        <Tag color={jenis === "mutasi_keluar" ? "blue" : "orange"}>
+          {data.jenis_rekomendasi}
+        </Tag>
+
+        <Button
+          size="small"
+          onClick={onEdit}
+          disabled={isLoading}
+          icon={<EditOutlined />}
+        >
           {isEditing ? "Mode Edit" : "Edit"}
         </Button>
       </div>
@@ -190,12 +232,29 @@ export default function RekomendasiForm({
           }}
         >
           <div style={{ display: "flex", gap: 10 }}>
-            <InfoCircleOutlined style={{ color: "#ff4d4f", fontSize: 18 }} />
+            <InfoCircleOutlined
+              style={{
+                color: "#ff4d4f",
+                fontSize: 18,
+              }}
+            />
+
             <div>
-              <div style={{ fontWeight: 600, color: "#ff4d4f" }}>
+              <div
+                style={{
+                  fontWeight: 600,
+                  color: "#ff4d4f",
+                }}
+              >
                 Status Sinkron: Gagal
               </div>
-              <div style={{ fontSize: 13, color: "#666" }}>
+
+              <div
+                style={{
+                  fontSize: 13,
+                  color: "#666",
+                }}
+              >
                 {data.keterangan_sinkron || "-"}
               </div>
             </div>
@@ -215,7 +274,12 @@ export default function RekomendasiForm({
           onFinish={onSubmit}
           disabled={isLoading}
         >
-          <div style={{ display: "flex", gap: 24 }}>
+          <div
+            style={{
+              display: "flex",
+              gap: 24,
+            }}
+          >
             <div style={{ flex: 1 }}>
               {sections
                 .filter((s: any) => s.col === "left")

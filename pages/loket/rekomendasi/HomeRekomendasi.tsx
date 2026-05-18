@@ -111,22 +111,74 @@ export default function HomeRekomendasi() {
   // =========================
   // SUBMIT
   // =========================
+  // =========================
+  // SUBMIT
+  // TANPA RELOAD GRID
+  // UPDATE ROW LOKAL SAJA
+  // =========================
   const handleSubmit = async (values: any) => {
     const pk = table?.config?.primary_key || "id";
-    if (!selectedData?.[pk]) return;
+
+    const currentId = selectedData?.[pk];
+
+    if (!currentId) return;
 
     try {
-      setUiLoading((p) => ({ ...p, submit: true }));
+      setUiLoading((p) => ({
+        ...p,
+        submit: true,
+      }));
 
-      await updateRekomendasi(selectedData[pk], values);
+      // =========================
+      // API UPDATE
+      // =========================
+      const res = await updateRekomendasi(currentId, values);
+
+      // =========================
+      // AMBIL DATA TERBARU
+      // =========================
+      const updatedData = res?.data?.data ??
+        res?.data ?? {
+          ...selectedData,
+          ...values,
+        };
+
+      // =========================
+      // UPDATE DETAIL FORM
+      // =========================
+      setSelectedData(updatedData);
+
+      // =========================
+      // UPDATE ROW TABLE
+      // TANPA FETCH ULANG
+      // =========================
+      setTable((prev: any) => ({
+        ...prev,
+
+        dataSource: (prev.dataSource ?? []).map((row: any) => {
+          const rowId = row?.[pk];
+
+          if (rowId !== currentId) {
+            return row;
+          }
+
+          return {
+            ...row,
+            ...updatedData,
+          };
+        }),
+      }));
 
       showSuccessAlert("Berhasil update");
+
       setIsEditing(false);
-      fetchData();
     } catch (err) {
       showErrorAlert(err, "Gagal update");
     } finally {
-      setUiLoading((p) => ({ ...p, submit: false }));
+      setUiLoading((p) => ({
+        ...p,
+        submit: false,
+      }));
     }
   };
 

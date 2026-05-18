@@ -10,7 +10,6 @@ export const rekomendasiSchema: Record<string, any[]> = {
           required: true,
         },
 
-        // existing form fields
         {
           name: "no_surat_rekomendasi",
           label: "No Surat",
@@ -76,6 +75,13 @@ export const rekomendasiSchema: Record<string, any[]> = {
           label: "Master Area",
           type: "select",
           required: true,
+        },
+        {
+          name: "no_surat_rekomendasi",
+          label: "No Surat",
+          type: "text",
+          required: true,
+          uppercase: true,
         },
       ],
     },
