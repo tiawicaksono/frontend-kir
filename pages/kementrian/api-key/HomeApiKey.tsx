@@ -60,7 +60,7 @@ export default function HomeApiKey() {
         </div>
       }
       desc="API Key digunakan untuk sinkron data dengan aplikasi kementrian."
-      headerRight={
+      extra={
         <ApiKeyHeaderMenu
           isOpen={dropdown.isHeaderOpen}
           onToggle={dropdown.toggleHeader}

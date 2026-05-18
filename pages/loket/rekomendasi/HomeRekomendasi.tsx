@@ -15,6 +15,7 @@ import {
 } from "@/services/rekomendasi.service";
 
 import { useShowAlert } from "@/core/alert/alert.hook";
+import ComponentCard from "@/components/common/ComponentCard";
 
 type Key = React.Key;
 
@@ -316,7 +317,8 @@ export default function HomeRekomendasi() {
       <AutoBreadcrumb />
 
       {/* ========================= TABLE ========================= */}
-      <Card
+      <ComponentCard
+        borderTop={true}
         title="Daftar Rekomendasi"
         extra={
           <Space>
@@ -344,10 +346,10 @@ export default function HomeRekomendasi() {
           }}
           onSelect={handleSelect}
         />
-      </Card>
+      </ComponentCard>
 
       {/* ========================= FORM ========================= */}
-      <Card title="Form Rekomendasi" className="mt-4">
+      <ComponentCard title="Form Rekomendasi" className="mt-4">
         <RekomendasiForm
           data={selectedData}
           onSubmit={handleSubmit}
@@ -356,7 +358,7 @@ export default function HomeRekomendasi() {
           onEdit={() => setIsEditing(true)}
           loading={uiLoading}
         />
-      </Card>
+      </ComponentCard>
     </div>
   );
 }

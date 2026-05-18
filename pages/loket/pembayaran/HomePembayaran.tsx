@@ -32,6 +32,7 @@ import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
 import PendaftaranEditModal from "@/pages/loket/pendaftaran/PendaftaranEditModal";
 
 import PembayaranFilter from "./PembayaranFilter";
+import ComponentCard from "@/components/common/ComponentCard";
 
 export default function HomePembayaran() {
   const { confirm } = useConfirm();
@@ -396,10 +397,9 @@ export default function HomePembayaran() {
 
   return (
     <div>
-      <AutoBreadcrumb />
-
-      <Card
+      <ComponentCard
         title="Manajemen Pembayaran"
+        borderTop={true}
         extra={
           <Space>
             <Button
@@ -498,7 +498,7 @@ export default function HomePembayaran() {
             );
           }}
         />
-      </Card>
+      </ComponentCard>
 
       <PendaftaranEditModal
         open={editOpen}

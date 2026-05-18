@@ -58,7 +58,7 @@ export default function ApiIntegrationCard({
     <ComponentCard
       title={data.name ?? "-"}
       desc={data.description ?? "-"}
-      headerRight={<SyncButton onSync={handleSync} />}
+      extra={<SyncButton onSync={handleSync} />}
     >
       <HrShimmer loading={loading} />
 

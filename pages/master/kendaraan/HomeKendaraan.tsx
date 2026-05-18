@@ -77,7 +77,7 @@ export default function HomeKendaraan() {
   ];
 
   return (
-    <ComponentCard title="Kendaraan Management">
+    <ComponentCard>
       <AppTabs defaultActiveKey="kendaraan" items={appsKendaraanConfig} />
     </ComponentCard>
   );

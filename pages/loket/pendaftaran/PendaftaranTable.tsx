@@ -8,6 +8,7 @@ import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 
 import { ColumnFormatters } from "@/components/ui/dynamic-table/ColumnFormatters";
 import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
+import ComponentCard from "@/components/common/ComponentCard";
 
 interface Props {
   table: any;
@@ -64,7 +65,7 @@ export default function PendaftaranListCard({
   }, [table.columns, FORMAT_MAP]);
 
   return (
-    <Card title="List Pendaftaran" className="mt-4">
+    <ComponentCard title="List Pendaftaran" className="mt-4">
       <DynamicTable
         columns={formattedColumns}
         dataSource={table.dataSource ?? []}
@@ -86,6 +87,6 @@ export default function PendaftaranListCard({
           />
         )}
       />
-    </Card>
+    </ComponentCard>
   );
 }

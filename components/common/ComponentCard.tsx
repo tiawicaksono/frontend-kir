@@ -6,7 +6,7 @@ interface ComponentCardProps {
   className?: string; // Additional custom classes for styling
   desc?: string; // Description text
   borderTop?: boolean;
-  headerRight?: React.ReactNode;
+  extra?: React.ReactNode;
 }
 
 const ComponentCard: React.FC<ComponentCardProps> = ({
@@ -15,7 +15,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
   className = "",
   desc = "",
   borderTop = false,
-  headerRight,
+  extra,
 }) => {
   return (
     <div
@@ -38,9 +38,7 @@ const ComponentCard: React.FC<ComponentCardProps> = ({
         </div>
 
         {/* Right (Optional) */}
-        {headerRight && (
-          <div className="flex items-center gap-2">{headerRight}</div>
-        )}
+        {extra && <div className="flex items-center gap-2">{extra}</div>}
       </div>
 
       {/* Card Body */}
