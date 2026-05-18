@@ -27,33 +27,55 @@ interface Props {
   pageSize: number;
 
   config?: {
-    dateFields?: string[];
+    // =========================
+    // DEFAULT TOOLBAR
+    // =========================
+    showToolbar?: boolean;
 
-    // 🔥 FILTER DATE STANDALONE
+    // =========================
+    // DATE FILTER
+    // =========================
     showTanggalFilter?: boolean;
+
+    // 🔥 DINAMIS
     tanggalField?: string;
+
+    tanggalLabel?: string;
   };
 
   onChange: (params: {
     page?: number;
     limit?: number;
+
     search?: string;
     search_by?: string;
+
     filters?: any;
+
     sorter?: Sorter;
 
-    // 🔥 CUSTOM FILTER
-    tanggal_pendaftaran?: string;
+    // 🔥 DINAMIS
+    [key: string]: any;
   }) => void;
 
   onReload: () => void;
 
+  // =========================
+  // CUSTOM TOOLBAR
+  // =========================
+  toolbar?: React.ReactNode;
+
+  // =========================
+  // ACTIONS
+  // =========================
   showActions?: boolean;
+
   renderActions?: (record: any) => React.ReactNode;
 
   rowKeyField?: string;
 
   onEdit?: (record: any) => void;
+
   onDelete?: (record: any) => void;
 
   // =========================
@@ -77,11 +99,17 @@ export default function DynamicTable({
   config,
   onChange,
   onReload,
+
+  toolbar,
+
   showActions = false,
   renderActions,
+
   rowKeyField = "id",
+
   onEdit,
   onDelete,
+
   onRow,
   rowSelection,
 }: Props) {
@@ -90,7 +118,14 @@ export default function DynamicTable({
   const [tanggal, setTanggal] = useState<any>(dayjs());
 
   // =========================
-  // ROW KEY (FIXED)
+  // DATE CONFIG
+  // =========================
+  const tanggalField = config?.tanggalField || "tanggal_pendaftaran";
+
+  const tanggalLabel = config?.tanggalLabel || "Tanggal";
+
+  // =========================
+  // ROW KEY
   // =========================
   const getRowKey = (record: any): React.Key => {
     if (record?.[rowKeyField] !== undefined) {
@@ -121,7 +156,9 @@ export default function DynamicTable({
         ? [
             {
               title: "Actions",
+
               align: "center" as const,
+
               width: 80,
 
               render: (_: any, record: any) => (
@@ -144,73 +181,78 @@ export default function DynamicTable({
     ];
   }, [columns, showActions, renderActions, rowKeyField, onEdit, onDelete]);
 
+  // =========================
+  // DEFAULT TOOLBAR
+  // =========================
+  const defaultToolbar = (
+    <div className="flex justify-between mb-4">
+      <Space wrap>
+        {/* ========================= */}
+        {/* DATE FILTER */}
+        {/* ========================= */}
+        {config?.showTanggalFilter && (
+          <DatePicker
+            placeholder={tanggalLabel}
+            value={tanggal}
+            format="DD/MM/YYYY"
+            onChange={(date) => {
+              setTanggal(date);
+
+              onChange({
+                [tanggalField]: date ? date.format("YYYY-MM-DD") : undefined,
+
+                page: 1,
+              });
+            }}
+          />
+        )}
+
+        {/* ========================= */}
+        {/* SEARCH BY */}
+        {/* ========================= */}
+        <Select
+          placeholder="Search By"
+          allowClear
+          style={{ width: 180 }}
+          value={searchBy}
+          onChange={(val) => setSearchBy(val)}
+          options={(columns || [])
+            .filter((col) => col.searchable)
+            .map((col) => ({
+              label: col.searchLabel || col.title,
+              value: col.searchField,
+            }))}
+        />
+
+        {/* ========================= */}
+        {/* SEARCH */}
+        {/* ========================= */}
+        <Input.Search
+          placeholder="Search..."
+          allowClear
+          style={{ width: 240 }}
+          onSearch={(val) =>
+            onChange({
+              search: val || undefined,
+              search_by: searchBy,
+              page: 1,
+            })
+          }
+        />
+      </Space>
+
+      <Button icon={<ReloadOutlined />} onClick={onReload}>
+        Reload
+      </Button>
+    </div>
+  );
+
   return (
     <>
       {/* ========================= */}
-      {/* FILTER */}
+      {/* TOOLBAR */}
       {/* ========================= */}
-      <div className="flex justify-between mb-4">
-        <Space wrap>
-          {/* ========================= */}
-          {/* TANGGAL FILTER */}
-          {/* ========================= */}
-          {config?.showTanggalFilter && (
-            <DatePicker
-              placeholder="Tanggal Pendaftaran"
-              value={tanggal}
-              format="DD/MM/YYYY"
-              onChange={(date) => {
-                setTanggal(date);
-
-                onChange({
-                  tanggal_pendaftaran: date
-                    ? date.format("YYYY-MM-DD")
-                    : undefined,
-
-                  page: 1,
-                });
-              }}
-            />
-          )}
-
-          {/* ========================= */}
-          {/* SEARCH BY */}
-          {/* ========================= */}
-          <Select
-            placeholder="Search By"
-            allowClear
-            style={{ width: 180 }}
-            value={searchBy}
-            onChange={(val) => setSearchBy(val)}
-            options={(columns || [])
-              .filter((col) => col.searchable)
-              .map((col) => ({
-                label: col.searchLabel || col.title,
-                value: col.searchField,
-              }))}
-          />
-
-          {/* ========================= */}
-          {/* SEARCH */}
-          {/* ========================= */}
-          <Input.Search
-            placeholder="Search..."
-            allowClear
-            style={{ width: 240 }}
-            onSearch={(val) =>
-              onChange({
-                search: val || undefined,
-                search_by: searchBy,
-                page: 1,
-              })
-            }
-          />
-        </Space>
-
-        <Button icon={<ReloadOutlined />} onClick={onReload}>
-          Reload
-        </Button>
-      </div>
+      {config?.showToolbar !== false && (toolbar || defaultToolbar)}
 
       {/* ========================= */}
       {/* TABLE */}
@@ -231,7 +273,9 @@ export default function DynamicTable({
         onChange={(pag, filters, sorter: any) => {
           onChange({
             page: pag.current,
+
             limit: pag.pageSize,
+
             filters,
 
             sorter: {
