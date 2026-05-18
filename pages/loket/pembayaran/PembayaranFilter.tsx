@@ -1,22 +1,34 @@
 "use client";
 
-import { Space, Select, Input, DatePicker, Button } from "antd";
-import { ReloadOutlined } from "@ant-design/icons";
-import { getStatusPenerbitan } from "@/services/options.service";
 import { useEffect, useState } from "react";
+
+import { Space, Select, Input, DatePicker, Button } from "antd";
+
+import { ReloadOutlined } from "@ant-design/icons";
+
+import dayjs from "dayjs";
+
+import { getStatusPenerbitan } from "@/services/options.service";
 
 interface Props {
   filters: any;
+
   onChange: (payload: any) => void;
+
+  onReload?: () => void;
+
   loading?: boolean;
 }
 
-export default function PembayaranFilters({
+export default function PembayaranFilter({
   filters,
   onChange,
+  onReload,
+
   loading,
 }: Props) {
   const [jenisOptions, setJenisOptions] = useState<any[]>([]);
+
   const [loadingJenis, setLoadingJenis] = useState(false);
 
   // ====================================
@@ -52,74 +64,116 @@ export default function PembayaranFilters({
   }, []);
 
   return (
-    <div className="flex justify-between mb-4">
+    <div className="flex justify-between mb-4 gap-2 flex-wrap">
       <Space wrap>
+        {/* ========================= */}
         {/* TANGGAL */}
+        {/* ========================= */}
         <DatePicker
           format="DD/MM/YYYY"
           placeholder="Tanggal Pendaftaran"
+          value={
+            filters?.tanggal_pendaftaran
+              ? dayjs(filters.tanggal_pendaftaran)
+              : undefined
+          }
           disabled={loading}
           onChange={(date) =>
             onChange({
               tanggal_pendaftaran: date ? date.format("YYYY-MM-DD") : undefined,
+
               page: 1,
             })
           }
         />
 
+        {/* ========================= */}
         {/* STATUS */}
+        {/* ========================= */}
         <Select
-          placeholder="Status"
+          placeholder="Status Pembayaran"
           allowClear
-          className="min-w-[140px]"
+          style={{ width: 180 }}
           disabled={loading}
+          value={
+            filters?.status_pembayaran === undefined
+              ? undefined
+              : String(filters.status_pembayaran)
+          }
           onChange={(val) =>
             onChange({
               status_pembayaran: val === undefined ? undefined : val === "true",
+
               page: 1,
             })
           }
           options={[
-            { label: "Sudah Bayar", value: "true" },
-            { label: "Belum Bayar", value: "false" },
+            {
+              label: "Sudah Bayar",
+              value: "true",
+            },
+            {
+              label: "Belum Bayar",
+              value: "false",
+            },
           ]}
         />
 
-        {/* JENIS UJI */}
+        {/* ========================= */}
+        {/* JENIS PENDAFTARAN */}
+        {/* ========================= */}
         <Select
           placeholder="Jenis Pendaftaran"
           allowClear
           loading={loadingJenis}
-          className="min-w-[180px]"
+          style={{ width: 220 }}
           disabled={loading}
+          value={filters?.status_penerbitan_id}
           onChange={(val) =>
             onChange({
               status_penerbitan_id: val,
+
               page: 1,
             })
           }
           options={jenisOptions}
         />
 
+        {/* ========================= */}
         {/* SEARCH */}
+        {/* ========================= */}
         <Input.Search
           placeholder="Cari..."
           allowClear
           disabled={loading}
+          defaultValue={filters?.search}
+          style={{ width: 220 }}
           onSearch={(val) =>
             onChange({
-              search: val,
+              search: val || undefined,
+
               page: 1,
             })
           }
-          className="min-w-[200px]"
         />
       </Space>
 
+      {/* ========================= */}
+      {/* RELOAD */}
+      {/* ========================= */}
       <Button
         icon={<ReloadOutlined />}
         disabled={loading}
-        onClick={() => onChange({ ...filters })}
+        onClick={() => {
+          if (onReload) {
+            onReload();
+            return;
+          }
+
+          onChange({
+            ...filters,
+          });
+        }}
       >
         Reload
       </Button>
