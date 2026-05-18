@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useState, useCallback } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Card } from "antd";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
@@ -18,6 +18,15 @@ import { useShowAlert } from "@/core/alert/alert.hook";
 
 export default function HomeRekomendasi() {
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
+
+  // =========================
+  // LOADING STATE
+  // =========================
+  const [uiLoading, setUiLoading] = useState({
+    detail: false,
+    submit: false,
+    sync: false,
+  });
 
   // =========================
   // TABLE STATE
@@ -53,7 +62,6 @@ export default function HomeRekomendasi() {
       setTable((prev: any) => ({ ...prev, loading: true }));
 
       const finalParams = customParams || table.params;
-
       const res = await fetchRekomendasi(finalParams);
 
       setTable((prev: any) => ({
@@ -81,28 +89,87 @@ export default function HomeRekomendasi() {
   ]);
 
   // =========================
-  // FETCH DETAIL (SOURCE OF TRUTH)
+  // DETAIL FETCH (CLICK ROW)
   // =========================
-  useEffect(() => {
-    if (!selectedId) return;
-    if (selectedData?.id === selectedId) return;
+  const handleSelect = async (record: any) => {
+    const pk = table?.config?.primary_key || "pendaftaran_id";
+    const id = record?.[pk];
 
-    const load = async () => {
-      try {
-        const res = await fetchRekomendasiDetail(selectedId);
+    if (!id) return;
 
-        const detail = res?.data ?? res?.data?.data ?? res?.data?.[0];
+    try {
+      setSelectedId(id);
+      setUiLoading((p) => ({ ...p, detail: true }));
 
-        if (detail) {
-          setSelectedData(detail);
-        }
-      } catch (err) {
-        showErrorAlert(err, "Gagal load detail");
-      }
-    };
+      const res = await fetchRekomendasiDetail(id);
+      const detail = res?.data?.data ?? res?.data;
 
-    load();
-  }, [selectedId]);
+      setSelectedData(detail);
+    } catch (err) {
+      showErrorAlert(err, "Gagal load detail");
+    } finally {
+      setUiLoading((p) => ({ ...p, detail: false }));
+    }
+  };
+
+  // =========================
+  // SUBMIT
+  // =========================
+  const handleSubmit = async (values: any) => {
+    const pk = table?.config?.primary_key || "id";
+
+    if (!selectedData?.[pk]) return;
+
+    try {
+      setUiLoading((p) => ({ ...p, submit: true }));
+
+      await updateRekomendasi(selectedData[pk], values);
+
+      showSuccessAlert("Berhasil update rekomendasi");
+
+      setIsEditing(false);
+      fetchData();
+    } catch (err) {
+      showErrorAlert(err, "Gagal update");
+    } finally {
+      setUiLoading((p) => ({ ...p, submit: false }));
+    }
+  };
+
+  // =========================
+  // SYNC
+  // =========================
+  const handleSync = async () => {
+    const pk = table?.config?.primary_key || "id";
+
+    if (!selectedData?.[pk]) return;
+
+    try {
+      setUiLoading((p) => ({ ...p, sync: true }));
+
+      await syncRekomendasi(selectedData[pk]);
+
+      showSuccessAlert("Berhasil sinkron");
+
+      fetchData();
+    } catch (err) {
+      showErrorAlert(err, "Gagal sinkron");
+    } finally {
+      setUiLoading((p) => ({ ...p, sync: false }));
+    }
+  };
+
+  // =========================
+  // TABLE CHANGE
+  // =========================
+  const handleTableChange = (payload: any) => {
+    setTable((prev: any) => ({
+      ...prev,
+      params: { ...prev.params, ...payload },
+    }));
+  };
+
+  const reload = () => fetchData();
 
   // =========================
   // COLUMNS
@@ -122,81 +189,13 @@ export default function HomeRekomendasi() {
       }));
   }, [table.config]);
 
-  // =========================
-  // TABLE CHANGE
-  // =========================
-  const handleTableChange = (payload: any) => {
-    setTable((prev: any) => ({
-      ...prev,
-      params: { ...prev.params, ...payload },
-    }));
-  };
-
-  const reload = () => fetchData();
-
-  // =========================
-  // SELECT ROW
-  // =========================
-  const handleSelect = async (record: any) => {
-    const pk = table?.config?.primary_key || "pendaftaran_id";
-    const id = record?.[pk];
-
-    if (!id) return;
-
-    try {
-      const res = await fetchRekomendasiDetail(id);
-
-      const detail = res?.data?.data ?? res?.data;
-
-      setSelectedData(detail);
-    } catch (err) {
-      showErrorAlert(err, "Gagal load detail");
-    }
-  };
-
-  // =========================
-  // SUBMIT
-  // =========================
-  const handleSubmit = async (values: any) => {
-    const pk = table?.config?.primary_key || "id";
-
-    if (!selectedData?.[pk]) return;
-
-    try {
-      await updateRekomendasi(selectedData[pk], values);
-
-      showSuccessAlert("Berhasil update rekomendasi");
-
-      setIsEditing(false);
-      fetchData();
-    } catch (err) {
-      showErrorAlert(err, "Gagal update");
-    }
-  };
-
-  // =========================
-  // SYNC
-  // =========================
-  const handleSync = async () => {
-    const pk = table?.config?.primary_key || "id";
-
-    if (!selectedData?.[pk]) return;
-
-    try {
-      await syncRekomendasi(selectedData[pk]);
-
-      showSuccessAlert("Berhasil sinkron");
-
-      fetchData();
-    } catch (err) {
-      showErrorAlert(err, "Gagal sinkron");
-    }
-  };
-
   return (
     <div>
       <AutoBreadcrumb />
 
+      {/* =========================
+          TABLE
+      ========================= */}
       <Card title="Daftar Rekomendasi">
         <RekomendasiTable
           table={{
@@ -205,11 +204,15 @@ export default function HomeRekomendasi() {
             setParams: handleTableChange,
             fetchData: reload,
             selectedId,
+            loading: table.loading || uiLoading.detail,
           }}
           onSelect={handleSelect}
         />
       </Card>
 
+      {/* =========================
+          FORM
+      ========================= */}
       <Card
         title="Form Rekomendasi"
         className="mt-4"
@@ -225,6 +228,7 @@ export default function HomeRekomendasi() {
           onSync={handleSync}
           isEditing={isEditing}
           onEdit={() => setIsEditing(true)}
+          loading={uiLoading}
         />
       </Card>
     </div>

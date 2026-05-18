@@ -57,7 +57,7 @@ export default function PembayaranTable({
   onBulkToggle,
 
   onEdit,
-  filters,
+  filters = {},
 }: Props) {
   const rowSelection = {
     selectedRowKeys,
@@ -72,8 +72,8 @@ export default function PembayaranTable({
       sorter: true,
 
       sortOrder:
-        filters.sort_by === "no_pendaftaran_harian"
-          ? filters.sort_order === "asc"
+        filters?.sort_by === "no_pendaftaran_harian"
+          ? filters?.sort_order === "asc"
             ? ("ascend" as const)
             : ("descend" as const)
           : undefined,

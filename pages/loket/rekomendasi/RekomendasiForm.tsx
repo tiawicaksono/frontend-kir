@@ -2,7 +2,11 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Button, Card, Empty, Form, Space, Tag } from "antd";
-import { InfoCircleOutlined } from "@ant-design/icons";
+import {
+  InfoCircleOutlined,
+  SaveOutlined,
+  SyncOutlined,
+} from "@ant-design/icons";
 
 import { rekomendasiSchema } from "@/schema/rekomendasi.schema";
 import { useWilayah } from "@/hooks/select-options/useWilayah";
@@ -16,6 +20,11 @@ interface Props {
   onSync: () => void;
   isEditing: boolean;
   onEdit: () => void;
+  loading?: {
+    detail: boolean;
+    submit: boolean;
+    sync: boolean;
+  };
 }
 
 export default function RekomendasiForm({
@@ -24,11 +33,12 @@ export default function RekomendasiForm({
   onSync,
   isEditing,
   onEdit,
+  loading,
 }: Props) {
   const [form] = Form.useForm();
   const wilayah = useWilayah(form, false);
   const { area } = useArea(true);
-
+  const isLoading = loading?.detail || loading?.submit || loading?.sync;
   const [hydrated, setHydrated] = useState(false);
 
   // =========================
@@ -130,7 +140,7 @@ export default function RekomendasiForm({
         form={form}
         extra={{
           options: optionsMap[field.name],
-          disabled: !isEditing || isDisabled(field.name),
+          disabled: !isEditing || isDisabled(field.name) || isLoading,
           onChange: (val: any) => {
             form.setFieldValue(field.name, val);
 
@@ -148,13 +158,23 @@ export default function RekomendasiForm({
   // =========================
   return (
     <div>
+      {isLoading && (
+        <div
+          style={{
+            position: "absolute",
+            inset: 0,
+            background: "rgba(255,255,255,0.4)",
+            zIndex: 2,
+          }}
+        />
+      )}
       {/* HEADER */}
       <div className="mb-4 flex flex-wrap gap-2">
         <Tag color="blue">{data.pendaftaran_kendaraan_no_uji}</Tag>
         <Tag color="purple">{data.pendaftaran_kendaraan_no_kendaraan}</Tag>
         <Tag color="green">{data.jenis_rekomendasi}</Tag>
 
-        <Button size="small" onClick={onEdit}>
+        <Button size="small" onClick={onEdit} disabled={isLoading}>
           {isEditing ? "Mode Edit" : "Edit"}
         </Button>
       </div>
@@ -193,6 +213,7 @@ export default function RekomendasiForm({
           labelCol={{ span: 4 }}
           colon={false}
           onFinish={onSubmit}
+          disabled={isLoading}
         >
           <div style={{ display: "flex", gap: 24 }}>
             <div style={{ flex: 1 }}>
@@ -212,12 +233,23 @@ export default function RekomendasiForm({
 
           <Space className="mt-4">
             {isEditing && (
-              <Button type="primary" htmlType="submit">
+              <Button
+                type="primary"
+                htmlType="submit"
+                loading={loading?.submit}
+                icon={<SaveOutlined />}
+              >
                 Simpan
               </Button>
             )}
 
-            <Button onClick={onSync}>Sinkronkan</Button>
+            <Button
+              onClick={onSync}
+              loading={loading?.sync}
+              icon={<SyncOutlined />}
+            >
+              Sinkronkan
+            </Button>
           </Space>
         </Form>
       )}
