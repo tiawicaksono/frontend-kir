@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
-import { Card } from "antd";
+import { Card, Button, Space } from "antd";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import RekomendasiTable from "./RekomendasiTable";
@@ -16,26 +16,30 @@ import {
 
 import { useShowAlert } from "@/core/alert/alert.hook";
 
+type Key = React.Key;
+
 export default function HomeRekomendasi() {
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
   // =========================
-  // LOADING STATE
+  // LOADING (SSR SAFE)
   // =========================
   const [uiLoading, setUiLoading] = useState({
     detail: false,
     submit: false,
     sync: false,
+    bulkSync: false,
   });
 
   // =========================
-  // TABLE STATE
+  // TABLE STATE (SSR SAFE INIT)
   // =========================
-  const [table, setTable] = useState<any>({
+  const [table, setTable] = useState<any>(() => ({
     dataSource: [],
     config: {},
     loading: false,
     total: 0,
+    selectedRowKeys: [] as Key[], // 🔥 FIX TYPE
 
     params: {
       page: 1,
@@ -45,12 +49,8 @@ export default function HomeRekomendasi() {
       sort_by: "pendaftaran_id",
       sort_order: "desc",
     },
-  });
+  }));
 
-  // =========================
-  // SELECT STATE
-  // =========================
-  const [selectedId, setSelectedId] = useState<any>(null);
   const [selectedData, setSelectedData] = useState<any>(null);
   const [isEditing, setIsEditing] = useState(false);
 
@@ -59,20 +59,19 @@ export default function HomeRekomendasi() {
   // =========================
   const fetchData = async (customParams?: any) => {
     try {
-      setTable((prev: any) => ({ ...prev, loading: true }));
+      setTable((p: any) => ({ ...p, loading: true }));
 
-      const finalParams = customParams || table.params;
-      const res = await fetchRekomendasi(finalParams);
+      const res = await fetchRekomendasi(customParams || table.params);
 
-      setTable((prev: any) => ({
-        ...prev,
+      setTable((p: any) => ({
+        ...p,
         loading: false,
         dataSource: res?.data ?? [],
         config: res?.config ?? {},
         total: res?.meta?.total ?? 0,
       }));
     } catch (err) {
-      setTable((prev: any) => ({ ...prev, loading: false }));
+      setTable((p: any) => ({ ...p, loading: false }));
       showErrorAlert(err, "Gagal load data");
     }
   };
@@ -89,7 +88,7 @@ export default function HomeRekomendasi() {
   ]);
 
   // =========================
-  // DETAIL FETCH (CLICK ROW)
+  // DETAIL
   // =========================
   const handleSelect = async (record: any) => {
     const pk = table?.config?.primary_key || "pendaftaran_id";
@@ -98,13 +97,10 @@ export default function HomeRekomendasi() {
     if (!id) return;
 
     try {
-      setSelectedId(id);
       setUiLoading((p) => ({ ...p, detail: true }));
 
       const res = await fetchRekomendasiDetail(id);
-      const detail = res?.data?.data ?? res?.data;
-
-      setSelectedData(detail);
+      setSelectedData(res?.data?.data ?? res?.data);
     } catch (err) {
       showErrorAlert(err, "Gagal load detail");
     } finally {
@@ -117,7 +113,6 @@ export default function HomeRekomendasi() {
   // =========================
   const handleSubmit = async (values: any) => {
     const pk = table?.config?.primary_key || "id";
-
     if (!selectedData?.[pk]) return;
 
     try {
@@ -125,8 +120,7 @@ export default function HomeRekomendasi() {
 
       await updateRekomendasi(selectedData[pk], values);
 
-      showSuccessAlert("Berhasil update rekomendasi");
-
+      showSuccessAlert("Berhasil update");
       setIsEditing(false);
       fetchData();
     } catch (err) {
@@ -137,11 +131,10 @@ export default function HomeRekomendasi() {
   };
 
   // =========================
-  // SYNC
+  // SINGLE SYNC
   // =========================
   const handleSync = async () => {
     const pk = table?.config?.primary_key || "id";
-
     if (!selectedData?.[pk]) return;
 
     try {
@@ -150,7 +143,6 @@ export default function HomeRekomendasi() {
       await syncRekomendasi(selectedData[pk]);
 
       showSuccessAlert("Berhasil sinkron");
-
       fetchData();
     } catch (err) {
       showErrorAlert(err, "Gagal sinkron");
@@ -160,32 +152,66 @@ export default function HomeRekomendasi() {
   };
 
   // =========================
-  // TABLE CHANGE
+  // CHECKBOX SAFE HANDLER
   // =========================
-  const handleTableChange = (payload: any) => {
-    setTable((prev: any) => ({
-      ...prev,
-      params: { ...prev.params, ...payload },
+  const handleSelectRowKeys = (keys: Key[]) => {
+    setTable((p: any) => ({
+      ...p,
+      selectedRowKeys: keys ?? [],
     }));
   };
 
-  const reload = () => fetchData();
+  // =========================
+  // BULK SYNC (TYPE SAFE)
+  // =========================
+  const handleBulkSync = async () => {
+    const ids = table.selectedRowKeys ?? [];
+
+    if (ids.length === 0) return;
+
+    try {
+      setUiLoading((p) => ({ ...p, bulkSync: true }));
+
+      // 🔥 FIX: pastikan backend support bulk
+      await syncRekomendasi({ ids });
+
+      showSuccessAlert("Berhasil sync semua data");
+
+      setTable((p: any) => ({
+        ...p,
+        selectedRowKeys: [],
+      }));
+
+      fetchData();
+    } catch (err) {
+      showErrorAlert(err, "Gagal bulk sync");
+    } finally {
+      setUiLoading((p) => ({ ...p, bulkSync: false }));
+    }
+  };
 
   // =========================
-  // COLUMNS
+  // TABLE CHANGE
   // =========================
+  const handleTableChange = (payload: any) => {
+    setTable((p: any) => ({
+      ...p,
+      params: { ...p.params, ...payload },
+    }));
+  };
+
   const columns = useMemo(() => {
     const labels = table?.config?.labels || {};
-    const sortable = table?.config?.sortable || [];
     const hidden = table?.config?.hidden || [];
+    const sortable = table?.config?.sortable || [];
 
     return Object.keys(labels)
-      .filter((key) => !hidden.includes(key))
-      .map((key) => ({
-        title: labels[key],
-        dataIndex: key,
-        key,
-        sorter: sortable.includes(key),
+      .filter((k) => !hidden.includes(k))
+      .map((k) => ({
+        title: labels[k],
+        dataIndex: k,
+        key: k,
+        sorter: sortable.includes(k),
       }));
   }, [table.config]);
 
@@ -193,35 +219,39 @@ export default function HomeRekomendasi() {
     <div>
       <AutoBreadcrumb />
 
-      {/* =========================
-          TABLE
-      ========================= */}
-      <Card title="Daftar Rekomendasi">
+      {/* ========================= TABLE ========================= */}
+      <Card
+        title="Daftar Rekomendasi"
+        extra={
+          <Space>
+            <Button
+              type="primary"
+              disabled={(table.selectedRowKeys ?? []).length === 0}
+              loading={uiLoading.bulkSync}
+              onClick={handleBulkSync}
+            >
+              Sync Terpilih ({(table.selectedRowKeys ?? []).length})
+            </Button>
+          </Space>
+        }
+      >
         <RekomendasiTable
           table={{
             ...table,
             columns,
             setParams: handleTableChange,
-            fetchData: reload,
-            selectedId,
+            fetchData,
             loading: table.loading || uiLoading.detail,
+
+            selectedRowKeys: table.selectedRowKeys ?? [],
+            onSelectRowKeys: handleSelectRowKeys,
           }}
           onSelect={handleSelect}
         />
       </Card>
 
-      {/* =========================
-          FORM
-      ========================= */}
-      <Card
-        title="Form Rekomendasi"
-        className="mt-4"
-        extra={
-          selectedData && !isEditing ? (
-            <a onClick={() => setIsEditing(true)}>Edit</a>
-          ) : null
-        }
-      >
+      {/* ========================= FORM ========================= */}
+      <Card title="Form Rekomendasi" className="mt-4">
         <RekomendasiForm
           data={selectedData}
           onSubmit={handleSubmit}

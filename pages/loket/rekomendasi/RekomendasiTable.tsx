@@ -1,48 +1,54 @@
 "use client";
 
 import { useMemo } from "react";
-
-import { Badge, Card, Tag, Tooltip } from "antd";
+import { Badge, Tag, Tooltip } from "antd";
 
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
-
 import { ColumnFormatters } from "@/components/ui/dynamic-table/ColumnFormatters";
 
 interface Props {
   table: any;
-
   onSelect?: (record: any) => void;
 }
 
-export default function RekomendasiTable({ table, onSelect }: Props) {
-  if (!table) return null;
+type SinkronStatus = "Sukses" | "Gagal" | "Belum";
 
-  const params = table.params ?? {
+export default function RekomendasiTable({ table, onSelect }: Props) {
+  const selectedRowKeys: React.Key[] = table?.selectedRowKeys ?? [];
+
+  const onSelectRowKeys = table?.onSelectRowKeys ?? (() => {});
+
+  const params = table?.params ?? {
     page: 1,
     limit: 10,
   };
 
   const key = table?.config?.primary_key || "id";
 
-  // =========================================
-  // FORMATTERS MAP
-  // =========================================
-  type SinkronStatus = "Sukses" | "Gagal" | "Belum";
+  // =========================
+  // BADGE COLOR
+  // =========================
   const getSinkronColor = (value?: SinkronStatus) => {
     switch (value) {
       case "Sukses":
         return "green";
+
       case "Gagal":
         return "red";
+
       case "Belum":
         return "orange";
+
       default:
         return "default";
     }
   };
 
-  const FORMAT_MAP = useMemo<Record<string, any>>(() => {
-    return {
+  // =========================
+  // FORMAT MAP
+  // =========================
+  const FORMAT_MAP = useMemo<Record<string, any>>(
+    () => ({
       created_at: ColumnFormatters.date(),
 
       kendaraan_no_uji: ColumnFormatters.bold(),
@@ -68,7 +74,7 @@ export default function RekomendasiTable({ table, onSelect }: Props) {
 
       area_area_code: {
         render: (value: string, record: any) => (
-          <Tooltip title={record.area_area_name}>{value}</Tooltip>
+          <Tooltip title={record.area_area_name}>{value || "-"}</Tooltip>
         ),
       },
 
@@ -79,45 +85,68 @@ export default function RekomendasiTable({ table, onSelect }: Props) {
       area_area_name: {
         hidden: true,
       },
-    };
-  }, []);
+    }),
+    [],
+  );
 
-  // =========================================
-  // APPLY FORMATTERS
-  // =========================================
+  // =========================
+  // APPLY FORMATTER
+  // =========================
   const formattedColumns = useMemo(() => {
-    return (table.columns ?? []).map((col: any) => {
-      const key = String(col.dataIndex);
+    return (table?.columns ?? []).map((col: any) => {
+      const columnKey = String(col.dataIndex);
 
-      const formatter = FORMAT_MAP[key];
+      const formatter = FORMAT_MAP[columnKey];
 
-      if (!formatter) return col;
+      if (!formatter) {
+        return col;
+      }
 
       return {
         ...col,
         ...formatter,
       };
     });
-  }, [table.columns, FORMAT_MAP]);
-
-  const config = {
-    dateFields: ["tanggal_pendaftaran", "created_at"],
-  };
+  }, [table?.columns, FORMAT_MAP]);
 
   return (
     <DynamicTable
       columns={formattedColumns}
-      dataSource={table.dataSource ?? []}
-      loading={table.loading ?? false}
-      total={table.total ?? 0}
+      dataSource={table?.dataSource ?? []}
+      loading={table?.loading ?? false}
+      total={table?.total ?? 0}
       page={params.page}
       pageSize={params.limit}
-      onChange={table.setParams ?? (() => {})}
-      onReload={table.fetchData}
+      onChange={table?.setParams ?? (() => {})}
+      onReload={table?.fetchData ?? (() => {})}
       rowKeyField={key}
-      config={config}
+      config={{
+        dateFields: ["tanggal_pendaftaran", "created_at"],
+      }}
+      // =========================
+      // BULK SELECTION
+      // =========================
+      rowSelection={{
+        selectedRowKeys,
+        onChange: (keys: React.Key[]) => {
+          onSelectRowKeys(keys);
+        },
+      }}
+      // =========================
+      // ROW CLICK
+      // =========================
       onRow={(record: any) => ({
-        onClick: () => onSelect?.(record),
+        onClick: (e: any) => {
+          // 🔥 prevent click row saat checkbox diklik
+          const target = e.target as HTMLElement;
+
+          const isCheckbox = target.closest(".ant-checkbox-wrapper");
+
+          if (isCheckbox) return;
+
+          onSelect?.(record);
+        },
+
         className: "cursor-pointer hover:bg-gray-50",
       })}
     />

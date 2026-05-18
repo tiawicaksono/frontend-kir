@@ -32,6 +32,11 @@ export const rekomendasiSchema: Record<string, any[]> = {
           required: true,
           uppercase: true,
         },
+      ],
+    },
+    {
+      col: "right",
+      fields: [
         {
           name: "alamat_pemilik_tujuan",
           label: "Alamat",
@@ -39,11 +44,6 @@ export const rekomendasiSchema: Record<string, any[]> = {
           required: true,
           uppercase: true,
         },
-      ],
-    },
-    {
-      col: "right",
-      fields: [
         {
           name: "provinsi_id",
           label: "Provinsi",

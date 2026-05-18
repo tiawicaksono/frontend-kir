@@ -19,8 +19,16 @@ export const updateRekomendasi = async (id: number, payload: any) => {
   return res.data;
 };
 
-export const syncRekomendasi = async (id: number) => {
-  const res = await api.post(`${API_URL}/loket/rekomendasi/${id}/sync`);
+export const syncRekomendasi = async (
+  payload: number | { ids: React.Key[] },
+) => {
+  // SINGLE
+  if (typeof payload === "number") {
+    return api.post(`/rekomendasi/${payload}/sync`);
+  }
 
-  return res.data;
+  // BULK
+  return api.post(`/rekomendasi/bulk-sync`, {
+    ids: payload.ids,
+  });
 };

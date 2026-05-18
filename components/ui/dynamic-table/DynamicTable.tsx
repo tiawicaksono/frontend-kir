@@ -1,9 +1,14 @@
 "use client";
 
+import { useMemo, useState } from "react";
+
 import { Table, Input, Button, Space, Select, DatePicker } from "antd";
+
+import type { TableRowSelection } from "antd/es/table/interface";
+
 import { ReloadOutlined } from "@ant-design/icons";
+
 import TableActions from "./TableActions";
-import { useState } from "react";
 
 interface Sorter {
   field?: string;
@@ -18,7 +23,10 @@ interface Props {
 
   page: number;
   pageSize: number;
-  config?: any;
+
+  config?: {
+    dateFields?: string[];
+  };
 
   onChange: (params: {
     page?: number;
@@ -33,15 +41,21 @@ interface Props {
 
   showActions?: boolean;
   renderActions?: (record: any) => React.ReactNode;
+
   rowKeyField?: string;
 
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
 
-  // =========================================
-  // NEW
-  // =========================================
+  // =========================
+  // ROW
+  // =========================
   onRow?: (record: any) => any;
+
+  // =========================
+  // BULK SELECTION
+  // =========================
+  rowSelection?: TableRowSelection<any>;
 }
 
 export default function DynamicTable({
@@ -56,75 +70,86 @@ export default function DynamicTable({
   onReload,
   showActions = false,
   renderActions,
-  rowKeyField,
+  rowKeyField = "id",
   onEdit,
   onDelete,
-
-  // =========================================
-  // NEW
-  // =========================================
   onRow,
+  rowSelection,
 }: Props) {
-  const [searchBy, setSearchBy] = useState<string | undefined>();
+  const [searchBy, setSearchBy] = useState<string>();
 
-  // =========================================
-  // DATE FIELD
-  // =========================================
-  const isDateField = config?.dateFields?.includes(searchBy);
+  // =========================
+  // DATE SEARCH
+  // =========================
+  const isDateField = config?.dateFields?.includes(searchBy || "");
 
-  // =========================================
-  // ROW KEY
-  // =========================================
-  const getRowKey = (record: any) => {
-    return rowKeyField
-      ? record?.[rowKeyField]
-      : record?.id ||
-          Object.keys(record || {}).find((k) => k.endsWith("_id")) ||
-          JSON.stringify(record);
+  // =========================
+  // ROW KEY (FIXED)
+  // =========================
+  const getRowKey = (record: any): React.Key => {
+    if (record?.[rowKeyField] !== undefined) {
+      return record[rowKeyField];
+    }
+
+    if (record?.id !== undefined) {
+      return record.id;
+    }
+
+    const dynamicKey = Object.keys(record || {}).find((k) => k.endsWith("_id"));
+
+    if (dynamicKey) {
+      return record[dynamicKey];
+    }
+
+    return JSON.stringify(record);
   };
 
-  // =========================================
-  // ACTION COLUMN
-  // =========================================
-  const finalColumns = [
-    ...columns,
+  // =========================
+  // FINAL COLUMNS
+  // =========================
+  const finalColumns = useMemo(() => {
+    return [
+      ...columns,
 
-    ...(showActions
-      ? [
-          {
-            title: "Actions",
-            align: "center",
-            width: 50,
-            render: (_: any, record: any) => (
-              <div className="flex justify-center">
-                {renderActions ? (
-                  renderActions(record)
-                ) : (
-                  <TableActions
-                    record={record}
-                    rowKeyField={rowKeyField}
-                    onEdit={onEdit}
-                    onDelete={onDelete}
-                  />
-                )}
-              </div>
-            ),
-          },
-        ]
-      : []),
-  ];
+      ...(showActions
+        ? [
+            {
+              title: "Actions",
+              align: "center" as const,
+              width: 80,
+
+              render: (_: any, record: any) => (
+                <div className="flex justify-center">
+                  {renderActions ? (
+                    renderActions(record)
+                  ) : (
+                    <TableActions
+                      record={record}
+                      rowKeyField={rowKeyField}
+                      onEdit={onEdit}
+                      onDelete={onDelete}
+                    />
+                  )}
+                </div>
+              ),
+            },
+          ]
+        : []),
+    ];
+  }, [columns, showActions, renderActions, rowKeyField, onEdit, onDelete]);
 
   return (
     <>
-      {/* ========================================= */}
+      {/* ========================= */}
       {/* FILTER */}
-      {/* ========================================= */}
+      {/* ========================= */}
       <div className="flex justify-between mb-4">
         <Space>
           <Select
             placeholder="Search By"
             allowClear
             style={{ width: 180 }}
+            value={searchBy}
             onChange={(val) => setSearchBy(val)}
             options={(columns || [])
               .filter((col) => col.searchable)
@@ -134,7 +159,6 @@ export default function DynamicTable({
               }))}
           />
 
-          {/* DATE PICKER */}
           {isDateField ? (
             <DatePicker
               style={{ width: 200 }}
@@ -153,7 +177,7 @@ export default function DynamicTable({
               allowClear
               onSearch={(val) =>
                 onChange({
-                  search: val,
+                  search: val || undefined,
                   search_by: searchBy,
                   page: 1,
                 })
@@ -167,15 +191,16 @@ export default function DynamicTable({
         </Button>
       </div>
 
-      {/* ========================================= */}
+      {/* ========================= */}
       {/* TABLE */}
-      {/* ========================================= */}
+      {/* ========================= */}
       <Table
         rowKey={getRowKey}
         columns={finalColumns}
-        dataSource={dataSource}
-        loading={loading || !columns.length}
+        dataSource={dataSource ?? []}
+        loading={loading}
         onRow={onRow}
+        rowSelection={rowSelection}
         pagination={{
           current: page,
           pageSize,
@@ -187,6 +212,7 @@ export default function DynamicTable({
             page: pag.current,
             limit: pag.pageSize,
             filters,
+
             sorter: {
               field: sorter?.field,
               order: sorter?.order,
