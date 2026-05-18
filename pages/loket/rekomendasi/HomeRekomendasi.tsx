@@ -2,7 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 import { Card, Button, Space } from "antd";
-
+import dayjs from "dayjs";
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import RekomendasiTable from "./RekomendasiTable";
 import RekomendasiForm from "./RekomendasiForm";
@@ -44,6 +44,7 @@ export default function HomeRekomendasi() {
     params: {
       page: 1,
       limit: 10,
+      tanggal_pendaftaran: dayjs().format("YYYY-MM-DD"),
       search: undefined,
       search_by: undefined,
       sort_by: "pendaftaran_id",
@@ -81,6 +82,7 @@ export default function HomeRekomendasi() {
   }, [
     table.params.page,
     table.params.limit,
+    table.params.tanggal_pendaftaran,
     table.params.search,
     table.params.search_by,
     table.params.sort_by,
@@ -254,18 +256,60 @@ export default function HomeRekomendasi() {
 
   const columns = useMemo(() => {
     const labels = table?.config?.labels || {};
+
     const hidden = table?.config?.hidden || [];
+
     const sortable = table?.config?.sortable || [];
+
+    const searchable = table?.config?.searchable || [];
 
     return Object.keys(labels)
       .filter((k) => !hidden.includes(k))
-      .map((k) => ({
-        title: labels[k],
-        dataIndex: k,
-        key: k,
-        sorter: sortable.includes(k),
-      }));
-  }, [table.config]);
+      .map((k) => {
+        // =========================
+        // MATCH SEARCH CONFIG
+        // =========================
+        const searchConfig = searchable.find((item: any) => {
+          // exact match
+          if (item.field === k) {
+            return true;
+          }
+
+          // relational last field
+          const lastField = item.field?.split(".").pop();
+
+          if (lastField === k) {
+            return true;
+          }
+
+          // 🔥 flatten support
+          // pendaftaran.kendaraan.no_uji
+          // -> pendaftaran_kendaraan_no_uji
+          const flattenedField = item.field?.replaceAll(".", "_");
+
+          return flattenedField === k;
+        });
+
+        return {
+          title: labels[k],
+
+          dataIndex: k,
+
+          key: k,
+
+          sorter: sortable.includes(k),
+
+          // =========================
+          // 🔥 SEARCH SUPPORT
+          // =========================
+          searchable: !!searchConfig,
+
+          searchField: searchConfig?.field,
+
+          searchLabel: searchConfig?.label,
+        };
+      });
+  }, [table?.config]);
 
   return (
     <div>

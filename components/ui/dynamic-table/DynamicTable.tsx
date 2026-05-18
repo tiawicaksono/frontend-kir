@@ -8,6 +8,8 @@ import type { TableRowSelection } from "antd/es/table/interface";
 
 import { ReloadOutlined } from "@ant-design/icons";
 
+import dayjs from "dayjs";
+
 import TableActions from "./TableActions";
 
 interface Sorter {
@@ -26,6 +28,10 @@ interface Props {
 
   config?: {
     dateFields?: string[];
+
+    // 🔥 FILTER DATE STANDALONE
+    showTanggalFilter?: boolean;
+    tanggalField?: string;
   };
 
   onChange: (params: {
@@ -35,6 +41,9 @@ interface Props {
     search_by?: string;
     filters?: any;
     sorter?: Sorter;
+
+    // 🔥 CUSTOM FILTER
+    tanggal_pendaftaran?: string;
   }) => void;
 
   onReload: () => void;
@@ -78,10 +87,7 @@ export default function DynamicTable({
 }: Props) {
   const [searchBy, setSearchBy] = useState<string>();
 
-  // =========================
-  // DATE SEARCH
-  // =========================
-  const isDateField = config?.dateFields?.includes(searchBy || "");
+  const [tanggal, setTanggal] = useState<any>(dayjs());
 
   // =========================
   // ROW KEY (FIXED)
@@ -144,7 +150,32 @@ export default function DynamicTable({
       {/* FILTER */}
       {/* ========================= */}
       <div className="flex justify-between mb-4">
-        <Space>
+        <Space wrap>
+          {/* ========================= */}
+          {/* TANGGAL FILTER */}
+          {/* ========================= */}
+          {config?.showTanggalFilter && (
+            <DatePicker
+              placeholder="Tanggal Pendaftaran"
+              value={tanggal}
+              format="DD/MM/YYYY"
+              onChange={(date) => {
+                setTanggal(date);
+
+                onChange({
+                  tanggal_pendaftaran: date
+                    ? date.format("YYYY-MM-DD")
+                    : undefined,
+
+                  page: 1,
+                });
+              }}
+            />
+          )}
+
+          {/* ========================= */}
+          {/* SEARCH BY */}
+          {/* ========================= */}
           <Select
             placeholder="Search By"
             allowClear
@@ -159,31 +190,21 @@ export default function DynamicTable({
               }))}
           />
 
-          {isDateField ? (
-            <DatePicker
-              style={{ width: 200 }}
-              format="DD/MM/YYYY"
-              onChange={(date) =>
-                onChange({
-                  search: date ? date.format("YYYY-MM-DD") : undefined,
-                  search_by: searchBy,
-                  page: 1,
-                })
-              }
-            />
-          ) : (
-            <Input.Search
-              placeholder="Search..."
-              allowClear
-              onSearch={(val) =>
-                onChange({
-                  search: val || undefined,
-                  search_by: searchBy,
-                  page: 1,
-                })
-              }
-            />
-          )}
+          {/* ========================= */}
+          {/* SEARCH */}
+          {/* ========================= */}
+          <Input.Search
+            placeholder="Search..."
+            allowClear
+            style={{ width: 240 }}
+            onSearch={(val) =>
+              onChange({
+                search: val || undefined,
+                search_by: searchBy,
+                page: 1,
+              })
+            }
+          />
         </Space>
 
         <Button icon={<ReloadOutlined />} onClick={onReload}>

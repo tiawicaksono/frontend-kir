@@ -49,8 +49,6 @@ export default function RekomendasiTable({ table, onSelect }: Props) {
   // =========================
   const FORMAT_MAP = useMemo<Record<string, any>>(
     () => ({
-      created_at: ColumnFormatters.date(),
-
       kendaraan_no_uji: ColumnFormatters.bold(),
 
       jenis_rekomendasi: {
@@ -121,7 +119,8 @@ export default function RekomendasiTable({ table, onSelect }: Props) {
       onReload={table?.fetchData ?? (() => {})}
       rowKeyField={key}
       config={{
-        dateFields: ["tanggal_pendaftaran", "created_at"],
+        // 🔥 munculkan filter tanggal
+        showTanggalFilter: true,
       }}
       // =========================
       // BULK SELECTION
