@@ -4,7 +4,6 @@ import { Table, Input, Button, Space, Select, DatePicker } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import TableActions from "./TableActions";
 import { useState } from "react";
-import dayjs from "dayjs";
 
 interface Sorter {
   field?: string;
@@ -38,6 +37,11 @@ interface Props {
 
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
+
+  // =========================================
+  // NEW
+  // =========================================
+  onRow?: (record: any) => any;
 }
 
 export default function DynamicTable({
@@ -55,12 +59,22 @@ export default function DynamicTable({
   rowKeyField,
   onEdit,
   onDelete,
+
+  // =========================================
+  // NEW
+  // =========================================
+  onRow,
 }: Props) {
   const [searchBy, setSearchBy] = useState<string | undefined>();
 
-  // ✅ hanya field tertentu yang pakai datepicker (khusus page seperti Pendaftaran)
+  // =========================================
+  // DATE FIELD
+  // =========================================
   const isDateField = config?.dateFields?.includes(searchBy);
 
+  // =========================================
+  // ROW KEY
+  // =========================================
   const getRowKey = (record: any) => {
     return rowKeyField
       ? record?.[rowKeyField]
@@ -69,8 +83,12 @@ export default function DynamicTable({
           JSON.stringify(record);
   };
 
+  // =========================================
+  // ACTION COLUMN
+  // =========================================
   const finalColumns = [
     ...columns,
+
     ...(showActions
       ? [
           {
@@ -98,6 +116,9 @@ export default function DynamicTable({
 
   return (
     <>
+      {/* ========================================= */}
+      {/* FILTER */}
+      {/* ========================================= */}
       <div className="flex justify-between mb-4">
         <Space>
           <Select
@@ -113,7 +134,7 @@ export default function DynamicTable({
               }))}
           />
 
-          {/* ✅ INPUT / DATE PICKER SWITCH */}
+          {/* DATE PICKER */}
           {isDateField ? (
             <DatePicker
               style={{ width: 200 }}
@@ -131,7 +152,11 @@ export default function DynamicTable({
               placeholder="Search..."
               allowClear
               onSearch={(val) =>
-                onChange({ search: val, search_by: searchBy, page: 1 })
+                onChange({
+                  search: val,
+                  search_by: searchBy,
+                  page: 1,
+                })
               }
             />
           )}
@@ -142,11 +167,15 @@ export default function DynamicTable({
         </Button>
       </div>
 
+      {/* ========================================= */}
+      {/* TABLE */}
+      {/* ========================================= */}
       <Table
         rowKey={getRowKey}
         columns={finalColumns}
         dataSource={dataSource}
         loading={loading || !columns.length}
+        onRow={onRow}
         pagination={{
           current: page,
           pageSize,

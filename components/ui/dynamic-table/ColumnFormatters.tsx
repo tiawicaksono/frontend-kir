@@ -1,5 +1,6 @@
-import { Tag } from "antd";
+import { Badge, Tag } from "antd";
 import dayjs from "dayjs";
+import { color } from "framer-motion";
 
 export const ColumnFormatters = {
   date: (format = "DD/MM/YYYY") => ({
@@ -26,5 +27,10 @@ export const ColumnFormatters = {
 
   tag: (color = "blue") => ({
     render: (value: any) => (value ? <Tag color={color}>{value}</Tag> : "-"),
+  }),
+
+  badge: (color = "red") => ({
+    render: (value: any) =>
+      value ? <Badge color={color} text={value} /> : "-",
   }),
 };
