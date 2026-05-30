@@ -1,111 +1,59 @@
+// hooks/usePembayaran.ts
 "use client";
 
-import { useState, useCallback, useEffect } from "react";
-
-import {
-  fetchPembayaran,
-  deletePembayaran,
-  togglePembayaran,
-} from "@/services/pembayaran.service";
+import { useCallback, useEffect, useState } from "react";
+import dayjs from "dayjs";
+import { PembayaranParams, PembayaranRow } from "@/types/pembayaran.type";
+import { fetchPembayaran } from "@/services/pembayaran.service";
 
 export function usePembayaran() {
-  const [data, setData] = useState<any[]>([]);
+  const [dataSource, setDataSource] = useState<PembayaranRow[]>([]);
   const [loading, setLoading] = useState(false);
-  const [loadingId, setLoadingId] = useState<number | null>(null);
+  const [total, setTotal] = useState(0);
 
-  const [filters, setFilters] = useState({
-    tanggal_uji: null,
-    search: "",
-    status_pembayaran: null,
+  const [params, setParams] = useState<PembayaranParams>({
+    page: 1,
+    limit: 10,
+
+    sort_by: "no_pendaftaran_harian",
+    sort_order: "desc",
+
+    search: undefined,
+    search_by: undefined,
+
+    tanggal_pendaftaran: dayjs().format("YYYY-MM-DD"),
+
+    status_pembayaran: undefined,
+    status_penerbitan_id: undefined,
   });
 
-  // ======================
-  // SAFE SET FILTER
-  // ======================
-  const setFilter = useCallback((key: string, value: any) => {
-    setFilters((prev) => ({
-      ...prev,
-      [key]: value,
-    }));
-  }, []);
-
-  // ======================
-  // FETCH DATA SAFE
-  // ======================
-  const load = useCallback(async () => {
-    setLoading(true);
-
+  const loadData = useCallback(async () => {
     try {
-      const res = await fetchPembayaran({
-        page: 1,
-        limit: 10,
-        ...filters,
-      });
+      setLoading(true);
 
-      setData(res?.data ?? []);
-    } catch (err) {
-      console.error("FETCH ERROR", err);
+      const res = await fetchPembayaran(params);
+
+      setDataSource(res?.data ?? []);
+      setTotal(res?.meta?.total ?? 0);
     } finally {
       setLoading(false);
     }
-  }, [filters]);
+  }, [params]);
 
   useEffect(() => {
-    load();
-  }, [load]);
-
-  // ======================
-  // TOGGLE BAYAR
-  // ======================
-  const toggleBayar = async (row: any) => {
-    if (!row?.id) return;
-
-    setLoadingId(row.id);
-
-    try {
-      const res = await togglePembayaran(row.id);
-
-      setData((prev) =>
-        prev.map((item) =>
-          item.id === row.id
-            ? {
-                ...item,
-                retribusi_status_pembayaran:
-                  res?.data?.status_pembayaran ??
-                  !item.retribusi_status_pembayaran,
-              }
-            : item,
-        ),
-      );
-    } catch (err) {
-      console.error(err);
-    } finally {
-      setLoadingId(null);
-    }
-  };
-
-  // ======================
-  // DELETE
-  // ======================
-  const removeData = async (id: number) => {
-    if (!id) return;
-
-    try {
-      await deletePembayaran(id);
-
-      setData((prev) => prev.filter((x) => x.id !== id));
-    } catch (err) {
-      console.error(err);
-    }
-  };
+    loadData();
+  }, [loadData]);
 
   return {
-    data,
+    dataSource,
+    setDataSource,
+
     loading,
-    loadingId,
-    filters,
-    setFilter,
-    toggleBayar,
-    removeData,
+    total,
+
+    params,
+    setParams,
+
+    reload: loadData,
   };
 }

@@ -1,65 +1,47 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useMemo, useState } from "react";
 
-import { Card, Badge, Tag, Dropdown, Space, Button } from "antd";
-
-import {
-  CheckCircleOutlined,
-  CloseCircleOutlined,
-  DeleteOutlined,
-  EditOutlined,
-  MoreOutlined,
-} from "@ant-design/icons";
-
-import dayjs from "dayjs";
-
-import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
+import { Button, Space } from "antd";
 
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
+import ComponentCard from "@/components/common/ComponentCard";
 
 import { useConfirm } from "@/core/confirm/confirm.hook";
 import { useShowAlert } from "@/core/alert/alert.hook";
 
 import {
-  fetchPembayaran,
   deletePembayaran,
   togglePembayaran,
 } from "@/services/pembayaran.service";
 
-import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
-
 import PendaftaranEditModal from "@/pages/loket/pendaftaran/PendaftaranEditModal";
 
 import PembayaranFilter from "./PembayaranFilter";
-import ComponentCard from "@/components/common/ComponentCard";
+
+import { usePembayaran } from "@/hooks/pembayaran/usePembayaran";
+import { createPembayaranColumns } from "./PembayaranColumns";
+import PembayaranActions from "./PembayaranActions";
+
+import { PembayaranRow } from "@/types/pembayaran.type";
 
 export default function HomePembayaran() {
   const { confirm } = useConfirm();
 
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
-  const [table, setTable] = useState<any>({
-    dataSource: [],
-    loading: false,
-    total: 0,
+  const {
+    dataSource,
+    setDataSource,
 
-    params: {
-      page: 1,
-      limit: 10,
+    loading,
+    total,
 
-      sort_by: "no_pendaftaran_harian",
-      sort_order: "desc",
+    params,
+    setParams,
 
-      search: undefined,
-      search_by: undefined,
-
-      tanggal_pendaftaran: dayjs().format("YYYY-MM-DD"),
-
-      status_pembayaran: undefined,
-      status_penerbitan_id: undefined,
-    },
-  });
+    reload,
+  } = usePembayaran();
 
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
@@ -67,107 +49,25 @@ export default function HomePembayaran() {
 
   const [editOpen, setEditOpen] = useState(false);
 
-  const [editData, setEditData] = useState<any>(null);
-
-  // =========================
-  // FETCH
-  // =========================
-  useEffect(() => {
-    let active = true;
-
-    const load = async () => {
-      try {
-        setTable((p: any) => ({
-          ...p,
-          loading: true,
-        }));
-
-        const res = await fetchPembayaran(table.params);
-
-        if (!active) return;
-
-        setTable((p: any) => ({
-          ...p,
-
-          loading: false,
-
-          dataSource: res?.data ?? [],
-
-          total: res?.meta?.total ?? 0,
-        }));
-
-        setSelectedRowKeys([]);
-      } catch (err) {
-        if (!active) return;
-
-        setTable((p: any) => ({
-          ...p,
-          loading: false,
-        }));
-
-        showErrorAlert(err, "Gagal load data");
-      }
-    };
-
-    load();
-
-    return () => {
-      active = false;
-    };
-  }, [table.params]);
-
-  // =========================
-  // RELOAD
-  // =========================
-  const handleReload = async () => {
-    try {
-      setTable((p: any) => ({
-        ...p,
-        loading: true,
-      }));
-
-      const res = await fetchPembayaran(table.params);
-
-      setTable((p: any) => ({
-        ...p,
-
-        loading: false,
-
-        dataSource: res?.data ?? [],
-
-        total: res?.meta?.total ?? 0,
-      }));
-    } catch (err) {
-      setTable((p: any) => ({
-        ...p,
-        loading: false,
-      }));
-
-      showErrorAlert(err, "Gagal reload");
-    }
-  };
+  const [editData, setEditData] = useState<PembayaranRow | null>(null);
 
   // =========================
   // TABLE CHANGE
   // =========================
   const handleTableChange = (payload: any) => {
-    setTable((p: any) => ({
-      ...p,
+    setParams((prev: any) => ({
+      ...prev,
 
-      params: {
-        ...p.params,
+      ...payload,
 
-        ...payload,
+      sort_by: payload?.sorter?.field ?? payload?.sort_by ?? prev.sort_by,
 
-        sort_by: payload?.sorter?.field ?? payload?.sort_by ?? p.params.sort_by,
-
-        sort_order:
-          payload?.sorter?.order === "ascend"
-            ? "asc"
-            : payload?.sorter?.order === "descend"
-              ? "desc"
-              : (payload?.sort_order ?? p.params.sort_order),
-      },
+      sort_order:
+        payload?.sorter?.order === "ascend"
+          ? "asc"
+          : payload?.sorter?.order === "descend"
+            ? "desc"
+            : (payload?.sort_order ?? prev.sort_order),
     }));
   };
 
@@ -186,11 +86,7 @@ export default function HomePembayaran() {
     try {
       await deletePembayaran(id);
 
-      setTable((p: any) => ({
-        ...p,
-
-        dataSource: p.dataSource.filter((x: any) => x.id !== id),
-      }));
+      setDataSource((prev: any[]) => prev.filter((item) => item.id !== id));
 
       showSuccessAlert("Berhasil dihapus");
     } catch (err) {
@@ -201,16 +97,14 @@ export default function HomePembayaran() {
   // =========================
   // TOGGLE
   // =========================
-  const handleToggle = async (row: any) => {
+  const handleToggle = async (row: PembayaranRow) => {
     setLoadingId(row.id);
 
     try {
       const res = await togglePembayaran(row.id);
 
-      setTable((p: any) => ({
-        ...p,
-
-        dataSource: p.dataSource.map((item: any) =>
+      setDataSource((prev) =>
+        prev.map((item) =>
           item.id === row.id
             ? {
                 ...item,
@@ -221,7 +115,7 @@ export default function HomePembayaran() {
               }
             : item,
         ),
-      }));
+      );
 
       showSuccessAlert("Status diperbarui");
     } catch (err) {
@@ -244,19 +138,10 @@ export default function HomePembayaran() {
     if (!ok) return;
 
     try {
-      setTable((p: any) => ({
-        ...p,
-        loading: true,
-      }));
-
       await Promise.all(selectedRowKeys.map((id) => togglePembayaran(id)));
 
-      setTable((p: any) => ({
-        ...p,
-
-        loading: false,
-
-        dataSource: p.dataSource.map((item: any) =>
+      setDataSource((prev: any[]) =>
+        prev.map((item) =>
           selectedRowKeys.includes(item.id)
             ? {
                 ...item,
@@ -265,17 +150,12 @@ export default function HomePembayaran() {
               }
             : item,
         ),
-      }));
+      );
 
       setSelectedRowKeys([]);
 
       showSuccessAlert("Bulk update berhasil");
     } catch (err) {
-      setTable((p: any) => ({
-        ...p,
-        loading: false,
-      }));
-
       showErrorAlert(err, "Bulk update gagal");
     }
   };
@@ -283,17 +163,19 @@ export default function HomePembayaran() {
   // =========================
   // EDIT
   // =========================
-  const handleOpenEdit = (row: any) => {
+  const handleOpenEdit = (row: PembayaranRow) => {
     setEditData(row);
 
     setEditOpen(true);
   };
 
-  const handleEditSuccess = (updated: any) => {
-    setTable((p: any) => ({
-      ...p,
-
-      dataSource: p.dataSource.map((item: any) =>
+  const handleEditSuccess = (
+    updated: Partial<PembayaranRow> & {
+      id: number;
+    },
+  ) => {
+    setDataSource((prev: any[]) =>
+      prev.map((item) =>
         item.id === updated.id
           ? {
               ...item,
@@ -301,105 +183,19 @@ export default function HomePembayaran() {
             }
           : item,
       ),
-    }));
+    );
   };
 
   // =========================
   // COLUMNS
   // =========================
-  const columns = useMemo(
-    () => [
-      {
-        title: "No Antrian",
-
-        dataIndex: "no_pendaftaran_harian",
-
-        key: "no_pendaftaran_harian",
-
-        sorter: true,
-
-        searchable: true,
-
-        searchField: "no_pendaftaran_harian",
-
-        render: (val: any) => <strong>{val || "-"}</strong>,
-      },
-
-      {
-        title: "Tanggal Uji",
-
-        dataIndex: "tanggal_uji",
-
-        render: (val: any) => (val ? dayjs(val).format("DD/MM/YYYY") : "-"),
-      },
-
-      {
-        title: "No Uji",
-
-        dataIndex: "kendaraan_no_uji",
-
-        searchable: true,
-
-        searchField: "kendaraan.no_uji",
-      },
-
-      {
-        title: "No Kendaraan",
-
-        dataIndex: "kendaraan_no_kendaraan",
-
-        searchable: true,
-
-        searchField: "kendaraan.no_kendaraan",
-      },
-
-      {
-        title: "Nama",
-
-        dataIndex: "kendaraan_nama_pemilik",
-
-        searchable: true,
-
-        searchField: "kendaraan.nama_pemilik",
-      },
-
-      {
-        title: "Status",
-
-        render: (_: any, row: any) => (
-          <Badge
-            status={row.retribusi_status_pembayaran ? "success" : "error"}
-            text={row.retribusi_status_pembayaran ? "Lunas" : "Belum Bayar"}
-          />
-        ),
-      },
-
-      {
-        title: "Pendaftaran",
-
-        render: (_: any, row: any) => (
-          <Tag
-            color={getPendaftaranTagColor(row.status_penerbitan_issuance_id)}
-          >
-            {row.status_penerbitan_issuance_name}
-          </Tag>
-        ),
-      },
-
-      {
-        title: "Petugas",
-
-        dataIndex: "petugas_name",
-      },
-    ],
-    [],
-  );
+  const columns = useMemo(() => createPembayaranColumns(), []);
 
   return (
-    <div>
+    <>
       <ComponentCard
         title="Manajemen Pembayaran"
-        borderTop={true}
+        borderTop
         extra={
           <Space>
             <Button
@@ -414,18 +210,18 @@ export default function HomePembayaran() {
       >
         <DynamicTable
           columns={columns}
-          dataSource={table.dataSource}
-          loading={table.loading}
-          total={table.total}
-          page={table.params.page}
-          pageSize={table.params.limit}
+          dataSource={dataSource}
+          loading={loading}
+          total={total}
+          page={params.page}
+          pageSize={params.limit}
           onChange={handleTableChange}
-          onReload={handleReload}
+          onReload={reload}
           rowKeyField="id"
           toolbar={
             <PembayaranFilter
-              filters={table.params}
-              loading={table.loading}
+              filters={params}
+              loading={loading}
               onChange={handleTableChange}
             />
           }
@@ -438,65 +234,15 @@ export default function HomePembayaran() {
             onChange: (keys) => setSelectedRowKeys(keys as number[]),
           }}
           showActions
-          renderActions={(row: any) => {
-            const menuItems = [
-              {
-                key: "toggle",
-
-                label: (
-                  <span className="flex items-center gap-2">
-                    {row.retribusi_status_pembayaran ? (
-                      <>
-                        <CloseCircleOutlined />
-                        Tandai Belum Bayar
-                      </>
-                    ) : (
-                      <>
-                        <CheckCircleOutlined />
-                        Tandai Lunas
-                      </>
-                    )}
-                  </span>
-                ),
-
-                disabled: loadingId === row.id,
-
-                onClick: () => handleToggle(row),
-              },
-
-              {
-                key: "edit",
-
-                label: (
-                  <span className="flex items-center gap-2">
-                    <EditOutlined />
-                    Edit
-                  </span>
-                ),
-
-                onClick: () => handleOpenEdit(row),
-              },
-
-              {
-                key: "delete",
-
-                label: (
-                  <span className="flex items-center gap-2 text-red-500">
-                    <DeleteOutlined />
-                    Delete
-                  </span>
-                ),
-
-                onClick: () => handleDelete(row.id),
-              },
-            ];
-
-            return (
-              <Dropdown menu={{ items: menuItems }} trigger={["click"]}>
-                <MoreOutlined className="cursor-pointer" />
-              </Dropdown>
-            );
-          }}
+          renderActions={(row: PembayaranRow) => (
+            <PembayaranActions
+              row={row}
+              loading={loadingId === row.id}
+              onToggle={handleToggle}
+              onEdit={handleOpenEdit}
+              onDelete={handleDelete}
+            />
+          )}
         />
       </ComponentCard>
 
@@ -506,6 +252,6 @@ export default function HomePembayaran() {
         onClose={() => setEditOpen(false)}
         onSuccess={handleEditSuccess}
       />
-    </div>
+    </>
   );
 }

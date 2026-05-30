@@ -146,7 +146,7 @@ export default function PembayaranFilter({
           placeholder="Cari..."
           allowClear
           disabled={loading}
-          defaultValue={filters?.search}
+          value={filters?.search}
           style={{ width: 220 }}
           onSearch={(val) =>
             onChange({
