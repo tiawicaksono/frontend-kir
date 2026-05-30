@@ -24,11 +24,11 @@ export const syncRekomendasi = async (
 ) => {
   // SINGLE
   if (typeof payload === "number") {
-    return api.post(`/rekomendasi/${payload}/sync`);
+    return api.post(`${API_URL}/loket/rekomendasi/${payload}/sync`);
   }
 
   // BULK
-  return api.post(`/rekomendasi/bulk-sync`, {
+  return api.post(`${API_URL}/loket/rekomendasi/bulk-sync`, {
     ids: payload.ids,
   });
 };

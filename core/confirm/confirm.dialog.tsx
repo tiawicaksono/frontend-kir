@@ -24,7 +24,7 @@ export default function ConfirmDialog({ options, onClose }: Props) {
   }, [onClose]);
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="w-[400px] rounded-2xl bg-white p-6 shadow-xl animate-in fade-in zoom-in-95 duration-200">
         <h2 className="text-lg font-semibold mb-2">
           {options.title || "Konfirmasi"}
