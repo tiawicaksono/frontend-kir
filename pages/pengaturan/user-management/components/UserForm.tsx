@@ -59,11 +59,7 @@ export default function UserForm({
       setEmail(initialValues.email || "");
       setPhone(initialValues.phone || "");
 
-      setSelectedValues(
-        initialValues.roles
-          ?.filter((r: any) => r.is_active) // 🔥 hanya yang aktif
-          .map((r: any) => r.id) || [],
-      );
+      setSelectedValues(initialValues.roles?.map((r: any) => r.id) || []);
     }
   }, [initialValues]);
 

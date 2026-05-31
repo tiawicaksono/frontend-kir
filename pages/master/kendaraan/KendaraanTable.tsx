@@ -1,15 +1,22 @@
 "use client";
 
 import { useEffect } from "react";
+
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 import TableActions from "@/components/ui/dynamic-table/TableActions";
 
+import type { KendaraanRow, KendaraanTableState } from "@/types/kendaraan.type";
+
 interface Props {
-  table?: any;
-  onView?: (record: any) => void;
-  onEdit: (record: any) => void;
-  onDelete: (id: string) => void;
-  onReload?: () => void;
+  table?: KendaraanTableState;
+
+  onView?: (record: KendaraanRow) => void;
+
+  onEdit: (record: KendaraanRow) => void;
+
+  onDelete: (id: number) => Promise<boolean>;
+
+  onReload?: () => Promise<void> | void;
 }
 
 export default function KendaraanTable({
@@ -19,37 +26,45 @@ export default function KendaraanTable({
   onDelete,
   onReload,
 }: Props) {
-  // 🔥 guard utama
-  if (!table) return null;
+  if (!table) {
+    return null;
+  }
 
-  const params = table.params ?? { page: 1, limit: 10 };
+  const {
+    columns,
+    dataSource,
+    loading,
+    total,
+    params,
+    setParams,
+    fetchData,
+    config,
+  } = table;
 
-  useEffect(() => {
-    table?.fetchData?.();
-  }, []); // 🔥 jangan pakai table.params (rawan undefined SSR)
-
-  const key = table?.config?.primary_key || "id";
+  const rowKeyField = config?.primary_key ?? "id";
 
   return (
     <DynamicTable
-      columns={table.columns ?? []}
-      dataSource={table.dataSource ?? []}
-      loading={table.loading ?? false}
-      total={table.total ?? 0}
+      columns={columns}
+      dataSource={dataSource}
+      loading={loading}
+      total={total}
       page={params.page}
       pageSize={params.limit}
-      onChange={table.setParams ?? (() => {})}
-      onReload={onReload || table.fetchData}
-      rowKeyField={key}
+      onChange={setParams}
+      onReload={onReload ?? fetchData}
+      rowKeyField={rowKeyField}
       showActions
-      renderActions={(record) => (
+      renderActions={(record: KendaraanRow) => (
         <TableActions
           record={record}
-          rowKeyField={key}
+          rowKeyField={rowKeyField}
           onView={() => onView?.(record)}
           onEdit={() => onEdit(record)}
-          onDelete={() => onDelete(record[key])}
-          actions={["edit", "view", "delete"]}
+          onDelete={() => {
+            void onDelete(Number(record[rowKeyField]));
+          }}
+          actions={["view", "edit", "delete"]}
         />
       )}
     />

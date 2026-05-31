@@ -12,12 +12,12 @@ import { useApiKeyActions } from "@/hooks/api-key/useApiKeyAction";
 
 const headerCellClass =
   "py-3 font-medium text-left text-gray-500 dark:text-gray-400";
-
+type ApiKeyActions = ReturnType<typeof useApiKeyActions>;
 interface Props {
   apiKeys?: ApiKeys[]; // 👈 IMPORTANT: optional
   loading: boolean;
   dropdown: ReturnType<typeof useApiKeyDropdown>;
-  actions: ReturnType<typeof useApiKeyActions>;
+  actions: ApiKeyActions;
   onEdit: (item: ApiKeys) => void;
 }
 

@@ -1,116 +1,137 @@
 "use client";
 
 import { Tabs, Button, Badge } from "antd";
-import { AppTabsProps } from "./types";
-import { useAppTabs } from "./useAppTabs";
-import { Modal } from "../modal";
 import { PlusOutlined } from "@ant-design/icons";
 
+import { AppTabsProps } from "./types";
+import { useAppTabs } from "./useAppTabs";
+
+import { useModal } from "@/core/modal/modal.hook";
+
 export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
-  const {
-    activeKey,
-    setActiveKey,
-    activeTab,
-    open,
-    mode,
-    formData,
-    openCreate,
-    openEdit,
-    closeModal,
-  } = useAppTabs(items, defaultActiveKey);
+  const { activeKey, setActiveKey, activeTab } = useAppTabs(
+    items,
+    defaultActiveKey,
+  );
 
-  const handleActionClick = () => {
-    if (activeTab?.actionType === "page") {
-      closeModal();
-      activeTab?.onActionClick?.();
+  const { openModal } = useModal();
+
+  // =========================
+  // CREATE
+  // =========================
+  const handleCreate = () => {
+    if (!activeTab) return;
+
+    if (activeTab.actionType === "page") {
+      activeTab.onActionClick?.();
       return;
     }
 
-    if (activeTab?.actionType === "custom") {
-      activeTab?.onActionClick?.();
+    if (activeTab.actionType === "custom") {
+      activeTab.onActionClick?.();
       return;
     }
 
-    openCreate(); // default modal
+    openModal({
+      className: "max-w-lg",
+      content: (
+        <>
+          <h2 className="mb-4 text-lg font-semibold">
+            {activeTab.actionLabel || "Add Data"}
+          </h2>
+
+          {activeTab.Form && (
+            <activeTab.Form
+              mode="create"
+              onSubmit={(data: any) => {
+                return activeTab.module.handleCreate(data);
+              }}
+            />
+          )}
+        </>
+      ),
+    });
+  };
+
+  // =========================
+  // EDIT
+  // =========================
+  const handleEdit = (item: any, row: any) => {
+    if (item.actionType === "page") {
+      item.onEditPage?.(row);
+      return;
+    }
+
+    openModal({
+      className: "max-w-lg",
+      content: (
+        <>
+          <h2 className="mb-4 text-lg font-semibold">Edit Data</h2>
+
+          {item.Form && (
+            <item.Form
+              mode="edit"
+              initialValues={row}
+              onSubmit={(data: any) => {
+                const pk = item.module.table.config.primary_key;
+
+                return item.module.handleUpdate({
+                  ...data,
+                  [pk]: row?.[pk],
+                });
+              }}
+            />
+          )}
+        </>
+      ),
+    });
   };
 
   return (
-    <>
-      <Tabs
-        activeKey={activeKey}
-        onChange={setActiveKey}
-        tabBarExtraContent={
-          activeTab?.showAction ? (
-            <Button type="primary" onClick={handleActionClick}>
-              <PlusOutlined /> {activeTab?.actionLabel || "Add"}
-            </Button>
-          ) : null
-        }
-        items={items.map((item) => {
-          const TableComponent = item.Table;
+    <Tabs
+      activeKey={activeKey}
+      onChange={setActiveKey}
+      tabBarExtraContent={
+        activeTab?.showAction ? (
+          <Button type="primary" onClick={handleCreate}>
+            <PlusOutlined />
+            {activeTab.actionLabel || "Add"}
+          </Button>
+        ) : null
+      }
+      items={items.map((item) => {
+        const TableComponent = item.Table;
 
-          return {
-            key: item.key,
-            label: (
-              <div className="flex items-center gap-2">
-                <span>
-                  {item.icon} {item.label}
-                </span>
-                {typeof item.badge === "number" && (
-                  <Badge count={item.badge} size="small" />
-                )}
-              </div>
-            ),
+        return {
+          key: item.key,
 
-            children: (
-              <TableComponent
-                table={item.module.table}
-                onView={(row: any) => {
-                  item.onViewPage?.(row); // 🔥 TAMBAH INI
-                }}
-                onEdit={(row: any) => {
-                  if (item.actionType === "page") {
-                    item.onEditPage?.(row);
-                  } else {
-                    openEdit(row);
-                  }
-                }}
-                onDelete={item.module.handleDeleteWrapper}
-                onReload={item.module.handleReload}
-              />
-            ),
-          };
-        })}
-      />
+          label: (
+            <div className="flex items-center gap-2">
+              <span>
+                {item.icon} {item.label}
+              </span>
 
-      {/* 🔥 MODAL (hanya kalau bukan page) */}
-      {activeTab?.actionType !== "page" && open && (
-        <Modal isOpen={open} onClose={closeModal} className="max-w-lg">
-          <h2 className="text-lg font-semibold mb-4">
-            {mode === "create"
-              ? activeTab?.actionLabel || "Add Data"
-              : "Edit Data"}
-          </h2>
+              {typeof item.badge === "number" && (
+                <Badge count={item.badge} size="small" />
+              )}
+            </div>
+          ),
 
-          {activeTab?.Form && (
-            <activeTab.Form
-              mode={mode}
-              initialValues={formData}
-              onSubmit={(data: any) => {
-                const pk = activeTab.module.table.config.primary_key;
-
-                return mode === "create"
-                  ? activeTab.module.handleCreate(data)
-                  : activeTab.module.handleUpdate({
-                      ...data,
-                      [pk]: formData?.[pk],
-                    });
+          children: (
+            <TableComponent
+              table={item.module.table}
+              onView={(row: any) => {
+                item.onViewPage?.(row);
               }}
-              onSuccess={closeModal}
+              onEdit={(row: any) => {
+                handleEdit(item, row);
+              }}
+              onDelete={item.module.handleDeleteWrapper}
+              onReload={item.module.handleReload}
             />
-          )}
-        </Modal>
-      )}
-    </>
+          ),
+        };
+      })}
+    />
   );
 }

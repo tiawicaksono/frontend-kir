@@ -6,18 +6,14 @@ import { Form, Select, DatePicker, Button } from "antd";
 
 import dayjs from "dayjs";
 
-import { Modal } from "@/components/ui/modal";
-
 import { updatePendaftaran } from "@/services/pendaftaran.service";
-
 import { getStatusPenerbitan } from "@/services/options.service";
 
 import { useShowAlert } from "@/core/alert/alert.hook";
+import { useModal } from "@/core/modal/modal.hook";
 
 interface Props {
-  open: boolean;
   data?: any;
-  onClose: () => void;
   onSuccess?: (data: any) => void;
 }
 
@@ -27,13 +23,10 @@ const mapOptions = (data: any[]) =>
     value: Number(i.value ?? i.id),
   }));
 
-export default function PendaftaranEditModal({
-  open,
-  data,
-  onClose,
-  onSuccess,
-}: Props) {
+export default function PendaftaranEditModal({ data, onSuccess }: Props) {
   const [form] = Form.useForm();
+
+  const { closeModal } = useModal();
 
   const { showSuccessAlert, showErrorAlert } = useShowAlert();
 
@@ -64,14 +57,14 @@ export default function PendaftaranEditModal({
   // ====================================
 
   useEffect(() => {
-    if (!open || !data || !statusOptions.length) return;
+    if (!data || !statusOptions.length) return;
 
     form.setFieldsValue({
       status_penerbitan_id: Number(data.status_penerbitan_issuance_id),
 
       tanggal_uji: data.tanggal_uji ? dayjs(data.tanggal_uji) : undefined,
     });
-  }, [open, data, statusOptions]);
+  }, [data, statusOptions, form]);
 
   // ====================================
   // SUBMIT
@@ -97,7 +90,7 @@ export default function PendaftaranEditModal({
 
       showSuccessAlert(res?.message || "Berhasil update");
 
-      onClose();
+      closeModal();
     } catch (err: any) {
       console.error(err);
 
@@ -108,7 +101,7 @@ export default function PendaftaranEditModal({
   };
 
   return (
-    <Modal isOpen={open} onClose={onClose} className="max-w-md">
+    <>
       <div className="mb-5">
         <h2 className="text-xl font-semibold">Edit Pendaftaran</h2>
 
@@ -142,6 +135,6 @@ export default function PendaftaranEditModal({
           Simpan Perubahan
         </Button>
       </Form>
-    </Modal>
+    </>
   );
 }

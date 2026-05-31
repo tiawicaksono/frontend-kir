@@ -11,6 +11,7 @@ import { AuthGuardProvider } from "@/core/auth/auth.provider";
 
 import { AlertProvider } from "@/core/alert/alert.provider";
 import { ConfirmProvider } from "@/core/confirm/confirm.provider";
+import { ModalProvider } from "@/core/modal/modal.provider";
 
 export function AppProviders({ children }: { children: React.ReactNode }) {
   return (
@@ -22,10 +23,12 @@ export function AppProviders({ children }: { children: React.ReactNode }) {
               {/* 🔥 AUTH HARUS DI DALAM CLIENT BOUNDARY */}
               <AuthProvider>
                 <ConfirmProvider>
-                  <SplashController />
+                  <ModalProvider>
+                    <SplashController />
 
-                  {/* ⚠️ Guard HARUS PALING DALAM */}
-                  <AuthGuardProvider>{children}</AuthGuardProvider>
+                    {/* ⚠️ Guard HARUS PALING DALAM */}
+                    <AuthGuardProvider>{children}</AuthGuardProvider>
+                  </ModalProvider>
                 </ConfirmProvider>
               </AuthProvider>
             </ThemeCustomizerProvider>

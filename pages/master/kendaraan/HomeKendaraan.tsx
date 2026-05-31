@@ -1,9 +1,12 @@
 "use client";
 
+import { useCallback, useEffect, useState } from "react";
+
+import { Badge, Button } from "antd";
+import { useRouter } from "next/navigation";
+
 import ComponentCard from "@/components/common/ComponentCard";
-import AppTabs from "@/components/ui/tabs/AppTabs";
-import { BookOutlined } from "@ant-design/icons";
-import { act, useEffect, useState } from "react";
+
 import {
   createKendaraan,
   updateKendaraan,
@@ -13,72 +16,86 @@ import {
 } from "@/services/data-kendaraan.service";
 
 import KendaraanTable from "./KendaraanTable";
-// 🔥 COMPONENTS
-import KendaraanForm from "./KendaraanForm";
-import { useKendaraanModule } from "../../../hooks/data-kendaraan/useKendaraanModule";
-import { useRouter } from "next/navigation";
-import { TabItemConfig } from "@/components/ui/tabs/types";
+
+import { useKendaraanModule } from "@/hooks/data-kendaraan/useKendaraanModule";
+
+import type { KendaraanRow } from "@/types/kendaraan.type";
 
 export default function HomeKendaraan() {
   const router = useRouter();
-  const [counts, setCounts] = useState({
-    countKendaraan: 0,
-  });
 
-  const loadCounts = async () => {
+  const [total, setTotal] = useState(0);
+
+  const loadCounts = useCallback(async () => {
     try {
       const res = await fetchKendaraanCounts();
-      setCounts({
-        countKendaraan: res.countData ?? 0,
-      });
-    } catch (err) {
-      console.error(err);
+
+      setTotal(res?.countData ?? 0);
+    } catch (error) {
+      console.error(error);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadCounts();
-  }, []);
+  }, [loadCounts]);
 
-  // 🔥 MODULES
-  const Kendaraan = useKendaraanModule({
-    fetcher: fetchTableDataKendaraan,
-    service: {
-      create: createKendaraan,
-      update: updateKendaraan,
-      delete: deleteKendaraan,
-    },
-    label: "Kendaraan",
-    loadCounts,
-  });
+  const { table, handleDelete, handleReload } =
+    useKendaraanModule<KendaraanRow>({
+      fetcher: fetchTableDataKendaraan,
 
-  // 🔥 CONFIG ARRAY
-  const appsKendaraanConfig: TabItemConfig[] = [
-    {
-      key: "kendaraan",
+      service: {
+        create: createKendaraan,
+        update: updateKendaraan,
+        delete: deleteKendaraan,
+      },
+
       label: "Kendaraan",
-      icon: <BookOutlined />,
-      module: Kendaraan,
-      Table: KendaraanTable,
-      Form: KendaraanForm,
-      badge: counts.countKendaraan,
 
-      showAction: true,
-      actionLabel: "Add Kendaraan",
+      loadCounts,
+    });
 
-      actionType: "page",
-      onActionClick: () => router.push("/master/data-kendaraan/create"),
+  const handleCreate = useCallback(() => {
+    router.push("/master/data-kendaraan/create");
+  }, [router]);
 
-      onViewPage: (row: any) =>
-        router.push(`/master/data-kendaraan/view/${row.id}`),
-      onEditPage: (row: any) =>
-        router.push(`/master/data-kendaraan/edit/${row.id}`),
+  const handleView = useCallback(
+    (row: KendaraanRow) => {
+      router.push(`/master/data-kendaraan/view/${row.id}`);
     },
-  ];
+    [router],
+  );
+
+  const handleEdit = useCallback(
+    (row: KendaraanRow) => {
+      router.push(`/master/data-kendaraan/edit/${row.id}`);
+    },
+    [router],
+  );
 
   return (
-    <ComponentCard>
-      <AppTabs defaultActiveKey="kendaraan" items={appsKendaraanConfig} />
+    <ComponentCard
+      borderTop
+      title={
+        <div className="flex items-center gap-2">
+          <span>Manajemen Kendaraan</span>
+
+          <Badge count={total} overflowCount={9999} />
+        </div>
+      }
+      extra={
+        <Button type="primary" onClick={handleCreate}>
+          Add Kendaraan
+        </Button>
+      }
+    >
+      <KendaraanTable
+        table={table}
+        onView={handleView}
+        onEdit={handleEdit}
+        onDelete={handleDelete}
+        onReload={handleReload}
+      />
     </ComponentCard>
   );
 }

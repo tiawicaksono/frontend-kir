@@ -1,54 +1,78 @@
-import { useEffect } from "react";
+"use client";
+
+import { useCallback } from "react";
+
 import { useKendaraanTable } from "./useKendaraanTable";
 import { useKendaraanAction } from "./useKendaraanAction";
 
-export function useKendaraanModule({
+import type { KendaraanModuleProps, PrimaryKey } from "@/types/kendaraan.type";
+
+export function useKendaraanModule<T extends Record<string, any>>({
   fetcher,
   service,
   label,
   loadCounts,
-}: any) {
+}: KendaraanModuleProps<T>) {
   const table = useKendaraanTable(fetcher);
-  const primaryKey = table.config.primary_key;
+
+  const primaryKey = String(table.config?.primary_key ?? "id") as keyof T;
+
+  const removeData = useCallback(
+    (id: PrimaryKey) => {
+      table.removeData(id);
+    },
+    [table],
+  );
 
   const {
     handleCreate,
-    handleUpdate: rawUpdate,
-    handleDelete,
-  } = useKendaraanAction(
+    handleUpdate,
+    handleDelete: rawDelete,
+    isSubmitting,
+  } = useKendaraanAction<T>({
     service,
     label,
-    async (newData: any) => {
+    primaryKey,
+
+    prependData: async (newData) => {
       table.prependData(newData);
+
       await loadCounts();
     },
-    (updatedData: any) => {
-      table.updateData?.(updatedData);
+
+    updateData: (updatedData) => {
+      table.updateData(updatedData);
     },
-    primaryKey,
+
+    removeData,
+  });
+
+  const handleDelete = useCallback(
+    async (id: PrimaryKey) => {
+      const success = await rawDelete(id);
+
+      if (success) {
+        await loadCounts();
+      }
+
+      return success;
+    },
+    [rawDelete, loadCounts],
   );
 
-  const handleDeleteWrapper = async (id: string) => {
-    const success = await handleDelete(id);
-
-    if (success) {
-      await loadCounts();
-    }
-  };
-
-  const handleReload = async () => {
+  const handleReload = useCallback(async () => {
     await Promise.all([table.fetchData(), loadCounts()]);
-  };
-
-  useEffect(() => {
-    table.fetchData();
-  }, [table.params]);
+  }, [table.fetchData, loadCounts]);
 
   return {
     table,
+
     handleCreate,
-    handleUpdate: rawUpdate,
-    handleDeleteWrapper,
+    handleUpdate,
+    handleDelete,
+
     handleReload,
+
+    isSubmitting,
   };
 }

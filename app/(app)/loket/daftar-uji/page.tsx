@@ -33,10 +33,7 @@ export default function DaftarUjiPage() {
     try {
       await deletePendaftaran(id);
 
-      table.updateData({
-        id,
-        _delete: true,
-      });
+      table.removeData(id);
 
       showSuccessAlert("Data berhasil dihapus");
     } catch (err: any) {

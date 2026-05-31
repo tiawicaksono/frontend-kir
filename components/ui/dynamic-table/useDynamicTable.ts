@@ -154,20 +154,23 @@ export function useDynamicTable(
   const updateData = useCallback(
     (updatedData: any) => {
       const pk = config.primary_key || "id";
-      if (updatedData._delete) {
-        // Handle deletion
-        setDataSource((prev) =>
-          prev.filter((item) => item[pk] !== updatedData[pk]),
-        );
-        setTotal((prev) => Math.max(0, prev - 1));
-      } else {
-        // Handle update
-        setDataSource((prev) =>
-          prev.map((item) =>
-            item[pk] === updatedData[pk] ? { ...item, ...updatedData } : item,
-          ),
-        );
-      }
+
+      setDataSource((prev) =>
+        prev.map((item) =>
+          item[pk] === updatedData[pk] ? { ...item, ...updatedData } : item,
+        ),
+      );
+    },
+    [config.primary_key],
+  );
+
+  const removeData = useCallback(
+    (id: string | number) => {
+      const pk = config.primary_key || "id";
+
+      setDataSource((prev) => prev.filter((item) => item[pk] !== id));
+
+      setTotal((prev) => Math.max(0, prev - 1));
     },
     [config.primary_key],
   );
@@ -186,5 +189,6 @@ export function useDynamicTable(
 
     prependData,
     updateData,
+    removeData,
   };
 }

@@ -25,6 +25,9 @@ export function useAppsSupportModule({
     (updatedData: any) => {
       table.updateData?.(updatedData);
     },
+    (id: string | number) => {
+      table.removeData?.(id);
+    },
     primaryKey,
   );
 

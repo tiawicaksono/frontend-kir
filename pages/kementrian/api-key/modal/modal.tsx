@@ -1,44 +1,50 @@
 "use client";
 
-import { Modal } from "@/components/ui/modal";
+import { useModal } from "@/core/modal/modal.hook";
+
 import { ApiKeys } from "@/types/api-keys.type";
+
 import ApiKeyForm from "@/pages/kementrian/api-key/modal/modal.form";
 
 interface Props {
-  isOpen: boolean;
-  onClose: () => void;
   editing?: ApiKeys | null;
+
   onSubmit: (data: {
     name: string;
     urlApi: string;
     token: string;
   }) => Promise<boolean>;
+
   isSubmitting?: boolean;
 }
 
 export default function ApiKeyModal({
-  isOpen,
-  onClose,
   editing,
   onSubmit,
   isSubmitting,
 }: Props) {
+  const { closeModal } = useModal();
+
   return (
-    <Modal isOpen={isOpen} onClose={onClose} className="max-w-lg">
-      <h2 className="text-lg font-semibold mb-4">
+    <>
+      <h2 className="mb-4 text-lg font-semibold">
         {editing ? "Edit API Key" : "Create API Key"}
       </h2>
 
-      {/* 🔥 KEY FIX */}
       <ApiKeyForm
         key={editing?.id ?? "create"}
         data={editing}
         isSubmitting={isSubmitting}
         onSubmit={async (form) => {
           const success = await onSubmit(form);
-          if (success) onClose();
+
+          if (success) {
+            closeModal();
+          }
+
+          return success;
         }}
       />
-    </Modal>
+    </>
   );
 }

@@ -10,6 +10,7 @@ import { useConfirm } from "@/core/confirm/confirm.hook";
 export function useRoleManagementAction(
   prependData?: (data: any) => void,
   updateData?: (data: any) => void,
+  removeData?: (id: string | number) => void,
 ) {
   const { confirm } = useConfirm();
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
@@ -64,8 +65,7 @@ export function useRoleManagementAction(
 
     try {
       await deleteRole(id);
-      // 🔥 hapus dari table
-      updateData?.({ id, _delete: true });
+      removeData?.(id);
       showSuccessAlert("Data berhasil dihapus");
       return true;
     } catch (err) {

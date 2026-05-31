@@ -11,8 +11,10 @@ interface Service {
 export function useAppsSupportAction(
   service: Service,
   label: string, // "Provinsi", "Kota", dll
+
   prependData?: (data: any) => void,
   updateData?: (data: any) => void,
+  removeData?: (id: string | number) => void,
   primaryKey: string = "id",
 ) {
   const { confirm } = useConfirm();
@@ -64,12 +66,12 @@ export function useAppsSupportAction(
       variant: "destructive",
     });
 
-    if (!confirmed) return;
+    if (!confirmed) return false;
 
     try {
       await service.delete(id);
 
-      updateData?.({ [primaryKey]: id, _delete: true });
+      removeData?.(id);
 
       showSuccessAlert(`${label} berhasil dihapus`);
       return true;

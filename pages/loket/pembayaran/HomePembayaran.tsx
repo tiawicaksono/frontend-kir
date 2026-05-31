@@ -9,6 +9,7 @@ import ComponentCard from "@/components/common/ComponentCard";
 
 import { useConfirm } from "@/core/confirm/confirm.hook";
 import { useShowAlert } from "@/core/alert/alert.hook";
+import { useModal } from "@/core/modal/modal.hook";
 
 import {
   deletePembayaran,
@@ -27,7 +28,7 @@ import { PembayaranRow } from "@/types/pembayaran.type";
 
 export default function HomePembayaran() {
   const { confirm } = useConfirm();
-
+  const { openModal } = useModal();
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
 
   const {
@@ -46,10 +47,6 @@ export default function HomePembayaran() {
   const [loadingId, setLoadingId] = useState<number | null>(null);
 
   const [selectedRowKeys, setSelectedRowKeys] = useState<number[]>([]);
-
-  const [editOpen, setEditOpen] = useState(false);
-
-  const [editData, setEditData] = useState<PembayaranRow | null>(null);
 
   // =========================
   // TABLE CHANGE
@@ -164,9 +161,18 @@ export default function HomePembayaran() {
   // EDIT
   // =========================
   const handleOpenEdit = (row: PembayaranRow) => {
-    setEditData(row);
-
-    setEditOpen(true);
+    openModal({
+      className: "max-w-md",
+      content: ({ close }) => (
+        <PendaftaranEditModal
+          data={row}
+          onSuccess={(updated) => {
+            handleEditSuccess(updated);
+            close();
+          }}
+        />
+      ),
+    });
   };
 
   const handleEditSuccess = (
@@ -192,66 +198,56 @@ export default function HomePembayaran() {
   const columns = useMemo(() => createPembayaranColumns(), []);
 
   return (
-    <>
-      <ComponentCard
-        title="Manajemen Pembayaran"
-        borderTop
-        extra={
-          <Space>
-            <Button
-              type="primary"
-              disabled={selectedRowKeys.length === 0}
-              onClick={handleBulkToggle}
-            >
-              Ubah Status ({selectedRowKeys.length})
-            </Button>
-          </Space>
+    <ComponentCard
+      title="Manajemen Pembayaran"
+      borderTop
+      extra={
+        <Space>
+          <Button
+            type="primary"
+            disabled={selectedRowKeys.length === 0}
+            onClick={handleBulkToggle}
+          >
+            Ubah Status ({selectedRowKeys.length})
+          </Button>
+        </Space>
+      }
+    >
+      <DynamicTable
+        columns={columns}
+        dataSource={dataSource}
+        loading={loading}
+        total={total}
+        page={params.page}
+        pageSize={params.limit}
+        onChange={handleTableChange}
+        onReload={reload}
+        rowKeyField="id"
+        toolbar={
+          <PembayaranFilter
+            filters={params}
+            loading={loading}
+            onChange={handleTableChange}
+          />
         }
-      >
-        <DynamicTable
-          columns={columns}
-          dataSource={dataSource}
-          loading={loading}
-          total={total}
-          page={params.page}
-          pageSize={params.limit}
-          onChange={handleTableChange}
-          onReload={reload}
-          rowKeyField="id"
-          toolbar={
-            <PembayaranFilter
-              filters={params}
-              loading={loading}
-              onChange={handleTableChange}
-            />
-          }
-          config={{
-            showToolbar: true,
-          }}
-          rowSelection={{
-            selectedRowKeys,
-
-            onChange: (keys) => setSelectedRowKeys(keys as number[]),
-          }}
-          showActions
-          renderActions={(row: PembayaranRow) => (
-            <PembayaranActions
-              row={row}
-              loading={loadingId === row.id}
-              onToggle={handleToggle}
-              onEdit={handleOpenEdit}
-              onDelete={handleDelete}
-            />
-          )}
-        />
-      </ComponentCard>
-
-      <PendaftaranEditModal
-        open={editOpen}
-        data={editData}
-        onClose={() => setEditOpen(false)}
-        onSuccess={handleEditSuccess}
+        config={{
+          showToolbar: true,
+        }}
+        rowSelection={{
+          selectedRowKeys,
+          onChange: (keys) => setSelectedRowKeys(keys as number[]),
+        }}
+        showActions
+        renderActions={(row: PembayaranRow) => (
+          <PembayaranActions
+            row={row}
+            loading={loadingId === row.id}
+            onToggle={handleToggle}
+            onEdit={handleOpenEdit}
+            onDelete={handleDelete}
+          />
+        )}
       />
-    </>
+    </ComponentCard>
   );
 }

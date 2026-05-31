@@ -1,6 +1,5 @@
 "use client";
 
-import { useState } from "react";
 import ComponentCard from "@/components/common/ComponentCard";
 import { useApiKeys } from "@/hooks/api-key/useApiKeys";
 import { useApiKeyDropdown } from "@/hooks/api-key/useApiKeyDropdown";
@@ -10,39 +9,38 @@ import ApiKeyTable from "./components/ApiKeyTable";
 import ApiKeyModal from "@/pages/kementrian/api-key/modal/modal";
 
 import { ApiKeys } from "@/types/api-keys.type";
+import { useModal } from "@/core/modal/modal.hook";
+import { useApiKeyActions } from "@/hooks/api-key/useApiKeyAction";
 
 export default function HomeApiKey() {
   const { apiKeys, setApiKeys, loading, refetch } = useApiKeys();
+  const actions = useApiKeyActions(apiKeys, setApiKeys);
   const dropdown = useApiKeyDropdown();
+  const { openModal } = useModal();
 
-  const [openModal, setOpenModal] = useState(false);
-  const [editing, setEditing] = useState<ApiKeys | null>(null);
-
-  // 🔥 IMPORTANT: lazy load actions (avoid SSR hook crash)
-  const [actions, setActions] = useState<any>(null);
-
-  const loadActions = async () => {
-    if (!actions) {
-      const mod = await import("@/hooks/api-key/useApiKeyAction");
-      setActions(mod.useApiKeyActions(apiKeys, setApiKeys));
-    }
+  const handleAdd = () => {
+    openModal({
+      className: "max-w-lg",
+      content: (
+        <ApiKeyModal
+          onSubmit={actions.handleCreate}
+          isSubmitting={actions.isSubmitting}
+        />
+      ),
+    });
   };
 
-  const handleEdit = async (item: ApiKeys) => {
-    await loadActions();
-    setEditing(item);
-    setOpenModal(true);
-  };
-
-  const handleAdd = async () => {
-    await loadActions();
-    setEditing(null);
-    setOpenModal(true);
-  };
-
-  const handleCloseModal = () => {
-    setOpenModal(false);
-    setEditing(null);
+  const handleEdit = (item: ApiKeys) => {
+    openModal({
+      className: "max-w-lg",
+      content: (
+        <ApiKeyModal
+          editing={item}
+          isSubmitting={actions.isSubmitting}
+          onSubmit={(data) => actions.handleUpdate(item.id, data)}
+        />
+      ),
+    });
   };
 
   const handleReload = async () => {
@@ -74,20 +72,8 @@ export default function HomeApiKey() {
         apiKeys={apiKeys}
         loading={loading}
         dropdown={dropdown}
-        actions={actions || {}}
+        actions={actions}
         onEdit={handleEdit}
-      />
-
-      <ApiKeyModal
-        isOpen={openModal}
-        onClose={handleCloseModal}
-        onSubmit={
-          editing && actions
-            ? (data) => actions.handleUpdate(editing.id, data)
-            : actions?.handleCreate || (async () => false)
-        }
-        editing={editing}
-        isSubmitting={actions?.isSubmitting || false}
       />
     </ComponentCard>
   );

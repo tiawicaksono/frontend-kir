@@ -1,61 +1,93 @@
-import { useState } from "react";
-import { useShowAlert } from "@/core/alert/alert.hook";
-import { useConfirm } from "@/core/confirm/confirm.hook";
+"use client";
 
-interface Service {
-  create: (data: any) => Promise<any>;
-  update: (id: string, data: any) => Promise<any>;
-  delete: (id: string) => Promise<any>;
+import { useState } from "react";
+
+import { useConfirm } from "@/core/confirm/confirm.hook";
+import { useShowAlert } from "@/core/alert/alert.hook";
+
+import { CrudService, PrimaryKey } from "@/types/kendaraan.type";
+
+interface Props<T> {
+  service: CrudService<T>;
+
+  label: string;
+
+  primaryKey?: keyof T;
+
+  prependData?: (data: T) => void;
+
+  updateData?: (data: Partial<T>) => void;
+
+  removeData?: (id: PrimaryKey) => void;
 }
 
-export function useKendaraanAction(
-  service: Service,
-  label: string, // "Provinsi", "Kota", dll
-  prependData?: (data: any) => void,
-  updateData?: (data: any) => void,
-  primaryKey: string = "id",
-) {
+export function useKendaraanAction<T extends Record<string, any>>({
+  service,
+  label,
+  primaryKey = "id" as keyof T,
+  prependData,
+  updateData,
+  removeData,
+}: Props<T>) {
   const { confirm } = useConfirm();
-  const { showErrorAlert, showSuccessAlert } = useShowAlert();
+
+  const { showSuccessAlert, showErrorAlert } = useShowAlert();
+
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleCreate = async (data: any) => {
+  const execute = async (
+    callback: () => Promise<any>,
+    successMessage: string,
+    errorMessage: string,
+  ) => {
     try {
       setIsSubmitting(true);
 
-      const res = await service.create(data);
+      const result = await callback();
 
-      prependData?.(res);
+      showSuccessAlert(successMessage);
 
-      showSuccessAlert(`${label} berhasil dibuat`);
-      return true;
-    } catch (err) {
-      showErrorAlert(err, `${label} gagal dibuat`);
-      return false;
+      return result;
+    } catch (error) {
+      showErrorAlert(error, errorMessage);
+
+      return null;
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleUpdate = async (data: any) => {
-    try {
-      setIsSubmitting(true);
+  const handleCreate = async (data: T) => {
+    const result = await execute(
+      () => service.create(data),
+      `${label} berhasil dibuat`,
+      `${label} gagal dibuat`,
+    );
 
-      const res = await service.update(data[primaryKey], data);
+    if (!result) return false;
 
-      updateData?.(res.data);
+    prependData?.(result?.data ?? result);
 
-      showSuccessAlert(`${label} berhasil diupdate`);
-      return true;
-    } catch (err) {
-      showErrorAlert(err, `${label} gagal diupdate`);
-      return false;
-    } finally {
-      setIsSubmitting(false);
-    }
+    return true;
   };
 
-  const handleDelete = async (id: string) => {
+  const handleUpdate = async (data: T) => {
+    const id = data[primaryKey] as PrimaryKey;
+
+    const result = await execute(
+      () => service.update(id, data),
+      `${label} berhasil diupdate`,
+      `${label} gagal diupdate`,
+    );
+
+    if (!result) return false;
+
+    updateData?.(result?.data ?? result);
+
+    return true;
+  };
+
+  const handleDelete = async (id: PrimaryKey) => {
     const confirmed = await confirm({
       title: `Hapus ${label}`,
       message: `Yakin ingin menghapus ${label.toLowerCase()} ini?`,
@@ -64,19 +96,19 @@ export function useKendaraanAction(
       variant: "destructive",
     });
 
-    if (!confirmed) return;
+    if (!confirmed) return false;
 
-    try {
-      await service.delete(id);
+    const result = await execute(
+      () => service.delete(id),
+      `${label} berhasil dihapus`,
+      `${label} gagal dihapus`,
+    );
 
-      updateData?.({ [primaryKey]: id, _delete: true });
+    if (!result) return false;
 
-      showSuccessAlert(`${label} berhasil dihapus`);
-      return true;
-    } catch (err) {
-      showErrorAlert(err, `${label} gagal dihapus`);
-      return false;
-    }
+    removeData?.(id);
+
+    return true;
   };
 
   return {
