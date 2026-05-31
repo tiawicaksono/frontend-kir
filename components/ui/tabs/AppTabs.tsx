@@ -14,7 +14,7 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
     defaultActiveKey,
   );
 
-  const { openModal } = useModal();
+  const { openModal, closeModal } = useModal();
 
   // =========================
   // CREATE
@@ -43,8 +43,12 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
           {activeTab.Form && (
             <activeTab.Form
               mode="create"
-              onSubmit={(data: any) => {
-                return activeTab.module.handleCreate(data);
+              onSubmit={async (data: any) => {
+                try {
+                  return await activeTab.module.handleCreate(data);
+                } finally {
+                  closeModal();
+                }
               }}
             />
           )}
@@ -72,13 +76,17 @@ export default function AppTabs({ items, defaultActiveKey }: AppTabsProps) {
             <item.Form
               mode="edit"
               initialValues={row}
-              onSubmit={(data: any) => {
+              onSubmit={async (data: any) => {
                 const pk = item.module.table.config.primary_key;
 
-                return item.module.handleUpdate({
-                  ...data,
-                  [pk]: row?.[pk],
-                });
+                try {
+                  return await item.module.handleUpdate({
+                    ...data,
+                    [pk]: row?.[pk],
+                  });
+                } finally {
+                  closeModal();
+                }
               }}
             />
           )}
