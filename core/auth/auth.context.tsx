@@ -61,6 +61,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     const channel = getAuthChannel();
+    const AUTH_PAGES = ["/signin", "/signup", "/reset-password"];
 
     initAuth();
 
@@ -73,13 +74,27 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       if (event.data === "LOGIN") {
         await initAuth();
+
+        if (typeof window !== "undefined") {
+          const currentPath = window.location.pathname;
+          const searchParams = new URLSearchParams(window.location.search);
+          const redirect = searchParams.get("redirect");
+
+          if (AUTH_PAGES.includes(currentPath)) {
+            if (redirect && redirect.startsWith("/")) {
+              router.replace(redirect);
+            } else {
+              router.replace("/dashboard");
+            }
+          }
+        }
       }
     };
 
     return () => {
       channel.close();
     };
-  }, []);
+  }, [router]);
 
   const login = async (email: string, password: string) => {
     await loginRequest(email, password);
@@ -92,10 +107,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       await logoutRequest();
     } catch {}
 
-    const current =
+    const currentPath =
+      typeof window !== "undefined" ? window.location.pathname : "/";
+    const currentUrl =
       typeof window !== "undefined"
         ? window.location.pathname + window.location.search
         : "/";
+    const AUTH_PAGES = ["/signin", "/signup", "/reset-password"];
 
     setUser(null);
     setMenus([]);
@@ -103,7 +121,11 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
     broadcastLogout();
 
-    router.replace(`/signin?redirect=${encodeURIComponent(current)}`);
+    if (AUTH_PAGES.includes(currentPath)) {
+      router.replace("/signin");
+    } else {
+      router.replace(`/signin?redirect=${encodeURIComponent(currentUrl)}`);
+    }
   };
   useAutoLogout(logout);
 
