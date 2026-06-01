@@ -1,77 +1,27 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
-
 import { Badge, Button } from "antd";
-import { useRouter } from "next/navigation";
 
 import ComponentCard from "@/components/common/ComponentCard";
 
-import {
-  createKendaraan,
-  updateKendaraan,
-  deleteKendaraan,
-  fetchTableDataKendaraan,
-  fetchKendaraanCounts,
-} from "@/services/data-kendaraan.service";
-
 import KendaraanTable from "./KendaraanTable";
 
-import { useKendaraanModule } from "@/hooks/data-kendaraan/useKendaraanModule";
-
-import type { KendaraanRow } from "@/types/kendaraan.type";
+import { useKendaraanPage } from "@/hooks/data-kendaraan/useKendaraanPage";
 
 export default function HomeKendaraan() {
-  const router = useRouter();
+  const {
+    total,
 
-  const [total, setTotal] = useState(0);
+    table,
 
-  const loadCounts = useCallback(async () => {
-    try {
-      const res = await fetchKendaraanCounts();
-
-      setTotal(res?.countData ?? 0);
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadCounts();
-  }, [loadCounts]);
-
-  const { table, handleDelete, handleReload } =
-    useKendaraanModule<KendaraanRow>({
-      fetcher: fetchTableDataKendaraan,
-
-      service: {
-        create: createKendaraan,
-        update: updateKendaraan,
-        delete: deleteKendaraan,
-      },
-
-      label: "Kendaraan",
-
-      loadCounts,
-    });
-
-  const handleCreate = useCallback(() => {
-    router.push("/master/data-kendaraan/create");
-  }, [router]);
-
-  const handleView = useCallback(
-    (row: KendaraanRow) => {
-      router.push(`/master/data-kendaraan/view/${row.id}`);
-    },
-    [router],
-  );
-
-  const handleEdit = useCallback(
-    (row: KendaraanRow) => {
-      router.push(`/master/data-kendaraan/edit/${row.id}`);
-    },
-    [router],
-  );
+    handleCreate,
+    handleView,
+    handleEdit,
+    handleDelete,
+    handleReload,
+    handleBlokir,
+    handleUnblock,
+  } = useKendaraanPage();
 
   return (
     <ComponentCard
@@ -95,6 +45,8 @@ export default function HomeKendaraan() {
         onEdit={handleEdit}
         onDelete={handleDelete}
         onReload={handleReload}
+        onBlokir={handleBlokir}
+        onUnblock={handleUnblock}
       />
     </ComponentCard>
   );

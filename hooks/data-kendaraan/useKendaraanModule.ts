@@ -73,6 +73,8 @@ export function useKendaraanModule<T extends Record<string, any>>({
 
     handleReload,
 
+    updateData: table.updateData,
+
     isSubmitting,
   };
 }

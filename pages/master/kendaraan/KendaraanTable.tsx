@@ -1,7 +1,5 @@
 "use client";
 
-import { useEffect } from "react";
-
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 import TableActions from "@/components/ui/dynamic-table/TableActions";
 
@@ -11,10 +9,11 @@ interface Props {
   table?: KendaraanTableState;
 
   onView?: (record: KendaraanRow) => void;
-
   onEdit: (record: KendaraanRow) => void;
-
   onDelete: (id: number) => Promise<boolean>;
+
+  onBlokir?: (record: KendaraanRow) => void;
+  onUnblock?: (record: KendaraanRow) => void;
 
   onReload?: () => Promise<void> | void;
 }
@@ -24,6 +23,8 @@ export default function KendaraanTable({
   onView,
   onEdit,
   onDelete,
+  onBlokir,
+  onUnblock,
   onReload,
 }: Props) {
   if (!table) {
@@ -55,18 +56,23 @@ export default function KendaraanTable({
       onReload={onReload ?? fetchData}
       rowKeyField={rowKeyField}
       showActions
-      renderActions={(record: KendaraanRow) => (
-        <TableActions
-          record={record}
-          rowKeyField={rowKeyField}
-          onView={() => onView?.(record)}
-          onEdit={() => onEdit(record)}
-          onDelete={() => {
-            void onDelete(Number(record[rowKeyField]));
-          }}
-          actions={["view", "edit", "delete"]}
-        />
-      )}
+      renderActions={(record: KendaraanRow) => {
+        console.log("ACTION RECORD", record);
+        return (
+          <TableActions
+            record={record}
+            rowKeyField={rowKeyField}
+            onView={() => onView?.(record)}
+            onEdit={() => onEdit(record)}
+            onDelete={() => {
+              void onDelete(Number(record[rowKeyField]));
+            }}
+            onBlokir={() => onBlokir?.(record)}
+            onUnblock={() => onUnblock?.(record)}
+            actions={["view", "edit", "delete", "blokir"]}
+          />
+        );
+      }}
     />
   );
 }

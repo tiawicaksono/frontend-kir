@@ -47,3 +47,13 @@ export async function fetchRiwayatUji(id: string) {
   const res = await api.get(`${API_URL}/master/kendaraan/${id}/riwayat-uji`);
   return res.data;
 }
+
+export async function blokirKendaraan(data: any) {
+  const res = await api.post(`${API_URL}/master/kendaraan/blokir`, data);
+  return res.data.data;
+}
+
+export async function unblockKendaraan(id: number) {
+  const res = await api.post(`${API_URL}/master/kendaraan/${id}/unblokir`);
+  return res.data.data;
+}

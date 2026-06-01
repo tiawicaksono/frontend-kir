@@ -6,6 +6,7 @@ import {
   EditOutlined,
   DeleteOutlined,
   EyeOutlined,
+  BlockOutlined,
 } from "@ant-design/icons";
 
 interface Props {
@@ -14,7 +15,11 @@ interface Props {
   onEdit?: (record: any) => void;
   onDelete?: (record: any) => void;
   onView?: (record: any) => void;
-  actions?: ("view" | "edit" | "delete")[];
+
+  onBlokir?: (record: any) => void;
+  onUnblock?: (record: any) => void;
+
+  actions?: ("view" | "edit" | "delete" | "blokir")[];
 }
 
 export default function TableActions({
@@ -23,7 +28,9 @@ export default function TableActions({
   onEdit,
   onDelete,
   onView,
-  actions = ["view", "edit", "delete"],
+  onBlokir,
+  onUnblock,
+  actions = ["view", "edit", "delete", "blokir"],
 }: Props) {
   const id = rowKeyField
     ? record[rowKeyField]
@@ -65,6 +72,26 @@ export default function TableActions({
         </span>
       ),
       onClick: () => onDelete?.(id),
+    });
+  }
+
+  if (actions.includes("blokir")) {
+    items.push({
+      key: "blokir",
+      label: (
+        <span className="flex items-center gap-2">
+          <BlockOutlined />
+          {record.is_blokir ? "Unblock" : "Block"}
+        </span>
+      ),
+
+      onClick: () => {
+        if (record.is_blokir) {
+          onUnblock?.(record);
+        } else {
+          onBlokir?.(record);
+        }
+      },
     });
   }
 
