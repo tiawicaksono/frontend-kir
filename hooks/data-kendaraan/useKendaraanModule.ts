@@ -11,7 +11,6 @@ export function useKendaraanModule<T extends Record<string, any>>({
   fetcher,
   service,
   label,
-  loadCounts,
 }: KendaraanModuleProps<T>) {
   const table = useKendaraanTable(fetcher);
 
@@ -36,8 +35,6 @@ export function useKendaraanModule<T extends Record<string, any>>({
 
     prependData: async (newData) => {
       table.prependData(newData);
-
-      await loadCounts();
     },
 
     updateData: (updatedData) => {
@@ -49,20 +46,14 @@ export function useKendaraanModule<T extends Record<string, any>>({
 
   const handleDelete = useCallback(
     async (id: PrimaryKey) => {
-      const success = await rawDelete(id);
-
-      if (success) {
-        await loadCounts();
-      }
-
-      return success;
+      return rawDelete(id);
     },
-    [rawDelete, loadCounts],
+    [rawDelete],
   );
 
   const handleReload = useCallback(async () => {
-    await Promise.all([table.fetchData(), loadCounts()]);
-  }, [table.fetchData, loadCounts]);
+    await table.fetchData();
+  }, [table.fetchData]);
 
   return {
     table,

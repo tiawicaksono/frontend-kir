@@ -49,6 +49,4 @@ export interface KendaraanModuleProps<T> {
   service: CrudService<T>;
 
   label: string;
-
-  loadCounts: () => Promise<void>;
 }

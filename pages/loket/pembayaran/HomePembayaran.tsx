@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 
-import { Button, Space } from "antd";
+import { Badge, Button, Space } from "antd";
 
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 import ComponentCard from "@/components/common/ComponentCard";
@@ -82,10 +82,20 @@ export default function HomePembayaran() {
 
     try {
       await deletePembayaran(id);
-
-      setDataSource((prev: any[]) => prev.filter((item) => item.id !== id));
-
+      // setDataSource((prev: any[]) => prev.filter((item) => item.id !== id));
       showSuccessAlert("Berhasil dihapus");
+      const isLastRowOnPage = dataSource.length === 1;
+      const isNotFirstPage = params.page > 1;
+
+      if (isLastRowOnPage && isNotFirstPage) {
+        setParams((prev) => ({
+          ...prev,
+          page: prev.page - 1,
+        }));
+
+        return;
+      }
+      await reload();
     } catch (err) {
       showErrorAlert(err, "Gagal hapus");
     }
@@ -199,7 +209,13 @@ export default function HomePembayaran() {
 
   return (
     <ComponentCard
-      title="Manajemen Pembayaran"
+      title={
+        <div className="flex items-center gap-2">
+          <span>Manajemen Pembayaran</span>
+
+          <Badge count={total} overflowCount={9999} />
+        </div>
+      }
       borderTop
       extra={
         <Space>

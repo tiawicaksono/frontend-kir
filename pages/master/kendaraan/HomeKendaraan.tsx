@@ -10,8 +10,6 @@ import { useKendaraanPage } from "@/hooks/data-kendaraan/useKendaraanPage";
 
 export default function HomeKendaraan() {
   const {
-    total,
-
     table,
 
     handleCreate,
@@ -30,7 +28,7 @@ export default function HomeKendaraan() {
         <div className="flex items-center gap-2">
           <span>Manajemen Kendaraan</span>
 
-          <Badge count={total} overflowCount={9999} />
+          <Badge count={table?.total ?? 0} overflowCount={9999} />
         </div>
       }
       extra={

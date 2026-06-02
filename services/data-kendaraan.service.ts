@@ -9,11 +9,6 @@ export async function cekDataApi(data: any) {
 /**
  * KENDARAAN
  */
-export const fetchKendaraanCounts = async () => {
-  const res = await api.get(`${API_URL}/master/kendaraan/counts`);
-  return res.data;
-};
-
 export async function fetchTableDataKendaraan(
   params: Record<string, any> = {},
 ) {

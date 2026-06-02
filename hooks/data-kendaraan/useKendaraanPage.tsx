@@ -11,7 +11,6 @@ import {
   updateKendaraan,
   deleteKendaraan,
   fetchTableDataKendaraan,
-  fetchKendaraanCounts,
   unblockKendaraan,
 } from "@/services/data-kendaraan.service";
 
@@ -27,22 +26,6 @@ export function useKendaraanPage() {
   const router = useRouter();
   const { openModal } = useModal();
 
-  const [total, setTotal] = useState(0);
-
-  const loadCounts = useCallback(async () => {
-    try {
-      const res = await fetchKendaraanCounts();
-
-      setTotal(res?.countData ?? 0);
-    } catch (error) {
-      console.error(error);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadCounts();
-  }, [loadCounts]);
-
   const { table, handleDelete, handleReload, updateData } =
     useKendaraanModule<KendaraanRow>({
       fetcher: fetchTableDataKendaraan,
@@ -54,8 +37,6 @@ export function useKendaraanPage() {
       },
 
       label: "Kendaraan",
-
-      loadCounts,
     });
 
   const handleCreate = useCallback(() => {
@@ -125,8 +106,6 @@ export function useKendaraanPage() {
   );
 
   return {
-    total,
-
     table,
 
     handleCreate,
