@@ -11,7 +11,7 @@ import DetailTabDataKendaraan from "@/components/data-kendaraan/DetailTabDataKen
 import DetailTabRiwayat from "@/components/data-kendaraan/DetailTabRiwayat";
 import DetailHeaderAction from "@/components/data-kendaraan/DetailHeaderAction";
 
-import { Card, Tabs, Tag, Spin, Button } from "antd";
+import { Card, Tabs, Tag, Spin, Button, Alert } from "antd";
 import { ReloadOutlined } from "@ant-design/icons";
 import type { TabBarExtraMap } from "@rc-component/tabs/es/interface";
 import { safe } from "@/utils/formatDetailKendaraan";
@@ -137,6 +137,33 @@ export default function KendaraanDetailContainer({ id }: { id: string }) {
 
               <div className="text-right">{headerAction}</div>
             </div>
+            {/* {data?.is_blokir && (
+              <Alert
+                className="mt-4"
+                type="error"
+                showIcon
+                message="Kendaraan Diblokir"
+                description={
+                  <>
+                    <div>Alasan blokir:</div>
+                    <div className="font-medium">
+                      {safe(data?.alasan_blokir)}
+                    </div>
+                  </>
+                }
+              />
+            )} */}
+            {data?.is_blokir && (
+              <div className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3">
+                <div className="flex items-center gap-2 text-red-700 font-semibold">
+                  🚫 Kendaraan Diblokir
+                </div>
+
+                <div className="mt-1 text-sm text-red-600">
+                  {safe(data?.alasan_blokir)}
+                </div>
+              </div>
+            )}
           </Card>
         )
       )}
