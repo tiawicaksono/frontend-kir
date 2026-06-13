@@ -140,3 +140,18 @@ export async function deleteBiroJasa(id: number) {
   const res = await api.delete(`${API_URL}/pengaturan/birojasa/${id}`);
   return res.data;
 }
+/**
+ * ===============================================================================
+ * KUOTA
+ * ===============================================================================
+ */
+export async function fetchTableDataKuota(params: Record<string, any> = {}) {
+  const res = await api.get(`${API_URL}/pengaturan/kuota`, {
+    params,
+  });
+  return res.data;
+}
+export async function updateKuota(id: number, data: any) {
+  const res = await api.put(`${API_URL}/pengaturan/kuota/${id}`, data);
+  return res.data;
+}

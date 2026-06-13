@@ -13,6 +13,7 @@ import KonfigurasiSumbuForm from "./form/KonfigurasiSumbuForm";
 import BiroJasaForm from "./form/BiroJasaForm";
 
 import { useAppsSupportModule } from "@/hooks/pengaturan/useAppsSupportModule";
+import { TabItemConfig } from "@/components/ui/tabs/types";
 
 import {
   fetchStatusPenerbitanCounts,
@@ -35,7 +36,10 @@ import {
   createBiroJasa,
   updateBiroJasa,
   deleteBiroJasa,
+  fetchTableDataKuota,
+  updateKuota,
 } from "@/services/apps-support.service";
+import KuotaForm from "./form/KuotaForm";
 
 export default function HomeAppsSupport() {
   const [counts, setCounts] = useState({
@@ -109,7 +113,16 @@ export default function HomeAppsSupport() {
     loadCounts,
   });
 
-  const tabs = [
+  const Kuota = useAppsSupportModule({
+    fetcher: fetchTableDataKuota,
+    service: {
+      update: updateKuota,
+    },
+    label: "Kuota",
+    loadCounts,
+  });
+
+  const tabs: TabItemConfig[] = [
     {
       key: "status",
       label: "Status Penerbitan",
@@ -118,6 +131,11 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: StatusPenerbitanForm,
       badge: counts.countStatusPenerbitan,
+
+      showAction: true,
+      actionLabel: "Add Status Penerbitan",
+
+      actionType: "modal", // 🔥 tetap modal
     },
     {
       key: "bahan",
@@ -127,6 +145,11 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: BahanUtamaKendaraanForm,
       badge: counts.countBahanUtama,
+
+      showAction: true,
+      actionLabel: "Add Bahan",
+
+      actionType: "modal", // 🔥 tetap modal
     },
     {
       key: "sumbu",
@@ -136,6 +159,11 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: KonfigurasiSumbuForm,
       badge: counts.countKonfigurasiSumbu,
+
+      showAction: true,
+      actionLabel: "Add Konfigurasi Sumbu",
+
+      actionType: "modal", // 🔥 tetap modal
     },
     {
       key: "biro",
@@ -145,6 +173,24 @@ export default function HomeAppsSupport() {
       Table: AppsSupportTable,
       Form: BiroJasaForm,
       badge: counts.countBiroJasa,
+
+      showAction: true,
+      actionLabel: "Add Biro Jasa",
+
+      actionType: "modal", // 🔥 tetap modal
+    },
+    {
+      key: "kuota",
+      label: "Kuota",
+      icon: <BookOutlined />,
+      module: Kuota,
+      Table: AppsSupportTable,
+      Form: KuotaForm,
+
+      // showAction: true,
+      // actionLabel: "Add Kuota",
+
+      // actionType: "modal", // 🔥 tetap modal
     },
   ];
 
