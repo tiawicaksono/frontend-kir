@@ -1,0 +1,92 @@
+"use client";
+
+import { useMemo } from "react";
+import { Card } from "antd";
+
+import TableActions from "@/components/ui/dynamic-table/TableActions";
+import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
+
+import { ColumnFormatters } from "@/components/ui/dynamic-table/ColumnFormatters";
+import { getPendaftaranTagColor } from "@/utils/jenisPendaftaranTag";
+import ComponentCard from "@/components/common/ComponentCard";
+
+interface Props {
+  table: any;
+  onEdit?: (record: any) => void;
+  onDelete?: (id: number) => void;
+}
+
+export default function PendaftaranListCard({
+  table,
+  onEdit,
+  onDelete,
+}: Props) {
+  if (!table) return null;
+
+  const params = table.params ?? {
+    page: 1,
+    limit: 10,
+  };
+
+  const key = table?.config?.primary_key || "id";
+
+  // =========================================
+  // FORMATTERS MAP (CLEAN & SCALABLE)
+  // =========================================
+  const FORMAT_MAP = useMemo<Record<string, any>>(() => {
+    return {
+      no_pendaftaran_harian: ColumnFormatters.bold(),
+      tanggal_uji: ColumnFormatters.date(),
+      status_penerbitan_issuance_name: {
+        render: (_: any, record: any) => {
+          return ColumnFormatters.tag(
+            getPendaftaranTagColor(record.status_penerbitan_issuance_id),
+          ).render(record.status_penerbitan_issuance_name);
+        },
+      },
+    };
+  }, []);
+
+  // =========================================
+  // APPLY FORMATTERS (SSR SAFE)
+  // =========================================
+  const formattedColumns = useMemo(() => {
+    return (table.columns ?? []).map((col: any) => {
+      const key = String(col.dataIndex);
+      const formatter = FORMAT_MAP[key];
+
+      if (!formatter) return col;
+
+      return {
+        ...col,
+        ...formatter,
+      };
+    });
+  }, [table.columns, FORMAT_MAP]);
+
+  return (
+    <ComponentCard title="List Pendaftaran" className="mt-4">
+      <DynamicTable
+        columns={formattedColumns}
+        dataSource={table.dataSource ?? []}
+        loading={table.loading ?? false}
+        total={table.total ?? 0}
+        page={params.page}
+        pageSize={params.limit}
+        onChange={table.setParams ?? (() => {})}
+        onReload={table.fetchData}
+        rowKeyField={key}
+        showActions
+        renderActions={(record) => (
+          <TableActions
+            record={record}
+            rowKeyField={key}
+            onEdit={() => onEdit?.(record)}
+            onDelete={() => onDelete?.(record.id)}
+            actions={["edit", "delete"]}
+          />
+        )}
+      />
+    </ComponentCard>
+  );
+}

@@ -3,22 +3,23 @@
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
 import { useShowAlert } from "@/core/alert/alert.hook";
 import { useConfirm } from "@/core/confirm/confirm.hook";
+import { useModal } from "@/core/modal/modal.hook";
 import { usePendaftaranTable } from "@/hooks/pendaftaran/usePendaftaranTable";
 import HomePendaftaran from "@/pages/loket/pendaftaran/HomePendaftaran";
-import PendaftaranListCard from "@/pages/loket/pendaftaran/PendaftaranTable";
+import PendaftaranListCard from "@/components/loket-pendaftaran/PendaftaranTable";
+import PendaftaranEditModal from "@/components/loket-pendaftaran/PendaftaranEditModal";
 import {
   deletePendaftaran,
   fetchPendaftaran,
 } from "@/services/pendaftaran.service";
-import { useState } from "react";
-import PendaftaranEditModal from "@/pages/loket/pendaftaran/PendaftaranEditModal";
 
 export default function DaftarUjiPage() {
-  const [editingData, setEditingData] = useState<any>(null);
-
   const { confirm } = useConfirm();
+  const { openModal } = useModal();
   const { showErrorAlert, showSuccessAlert } = useShowAlert();
+
   const table = usePendaftaranTable(fetchPendaftaran);
+
   const handleDelete = async (id: number) => {
     const confirmed = await confirm({
       title: "Hapus Pendaftaran",
@@ -42,11 +43,23 @@ export default function DaftarUjiPage() {
   };
 
   const handleEdit = (record: any) => {
-    setEditingData(record);
+    openModal({
+      className: "max-w-lg",
+      content: (
+        <PendaftaranEditModal
+          data={record}
+          onSuccess={(updatedData) => {
+            table.updateData(updatedData);
+          }}
+        />
+      ),
+    });
   };
+
   return (
     <div>
       <AutoBreadcrumb pageTitle="Form Pendaftaran" />
+
       <div className="grid grid-cols-12 gap-4 md:gap-6">
         <div className="col-span-12">
           <HomePendaftaran
@@ -59,18 +72,6 @@ export default function DaftarUjiPage() {
             table={table}
             onEdit={handleEdit}
             onDelete={handleDelete}
-          />
-
-          <PendaftaranEditModal
-            open={!!editingData}
-            data={editingData}
-            onClose={() => setEditingData(null)}
-            onSuccess={(updatedData) => {
-              table.updateData(updatedData);
-
-              // close modal biar clean
-              setEditingData(null);
-            }}
           />
         </div>
       </div>

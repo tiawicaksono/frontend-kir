@@ -1,7 +1,7 @@
 "use client";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import KendaraanForm from "@/pages/master/kendaraan/KendaraanForm";
+import KendaraanForm from "@/components/master-kendaraan/KendaraanForm";
 
 export default function DataKendaraanPage() {
   return (

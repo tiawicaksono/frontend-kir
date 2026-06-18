@@ -5,7 +5,7 @@ import { useMemo, useState } from "react";
 import DynamicTable from "@/components/ui/dynamic-table/DynamicTable";
 import ComponentCard from "@/components/common/ComponentCard";
 
-import CetakKartuUjiFilter from "./CetakKartuUjiFilter";
+import CetakKartuUjiFilter from "@/components/cetak-kartu-uji/CetakKartuUjiFilter";
 
 import { useConfirm } from "@/core/confirm/confirm.hook";
 import { useShowAlert } from "@/core/alert/alert.hook";
@@ -13,7 +13,7 @@ import { useShowAlert } from "@/core/alert/alert.hook";
 import { printKartuUji } from "@/services/cetak-kartu-uji.service";
 
 import { useCetakKartuUji } from "@/hooks/cetak-kartu/useCetakKartuUji";
-import { createCetakKartuUjiColumns } from "./cetakKartuUjiColumns";
+import { createCetakKartuUjiColumns } from "@/utils/cetakKartuUjiColumns";
 
 export default function HomeCetakKartuUji() {
   const { confirm } = useConfirm();

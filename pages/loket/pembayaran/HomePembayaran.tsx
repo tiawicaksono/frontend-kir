@@ -16,13 +16,13 @@ import {
   togglePembayaran,
 } from "@/services/pembayaran.service";
 
-import PendaftaranEditModal from "@/pages/loket/pendaftaran/PendaftaranEditModal";
+import PendaftaranEditModal from "@/components/loket-pendaftaran/PendaftaranEditModal";
 
-import PembayaranFilter from "./PembayaranFilter";
+import PembayaranFilter from "@/components/loket-pembayaran/PembayaranFilter";
 
 import { usePembayaran } from "@/hooks/pembayaran/usePembayaran";
-import { createPembayaranColumns } from "./PembayaranColumns";
-import PembayaranActions from "./PembayaranActions";
+import { createPembayaranColumns } from "@/utils/PembayaranColumns";
+import PembayaranActions from "@/components/loket-pembayaran/PembayaranActions";
 
 import { PembayaranRow } from "@/types/pembayaran.type";
 

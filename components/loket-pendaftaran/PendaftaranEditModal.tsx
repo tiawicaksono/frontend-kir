@@ -13,7 +13,7 @@ import { useShowAlert } from "@/core/alert/alert.hook";
 import { useModal } from "@/core/modal/modal.hook";
 
 interface Props {
-  data?: any;
+  data: any;
   onSuccess?: (data: any) => void;
 }
 
@@ -31,12 +31,7 @@ export default function PendaftaranEditModal({ data, onSuccess }: Props) {
   const { showSuccessAlert, showErrorAlert } = useShowAlert();
 
   const [loading, setLoading] = useState(false);
-
   const [statusOptions, setStatusOptions] = useState<any[]>([]);
-
-  // ====================================
-  // LOAD OPTIONS
-  // ====================================
 
   useEffect(() => {
     const load = async () => {
@@ -52,23 +47,17 @@ export default function PendaftaranEditModal({ data, onSuccess }: Props) {
     load();
   }, []);
 
-  // ====================================
-  // PREFILL
-  // ====================================
-
   useEffect(() => {
-    if (!data || !statusOptions.length) return;
+    if (!data || !statusOptions.length) {
+      form.resetFields();
+      return;
+    }
 
     form.setFieldsValue({
       status_penerbitan_id: Number(data.status_penerbitan_issuance_id),
-
       tanggal_uji: data.tanggal_uji ? dayjs(data.tanggal_uji) : undefined,
     });
   }, [data, statusOptions, form]);
-
-  // ====================================
-  // SUBMIT
-  // ====================================
 
   const handleSubmit = async () => {
     try {
@@ -78,7 +67,6 @@ export default function PendaftaranEditModal({ data, onSuccess }: Props) {
 
       const payload = {
         status_penerbitan_id: values.status_penerbitan_id,
-
         tanggal_uji: values.tanggal_uji?.format("YYYY-MM-DD"),
       };
 
@@ -118,7 +106,12 @@ export default function PendaftaranEditModal({ data, onSuccess }: Props) {
         <Form.Item
           label="Jenis Uji"
           name="status_penerbitan_id"
-          rules={[{ required: true }]}
+          rules={[
+            {
+              required: true,
+              message: "Jenis uji wajib dipilih",
+            },
+          ]}
         >
           <Select options={statusOptions} />
         </Form.Item>
@@ -126,7 +119,12 @@ export default function PendaftaranEditModal({ data, onSuccess }: Props) {
         <Form.Item
           label="Tanggal Uji"
           name="tanggal_uji"
-          rules={[{ required: true }]}
+          rules={[
+            {
+              required: true,
+              message: "Tanggal uji wajib diisi",
+            },
+          ]}
         >
           <DatePicker className="w-full" format="DD/MM/YYYY" />
         </Form.Item>

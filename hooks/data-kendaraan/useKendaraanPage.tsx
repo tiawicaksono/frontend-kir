@@ -16,11 +16,10 @@ import {
 
 import { useKendaraanModule } from "@/hooks/data-kendaraan/useKendaraanModule";
 
-import BlokirKendaraanModal from "@/pages/master/kendaraan/BlokirKendaraanModal";
-
 import type { KendaraanRow } from "@/types/kendaraan.type";
 import { useShowAlert } from "@/core/alert/alert.hook";
 import { useConfirm } from "@/core/confirm/confirm.hook";
+import BlokirKendaraanModal from "@/components/master-kendaraan/BlokirKendaraanModal";
 
 export function useKendaraanPage() {
   const router = useRouter();

@@ -1,7 +1,7 @@
 "use client";
 
 import AutoBreadcrumb from "@/components/common/AutoBreadcrumb";
-import KendaraanForm from "@/pages/master/kendaraan/KendaraanForm";
+import KendaraanForm from "@/components/master-kendaraan/KendaraanForm";
 import { useParams } from "next/navigation";
 
 export default function Page() {
